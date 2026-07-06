@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /404.html
+Disallow: /500.html
+Disallow: /503.html
+Disallow: /offline.html
+
+Sitemap: https://paul1l.github.io/MB_Kuzbass/sitemap.xml

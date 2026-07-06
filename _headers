@@ -1,0 +1,25 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+
+/assets/*
+  Cache-Control: public, max-age=2592000, immutable
+
+/reviews-config.js
+  Cache-Control: no-cache
+
+/sw.js
+  Cache-Control: no-cache
+
+/404.html
+  X-Robots-Tag: noindex
+
+/500.html
+  X-Robots-Tag: noindex
+
+/503.html
+  X-Robots-Tag: noindex
+
+/offline.html
+  X-Robots-Tag: noindex
