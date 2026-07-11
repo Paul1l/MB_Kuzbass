@@ -19,10 +19,10 @@
       content="МБ Кузбасс, MB Kuzbass, оригинальные запчасти Mercedes-Benz, запчасти BMW Барнаул, японские доноры, авто с японских аукционов, машинокомплекты, поставки для авторазборов, контейнерные поставки"
     />
     <link rel="canonical" href="https://paul1l.github.io/MB_Kuzbass/" />
-    <link rel="icon" href="./assets/telegram-avatar.jpg" type="image/jpeg" />
-    <link rel="apple-touch-icon" href="./assets/telegram-avatar.jpg" />
-    <link rel="manifest" href="./site.webmanifest" />
-    <link rel="preload" as="image" href="./assets/2gis-photo-02.jpg" />
+    <link rel="icon" href="%BASE_URL%assets/telegram-avatar.jpg" type="image/jpeg" />
+    <link rel="apple-touch-icon" href="%BASE_URL%assets/telegram-avatar.jpg" />
+    <link rel="manifest" href="%BASE_URL%site.webmanifest" />
+    <link rel="preload" as="image" href="%BASE_URL%assets/2gis-photo-02.jpg" />
     <meta property="og:type" content="business.business" />
     <meta property="og:locale" content="ru_RU" />
     <meta property="og:site_name" content="МБ Кузбасс / MB Kuzbass" />
@@ -102,18 +102,17 @@
       }
     </script>
     <title>МБ Кузбасс / MB Kuzbass — оригинальные запчасти Mercedes-Benz и BMW с японских доноров</title>
-    <script type="module" crossorigin src="./assets/index-BHV2E-pg.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DiQ_VHnP.css">
   </head>
   <body>
     <div id="root"></div>
-    <script src="./reviews-config.js"></script>
+    <script src="%BASE_URL%reviews-config.js"></script>
     <script>
       if ('serviceWorker' in navigator && !['localhost', '127.0.0.1'].includes(location.hostname)) {
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('./sw.js').catch(function () {});
+          navigator.serviceWorker.register('%BASE_URL%sw.js').catch(function () {});
         });
       }
     </script>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
