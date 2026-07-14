@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mb-kuzbass-static-v2';
+const CACHE_NAME = 'mb-kuzbass-static-v3';
 const OFFLINE_URL = './offline.html';
 const PRECACHE_URLS = ['./', './index.html', './offline.html', './error.css', './assets/telegram-avatar.jpg'];
 
@@ -21,9 +21,19 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode !== 'navigate') return;
+  const requestUrl = new URL(event.request.url);
+
+  // Обрабатывает только переходы внутри этого сайта. Внешние и служебные запросы не попадают
+  // под управление кеша и не могут подменить offline-ответ.
+  if (
+    event.request.method !== 'GET' ||
+    event.request.mode !== 'navigate' ||
+    requestUrl.origin !== self.location.origin
+  ) {
+    return;
+  }
 
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(OFFLINE_URL)),
+    fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(OFFLINE_URL)),
   );
 });

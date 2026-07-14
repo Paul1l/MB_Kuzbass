@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://catalog.api.2gis.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'; worker-src 'self'; manifest-src 'self'; media-src 'self'"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#181818" />
     <meta name="author" content="ИП Пушкарев Кирилл Александрович" />
@@ -102,18 +107,11 @@
       }
     </script>
     <title>МБ Кузбасс / MB Kuzbass — оригинальные запчасти Mercedes-Benz и BMW с японских доноров</title>
-    <script type="module" crossorigin src="./assets/index-BHV2E-pg.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DiQ_VHnP.css">
+    <script type="module" crossorigin src="./assets/index-Kpdk83e6.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D834ebzX.css">
   </head>
   <body>
     <div id="root"></div>
-    <script src="./reviews-config.js"></script>
-    <script>
-      if ('serviceWorker' in navigator && !['localhost', '127.0.0.1'].includes(location.hostname)) {
-        window.addEventListener('load', function () {
-          navigator.serviceWorker.register('./sw.js').catch(function () {});
-        });
-      }
-    </script>
+    <script  src="./reviews-config.js"></script>
   </body>
 </html>

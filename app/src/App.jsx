@@ -34,13 +34,14 @@ function getButtonClass(variant) {
 // Нужна для cookie-плашки. Проверяет, есть ли в браузере отметка о принятии технических cookie.
 function hasAcceptedCookieNotice() {
   if (typeof window === 'undefined') return true;
-  return document.cookie.includes(`${cookieName}=accepted`);
+  return document.cookie.split('; ').some((cookie) => cookie === `${cookieName}=accepted`);
 }
 
 // Нужна для cookie-плашки. Сохраняет согласие на технические cookie на один год.
 function saveCookieNoticeAccept() {
   const maxAge = 60 * 60 * 24 * 365;
-  document.cookie = `${cookieName}=accepted; Max-Age=${maxAge}; Path=/; SameSite=Lax`;
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${cookieName}=accepted; Max-Age=${maxAge}; Path=/; SameSite=Strict${secure}`;
 }
 
 // Нужна для формы заявки. Собирает имя, контакт и задачу в готовый текст для отправки в Telegram.
@@ -210,7 +211,7 @@ function SectionIntro({ index, eyebrow, title, text }) {
 // Нужна для быстрых контактов. Создает ссылку на внешний канал связи в едином стиле кнопки.
 function ContactButton({ item }) {
   return (
-    <a className={getButtonClass(item.variant)} href={item.href} target="_blank" rel="noreferrer">
+    <a className={getButtonClass(item.variant)} href={item.href} target="_blank" rel="noopener noreferrer">
       {item.label}
     </a>
   );
@@ -229,7 +230,7 @@ function CatalogCategoryPage({ category }) {
         <h1>{category.label}</h1>
         <p>{category.description}</p>
         <div className="catalog-page__actions">
-          <a className="button button--primary" href={contact.telegram} target="_blank" rel="noreferrer">
+          <a className="button button--primary" href={contact.telegram} target="_blank" rel="noopener noreferrer">
             Уточнить наличие в Telegram
           </a>
           <a className="button button--ghost" href="#contacts">
@@ -252,7 +253,7 @@ function CatalogCategoryPage({ category }) {
               <span>{item.meta}</span>
               <h2>{item.title}</h2>
               <p>{item.description}</p>
-              <a className="button button--ghost" href={contact.telegram} target="_blank" rel="noreferrer">
+              <a className="button button--ghost" href={contact.telegram} target="_blank" rel="noopener noreferrer">
                 Уточнить наличие
               </a>
             </div>
@@ -348,7 +349,7 @@ function ReviewCard({ review }) {
         <span>{review.rating}</span>
       </div>
       <p>{review.text}</p>
-      <a href={review.link} target="_blank" rel="noreferrer">
+      <a href={review.link} target="_blank" rel="noopener noreferrer">
         {review.source}, {review.date}
       </a>
     </article>
@@ -465,7 +466,7 @@ function Footer({ onOpenLegal }) {
             поставки для авторазборов по России.
           </p>
           <div className="footer__actions">
-            <a className="button button--primary" href={contact.telegram} target="_blank" rel="noreferrer">
+            <a className="button button--primary" href={contact.telegram} target="_blank" rel="noopener noreferrer">
               Telegram
             </a>
             <a className="button button--dark-outline" href="#request">
@@ -477,7 +478,7 @@ function Footer({ onOpenLegal }) {
         <div className="footer__column">
           <h3>Контакты</h3>
           <a href={contact.phoneHref}>{contact.phone}</a>
-          <a href={contact.telegram} target="_blank" rel="noreferrer">
+          <a href={contact.telegram} target="_blank" rel="noopener noreferrer">
             Telegram
           </a>
           <p>{contact.address}</p>
@@ -730,7 +731,7 @@ function App() {
         : 'Telegram откроется в новой вкладке. Если текст не скопировался, отправьте VIN, контакт и задачу вручную.',
     );
 
-    window.open(contact.telegram, '_blank', 'noreferrer');
+    window.open(contact.telegram, '_blank', 'noopener,noreferrer');
   }
 
   // Нужна для карточек каталога на главной. Открывает SPA-категорию и сбрасывает старую позицию прокрутки.
@@ -917,7 +918,7 @@ function App() {
             </span>
             <div className="review-summary__links">
               {reviewSourceLinks.map((source) => (
-                <a href={source.url} target="_blank" rel="noreferrer" key={source.name}>
+                <a href={source.url} target="_blank" rel="noopener noreferrer" key={source.name}>
                   {source.name}: {source.label}
                 </a>
               ))}
@@ -950,7 +951,13 @@ function App() {
                 <div className="form-row">
                   <label>
                     Имя
-                    <input type="text" name="name" placeholder="Как к вам обращаться" autoComplete="name" />
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Как к вам обращаться"
+                      autoComplete="name"
+                      maxLength="80"
+                    />
                   </label>
                   <label>
                     Контакт
@@ -959,6 +966,7 @@ function App() {
                       name="contact"
                       placeholder="Телефон, Telegram или VK"
                       autoComplete="tel"
+                      maxLength="120"
                     />
                   </label>
                 </div>
@@ -969,6 +977,7 @@ function App() {
                     rows="5"
                     placeholder="VIN, модель, год, название детали или ссылка"
                     defaultValue={defaultRequestText}
+                    maxLength="1500"
                   />
                 </label>
                 <label className="privacy-check">
@@ -1003,7 +1012,7 @@ function App() {
               </div>
               <div className="contact-info__item">
                 <span>Основная связь</span>
-                <a href={contact.telegram} target="_blank" rel="noreferrer">
+                <a href={contact.telegram} target="_blank" rel="noopener noreferrer">
                   Telegram
                 </a>
               </div>
