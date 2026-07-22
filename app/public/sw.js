@@ -1,6 +1,13 @@
-const CACHE_NAME = 'mb-kuzbass-static-v3';
+const CACHE_NAME = 'mb-kuzbass-static-v4';
 const OFFLINE_URL = './offline.html';
-const PRECACHE_URLS = ['./', './index.html', './offline.html', './error.css', './assets/telegram-avatar.jpg'];
+const PRECACHE_URLS = [
+  './',
+  './index.html',
+  './offline.html',
+  './error.css',
+  './analytics-config.js',
+  './assets/telegram-avatar.jpg',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

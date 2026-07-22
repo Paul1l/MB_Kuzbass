@@ -1,0 +1,13 @@
+app/node_modules/
+app/dist/
+app/.npm-cache/
+app/*.log
+screenshots/
+
+# WebP-файлы ниже генерируются из редактируемых JPG/PNG командой npm run build.
+app/public/assets/2gis-photo-*.webp
+app/public/assets/client-car-*.webp
+app/public/assets/parallax-*.webp
+app/public/assets/engine-c203-m111.webp
+app/public/assets/mb-kuzbass-label-background.webp
+app/public/assets/telegram-avatar.webp

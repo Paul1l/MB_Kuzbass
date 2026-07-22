@@ -1,0 +1,49 @@
+# Пример server-блока для собственного HTTPS-хостинга. Замените example.ru и путь root.
+server {
+    listen 443 ssl http2;
+    server_name example.ru www.example.ru;
+    server_tokens off;
+    root /var/www/mb-kuzbass;
+    index index.html;
+
+    error_page 404 /404.html;
+    error_page 500 502 /500.html;
+    error_page 503 /503.html;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Cross-Origin-Resource-Policy "same-site" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://mc.yandex.ru https://mc.yandex.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://mc.yandex.ru https://mc.yandex.com; font-src 'self' data:; connect-src 'self' https://catalog.api.2gis.com https://mc.yandex.ru https://mc.yandex.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; worker-src 'self'; manifest-src 'self'; media-src 'self'; upgrade-insecure-requests" always;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location = /index.html {
+        expires -1;
+    }
+
+    location ~ ^/(?:analytics-config|reviews-config|sw)\.js$ {
+        expires -1;
+        try_files $uri =404;
+    }
+
+    location ~* \.(?:css|js|webp|svg|ico|woff2)$ {
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
+        try_files $uri =404;
+    }
+
+    location = /503.html {
+        expires -1;
+    }
+
+
+    location ~ ^/(?:404|500)\.html$ {
+        expires -1;
+    }
+}

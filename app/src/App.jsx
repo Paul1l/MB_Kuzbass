@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   brandBackdropImage,
   brandAvatar,
@@ -19,9 +19,10 @@ import {
   stats,
 } from './data.js';
 import { isOnlineReviewsConfigured, loadOnlineReviewsMeta } from './onlineReviews.js';
+import { disableAnalytics, enableAnalytics, trackGoal, trackPageView } from './analytics.js';
+import { readPrivacyPreferences, savePrivacyPreferences } from './privacyConsent.js';
 
 const defaultRequestText = 'Здравствуйте! Нужны запчасти, автомобиль с японского аукциона или поставка машинокомплекта.';
-const cookieName = 'mb_cookie_notice';
 
 // Нужна для единообразного оформления ссылок-кнопок. По типу канала связи возвращает CSS-классы обычной,
 // основной или второстепенной кнопки.
@@ -29,19 +30,6 @@ function getButtonClass(variant) {
   if (variant === 'primary') return 'button button--primary';
   if (variant === 'ghost') return 'button button--ghost';
   return 'button';
-}
-
-// Нужна для cookie-плашки. Проверяет, есть ли в браузере отметка о принятии технических cookie.
-function hasAcceptedCookieNotice() {
-  if (typeof window === 'undefined') return true;
-  return document.cookie.split('; ').some((cookie) => cookie === `${cookieName}=accepted`);
-}
-
-// Нужна для cookie-плашки. Сохраняет согласие на технические cookie на один год.
-function saveCookieNoticeAccept() {
-  const maxAge = 60 * 60 * 24 * 365;
-  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-  document.cookie = `${cookieName}=accepted; Max-Age=${maxAge}; Path=/; SameSite=Strict${secure}`;
 }
 
 // Нужна для формы заявки. Собирает имя, контакт и задачу в готовый текст для отправки в Telegram.
@@ -211,7 +199,13 @@ function SectionIntro({ index, eyebrow, title, text }) {
 // Нужна для быстрых контактов. Создает ссылку на внешний канал связи в едином стиле кнопки.
 function ContactButton({ item }) {
   return (
-    <a className={getButtonClass(item.variant)} href={item.href} target="_blank" rel="noopener noreferrer">
+    <a
+      className={getButtonClass(item.variant)}
+      href={item.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => trackGoal(`contact_${item.key}`)}
+    >
       {item.label}
     </a>
   );
@@ -230,7 +224,13 @@ function CatalogCategoryPage({ category }) {
         <h1>{category.label}</h1>
         <p>{category.description}</p>
         <div className="catalog-page__actions">
-          <a className="button button--primary" href={contact.telegram} target="_blank" rel="noopener noreferrer">
+          <a
+            className="button button--primary"
+            href={contact.telegram}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackGoal('catalog_telegram')}
+          >
             Уточнить наличие в Telegram
           </a>
           <a className="button button--ghost" href="#contacts">
@@ -253,7 +253,13 @@ function CatalogCategoryPage({ category }) {
               <span>{item.meta}</span>
               <h2>{item.title}</h2>
               <p>{item.description}</p>
-              <a className="button button--ghost" href={contact.telegram} target="_blank" rel="noopener noreferrer">
+              <a
+                className="button button--ghost"
+                href={contact.telegram}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackGoal('catalog_item_telegram')}
+              >
                 Уточнить наличие
               </a>
             </div>
@@ -378,18 +384,60 @@ function LegalLink({ doc, onOpen }) {
 
 // Нужна для правовой информации. Показывает выбранный документ поверх страницы, не растягивая основной лендинг.
 function LegalModal({ doc, onClose }) {
+  const panelRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const openerRef = useRef(null);
+
+  // Блокирует прокрутку страницы, удерживает фокус внутри документа и возвращает его инициатору после закрытия.
+  useEffect(() => {
+    if (!doc) return undefined;
+
+    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+
+    function keepFocusInside(event) {
+      if (event.key !== 'Tab' || !panelRef.current) return;
+      const focusableElements = Array.from(
+        panelRef.current.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (!focusableElements.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    }
+
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', keepFocusInside);
+    window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', keepFocusInside);
+      openerRef.current?.focus();
+    };
+  }, [doc]);
+
   if (!doc) return null;
 
   return (
     <div className="legal-modal" role="dialog" aria-modal="true" aria-labelledby="legal-title">
       <button className="legal-modal__backdrop" type="button" aria-label="Закрыть документ" onClick={onClose} />
-      <article className="legal-modal__panel">
+      <article className="legal-modal__panel" ref={panelRef} tabIndex="-1">
         <div className="legal-modal__head">
           <div>
             <p>Правовая информация</p>
             <h2 id="legal-title">{doc.title}</h2>
           </div>
-          <button className="legal-modal__close" type="button" onClick={onClose}>
+          <button className="legal-modal__close" type="button" onClick={onClose} ref={closeButtonRef}>
             Закрыть
           </button>
         </div>
@@ -407,27 +455,73 @@ function LegalModal({ doc, onClose }) {
   );
 }
 
-// Нужна для уведомления о cookie. Показывает плашку, сохраняет принятие и открывает подробную политику.
-function CookieBanner({ onOpenDocument }) {
-  const [visible, setVisible] = useState(() => !hasAcceptedCookieNotice());
+// Показывает отдельный выбор для обязательных cookie и необязательной аналитики.
+function CookieBanner({ preferences, initialSettings = false, onSave, onClose, onOpenDocument }) {
+  const [showSettings, setShowSettings] = useState(initialSettings);
+  const [analyticsAllowed, setAnalyticsAllowed] = useState(Boolean(preferences?.analytics));
 
-  // Нужна для кнопки принятия cookie. Сохраняет согласие и скрывает плашку.
-  function handleAccept() {
-    saveCookieNoticeAccept();
-    setVisible(false);
+  if (showSettings) {
+    return (
+      <div className="cookie-banner" role="region" aria-labelledby="cookie-settings-title">
+        <div className="cookie-banner__copy">
+          <h2 id="cookie-settings-title">Настройки cookie</h2>
+          <p>Вы можете изменить необязательные настройки в любое время через ссылку в подвале сайта.</p>
+        </div>
+        <div className="cookie-options">
+          <label className="cookie-option">
+            <input type="checkbox" checked disabled />
+            <span>
+              <strong>Необходимые</strong>
+              <small>Запоминают выбранные настройки. Эти cookie нужны для работы интерфейса.</small>
+            </span>
+          </label>
+          <label className="cookie-option">
+            <input
+              type="checkbox"
+              checked={analyticsAllowed}
+              onChange={(event) => setAnalyticsAllowed(event.target.checked)}
+            />
+            <span>
+              <strong>Аналитика</strong>
+              <small>Яндекс.Метрика помогает оценивать посещения и клики. Загружается только после согласия.</small>
+            </span>
+          </label>
+        </div>
+        <div className="cookie-banner__actions">
+          <button className="button button--primary" type="button" onClick={() => onSave(analyticsAllowed)}>
+            Сохранить выбор
+          </button>
+          {preferences && (
+            <button className="button" type="button" onClick={onClose}>
+              Отмена
+            </button>
+          )}
+          <button className="button" type="button" onClick={() => onOpenDocument('cookies')}>
+            Политика cookie
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  if (!visible) return null;
-
   return (
-    <div className="cookie-banner" role="region" aria-label="Уведомление о cookie">
-      <p>
-        Сайт использует технические cookie, чтобы запомнить согласие и не показывать это сообщение
-        повторно. Рекламные cookie и сторонняя аналитика не подключены.
-      </p>
+    <div className="cookie-banner" role="region" aria-label="Выбор cookie">
+      <div className="cookie-banner__copy">
+        <h2>Управление cookie</h2>
+        <p>
+          Необходимые cookie запоминают ваш выбор. Яндекс.Метрика включится только после отдельного
+          разрешения на аналитику. Рекламные технологии не подключены.
+        </p>
+      </div>
       <div className="cookie-banner__actions">
-        <button className="button button--primary" type="button" onClick={handleAccept}>
-          Принять
+        <button className="button button--primary" type="button" onClick={() => onSave(true)}>
+          Разрешить аналитику
+        </button>
+        <button className="button" type="button" onClick={() => onSave(false)}>
+          Только необходимые
+        </button>
+        <button className="button" type="button" onClick={() => setShowSettings(true)}>
+          Настроить
         </button>
         <button className="button" type="button" onClick={() => onOpenDocument('cookies')}>
           Подробнее
@@ -438,7 +532,7 @@ function CookieBanner({ onOpenDocument }) {
 }
 
 // Нужна для нижней части сайта. Показывает служебную информацию и ссылки на юридические документы.
-function Footer({ onOpenLegal }) {
+function Footer({ onOpenLegal, onOpenPrivacySettings }) {
   const footerNavigation = [
     { href: '#about', label: 'О компании' },
     { href: '#directions', label: 'Направления' },
@@ -466,10 +560,16 @@ function Footer({ onOpenLegal }) {
             поставки для авторазборов по России.
           </p>
           <div className="footer__actions">
-            <a className="button button--primary" href={contact.telegram} target="_blank" rel="noopener noreferrer">
+            <a
+              className="button button--primary"
+              href={contact.telegram}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackGoal('footer_telegram')}
+            >
               Telegram
             </a>
-            <a className="button button--dark-outline" href="#request">
+            <a className="button button--dark-outline" href="#request" onClick={() => trackGoal('footer_request')}>
               Оставить заявку
             </a>
           </div>
@@ -477,8 +577,13 @@ function Footer({ onOpenLegal }) {
 
         <div className="footer__column">
           <h3>Контакты</h3>
-          <a href={contact.phoneHref}>{contact.phone}</a>
-          <a href={contact.telegram} target="_blank" rel="noopener noreferrer">
+          <a href={contact.phoneHref} onClick={() => trackGoal('footer_phone')}>{contact.phone}</a>
+          <a
+            href={contact.telegram}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackGoal('footer_contact_telegram')}
+          >
             Telegram
           </a>
           <p>{contact.address}</p>
@@ -499,6 +604,9 @@ function Footer({ onOpenLegal }) {
           {legalDocs.map((doc) => (
             <LegalLink doc={doc} onOpen={onOpenLegal} key={doc.id} />
           ))}
+          <button type="button" onClick={onOpenPrivacySettings}>
+            Настройки cookie
+          </button>
         </nav>
       </div>
 
@@ -523,6 +631,8 @@ function Footer({ onOpenLegal }) {
 function App() {
   const [formStatus, setFormStatus] = useState('');
   const [activeLegalId, setActiveLegalId] = useState(null);
+  const [privacyPreferences, setPrivacyPreferences] = useState(() => readPrivacyPreferences());
+  const [privacyPanelOpen, setPrivacyPanelOpen] = useState(() => !readPrivacyPreferences());
   const [currentReviewsMeta, setCurrentReviewsMeta] = useState(() => ({ ...reviewsMeta, isLive: false }));
   const onlineReviewsConfigured = useMemo(() => isOnlineReviewsConfigured(reviewsProvider), []);
   const [reviewsSyncStatus, setReviewsSyncStatus] = useState(onlineReviewsConfigured ? 'loading' : 'static');
@@ -563,6 +673,33 @@ function App() {
     [catalogSlug],
   );
 
+  // Загружает Яндекс.Метрику только после согласия и удаляет ее cookie после отзыва согласия.
+  useEffect(() => {
+    let isActive = true;
+
+    if (!privacyPreferences?.analytics) {
+      disableAnalytics();
+      return undefined;
+    }
+
+    enableAnalytics()
+      .then((enabled) => {
+        if (isActive && enabled) trackPageView();
+      })
+      .catch(() => {
+        // Сбой внешней аналитики не влияет на работу витрины и формы.
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [privacyPreferences?.analytics]);
+
+  // Учитывает отдельные SPA-страницы каталога и юридические документы после инициализации аналитики.
+  useEffect(() => {
+    if (privacyPreferences?.analytics) trackPageView();
+  }, [activeLegalId, catalogSlug, privacyPreferences?.analytics]);
+
   // Закрывает модальное окно документов по Escape, чтобы юридические страницы не блокировали просмотр сайта.
   useEffect(() => {
     // Нужна для клавиатурного закрытия модалки. При Escape сбрасывает выбранный документ.
@@ -580,6 +717,7 @@ function App() {
     function handleHashChange() {
       const legalDocId = window.location.hash.replace(/^#/, '');
       const hasLegalDoc = legalDocs.some((doc) => doc.id === legalDocId);
+      trackPageView();
 
       if (hasLegalDoc) {
         setActiveLegalId(legalDocId);
@@ -731,6 +869,7 @@ function App() {
         : 'Telegram откроется в новой вкладке. Если текст не скопировался, отправьте VIN, контакт и задачу вручную.',
     );
 
+    trackGoal('request_submit');
     window.open(contact.telegram, '_blank', 'noopener,noreferrer');
   }
 
@@ -745,8 +884,16 @@ function App() {
     }
 
     setCatalogSlug(slug);
+    trackGoal('catalog_open');
     window.requestAnimationFrame(resetScroll);
     window.setTimeout(resetScroll, 80);
+  }
+
+  // Фиксирует выбор cookie и закрывает панель. Отдельное согласие на аналитику можно отозвать в footer.
+  function handlePrivacySave(analyticsAllowed) {
+    const nextPreferences = savePrivacyPreferences(analyticsAllowed);
+    setPrivacyPreferences(nextPreferences);
+    setPrivacyPanelOpen(false);
   }
 
   return (
@@ -783,7 +930,7 @@ function App() {
               {primaryMessengers.map((item) => (
                 <ContactButton item={item} key={item.key} />
               ))}
-              <a className="button button--ghost" href="#request">
+              <a className="button button--ghost" href="#request" onClick={() => trackGoal('hero_request')}>
                 Оставить заявку
               </a>
             </div>
@@ -799,7 +946,7 @@ function App() {
           >
             <div className="hero-cover__content">
               <span>{site.name}</span>
-              <h2>Mercedes-Benz / BMW / Japan auctions</h2>
+              <h2>Mercedes-Benz / BMW / Аукционы Японии</h2>
               <p>Оригинальные запчасти, автомобили с аукционов и поставки для авторазборов.</p>
             </div>
           </div>
@@ -992,7 +1139,7 @@ function App() {
                   <button className="button button--primary" type="submit">
                     Открыть Telegram
                   </button>
-                  <a className="button button--ghost" href={contact.phoneHref}>
+                  <a className="button button--ghost" href={contact.phoneHref} onClick={() => trackGoal('request_phone')}>
                     Позвонить
                   </a>
                 </div>
@@ -1012,13 +1159,18 @@ function App() {
               </div>
               <div className="contact-info__item">
                 <span>Основная связь</span>
-                <a href={contact.telegram} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={contact.telegram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackGoal('contacts_telegram')}
+                >
                   Telegram
                 </a>
               </div>
               <div className="contact-info__item">
                 <span>Телефон</span>
-                <a href={contact.phoneHref}>{contact.phone}</a>
+                <a href={contact.phoneHref} onClick={() => trackGoal('contacts_phone')}>{contact.phone}</a>
               </div>
               <div className="contact-info__item">
                 <span>Адрес</span>
@@ -1042,8 +1194,16 @@ function App() {
         )}
       </main>
 
-      <Footer onOpenLegal={setActiveLegalId} />
-      <CookieBanner onOpenDocument={setActiveLegalId} />
+      <Footer onOpenLegal={setActiveLegalId} onOpenPrivacySettings={() => setPrivacyPanelOpen(true)} />
+      {privacyPanelOpen && (
+        <CookieBanner
+          preferences={privacyPreferences}
+          initialSettings={Boolean(privacyPreferences)}
+          onSave={handlePrivacySave}
+          onClose={() => setPrivacyPanelOpen(false)}
+          onOpenDocument={setActiveLegalId}
+        />
+      )}
       <LegalModal doc={activeLegalDoc} onClose={() => setActiveLegalId(null)} />
     </>
   );
