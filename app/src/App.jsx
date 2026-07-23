@@ -211,10 +211,24 @@ function ContactButton({ item }) {
   );
 }
 
+// Keeps image areas useful when a cached page points at an asset that has
+// already been replaced during deployment.
+function createImageFallbackHandler(fallbackUrl) {
+  return (event) => {
+    const image = event.currentTarget;
+    if (image.dataset.fallbackApplied === 'true') return;
+
+    image.dataset.fallbackApplied = 'true';
+    image.classList.add('is-fallback');
+    image.src = fallbackUrl;
+  };
+}
+
 // Нужна карточкам с несколькими ракурсами. Показывает одно стабильное по размеру изображение
 // и позволяет вручную переключать фото, не запуская автоматическую карусель.
 function CatalogProductGallery({ product }) {
   const [activeImage, setActiveImage] = useState(0);
+  const handleImageError = createImageFallbackHandler(brandBackdropImage);
   const totalImages = product.images.length;
   const currentImage = product.images[activeImage];
 
@@ -242,6 +256,7 @@ function CatalogProductGallery({ product }) {
           height="600"
           loading="lazy"
           decoding="async"
+          onError={handleImageError}
         />
       </a>
 
@@ -713,6 +728,7 @@ function App() {
     [heroCoverBackgroundImage],
   );
   const primaryMessengers = messengers.filter((item) => item.key !== 'twoGis');
+  const handleCatalogPreviewError = createImageFallbackHandler(brandBackdropImage);
   const currentStats = useMemo(
     () => createStatsWithReviews(stats, currentReviewsMeta),
     [currentReviewsMeta],
@@ -877,16 +893,28 @@ function App() {
       window.requestAnimationFrame(updateParallaxBackground);
     }
 
+    const delayedUpdates = [80, 260, 700].map((delay) => window.setTimeout(queueUpdate, delay));
+    const pageShell = document.querySelector('.page-shell');
+    const resizeObserver =
+      pageShell && typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(queueUpdate)
+        : null;
+
+    resizeObserver?.observe(pageShell);
     queueUpdate();
     window.addEventListener('scroll', queueUpdate, { passive: true });
     window.addEventListener('resize', queueUpdate);
+    window.addEventListener('hashchange', queueUpdate);
 
     return () => {
       window.removeEventListener('scroll', queueUpdate);
       window.removeEventListener('resize', queueUpdate);
+      window.removeEventListener('hashchange', queueUpdate);
+      delayedUpdates.forEach((timeoutId) => window.clearTimeout(timeoutId));
+      resizeObserver?.disconnect();
       document.documentElement.style.removeProperty('--parallax-y');
     };
-  }, [resolvedParallaxBackgrounds.length]);
+  }, [catalogSlug, resolvedParallaxBackgrounds.length]);
 
   // Пытается получить актуальные публичные показатели отзывов из 2ГИС, если задан API-ключ или proxy.
   useEffect(() => {
@@ -1084,8 +1112,22 @@ function App() {
           <div className="catalog">
             {catalog.map((item) => (
               <a href={item.href} onClick={(event) => handleCatalogOpen(event, item.slug)} key={item.label}>
-                <span>{item.label}</span>
-                <small>{item.caption}</small>
+                {item.previewImage && (
+                  <img
+                    className="catalog__preview"
+                    src={item.previewImage}
+                    alt={item.previewAlt}
+                    width="320"
+                    height="240"
+                    loading="lazy"
+                    decoding="async"
+                    onError={handleCatalogPreviewError}
+                  />
+                )}
+                <span className="catalog__copy">
+                  <strong>{item.label}</strong>
+                  <small>{item.caption}</small>
+                </span>
               </a>
             ))}
           </div>

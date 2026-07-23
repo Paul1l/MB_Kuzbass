@@ -1,9 +1,11 @@
+import { getAssetUrl } from './assetUrl.js';
+
 // Нужна для всех локальных изображений. Возвращает путь с учетом base URL, чтобы сайт работал и локально, и на хостинге.
 const asset = (fileName) => {
   const optimizedName = fileName === 'telegram-avatar.jpg'
     ? fileName
     : fileName.replace(/\.(?:jpe?g|png)$/i, '.webp');
-  return `${import.meta.env.BASE_URL}assets/${optimizedName}`;
+  return getAssetUrl(`assets/${optimizedName}`);
 };
 
 // Главные SEO-настройки и базовая информация компании. Эти поля попадают в title, description, JSON-LD и footer.
