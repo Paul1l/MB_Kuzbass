@@ -211,6 +211,69 @@ function ContactButton({ item }) {
   );
 }
 
+// Нужна карточкам с несколькими ракурсами. Показывает одно стабильное по размеру изображение
+// и позволяет вручную переключать фото, не запуская автоматическую карусель.
+function CatalogProductGallery({ product }) {
+  const [activeImage, setActiveImage] = useState(0);
+  const totalImages = product.images.length;
+  const currentImage = product.images[activeImage];
+
+  const showPrevious = () => {
+    setActiveImage((current) => (current - 1 + totalImages) % totalImages);
+  };
+
+  const showNext = () => {
+    setActiveImage((current) => (current + 1) % totalImages);
+  };
+
+  return (
+    <div className="catalog-product-card__media">
+      <a
+        className="catalog-product-card__image-link"
+        href={currentImage}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={`Открыть фото: ${product.title}`}
+      >
+        <img
+          src={currentImage}
+          alt={totalImages > 1 ? `${product.alt}, ракурс ${activeImage + 1}` : product.alt}
+          width="800"
+          height="600"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+
+      {totalImages > 1 && (
+        <>
+          <button
+            className="catalog-product-card__gallery-button catalog-product-card__gallery-button--previous"
+            type="button"
+            onClick={showPrevious}
+            aria-label={`Предыдущее фото: ${product.title}`}
+            title="Предыдущее фото"
+          >
+            ‹
+          </button>
+          <button
+            className="catalog-product-card__gallery-button catalog-product-card__gallery-button--next"
+            type="button"
+            onClick={showNext}
+            aria-label={`Следующее фото: ${product.title}`}
+            title="Следующее фото"
+          >
+            ›
+          </button>
+          <span className="catalog-product-card__gallery-count" aria-live="polite">
+            {activeImage + 1} / {totalImages}
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
 // Нужна для SPA-страниц каталога. Показывает выбранную категорию, карточки позиций и CTA для запроса в Telegram.
 function CatalogCategoryPage({ category }) {
   return (
@@ -246,9 +309,7 @@ function CatalogCategoryPage({ category }) {
       <div className="catalog-products" aria-label={`Каталог: ${category.label}`}>
         {category.items.map((item) => (
           <article className="catalog-product-card" key={item.title}>
-            <div className="catalog-product-card__media">
-              <span>Фото будет добавлено</span>
-            </div>
+            <CatalogProductGallery product={item} />
             <div className="catalog-product-card__body">
               <span>{item.meta}</span>
               <h2>{item.title}</h2>

@@ -1,0 +1,272 @@
+{
+  "categories": [
+    {
+      "slug": "engines",
+      "label": "Двигатели и навесное",
+      "description": "Оригинальные двигатели Mercedes-Benz и BMW с японских автомобилей-доноров. Комплектность, маркировку и совместимость подтверждаем перед сделкой.",
+      "products": [
+        {
+          "title": "Двигатель BMW E39 M54",
+          "meta": "BMW · M54",
+          "description": "Фото фактического агрегата. Комплектность, маркировку и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Двигатели и навесное/Двигатель BMW E39 M54.webp"],
+          "images": ["bmw-e39-m54.webp"]
+        },
+        {
+          "title": "Двигатель BMW X3 N52",
+          "meta": "BMW · N52",
+          "description": "Фото фактического агрегата. Комплектность, маркировку и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Двигатели и навесное/Двигатель BMW X3 N52.webp"],
+          "images": ["bmw-x3-n52.webp"]
+        },
+        {
+          "title": "Двигатель Mercedes-Benz C203 M111",
+          "meta": "Mercedes-Benz · M111",
+          "description": "Фото фактического агрегата. Комплектность, маркировку и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Двигатели и навесное/Двигатель C203 M111.jfif"],
+          "images": ["mercedes-c203-m111.webp"]
+        },
+        {
+          "title": "Двигатель Mercedes-Benz C203 M271",
+          "meta": "Mercedes-Benz · M271",
+          "description": "Фото фактического агрегата. Комплектность, маркировку и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Двигатели и навесное/Двигатель C203 M271.webp"],
+          "images": ["mercedes-c203-m271.webp"]
+        },
+        {
+          "title": "Двигатель Mercedes-Benz E211 M272",
+          "meta": "Mercedes-Benz · M272",
+          "description": "Фото фактического агрегата. Комплектность, маркировку и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Двигатели и навесное/Двигатель E211 M272.webp"],
+          "images": ["mercedes-e211-m272.webp"]
+        },
+        {
+          "title": "Двигатель BMW E60 N62",
+          "meta": "BMW · N62",
+          "description": "Фото фактического агрегата. Комплектность, маркировку и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Двигатели и навесное/Двигатель MW E60 N62.webp"],
+          "images": ["bmw-e60-n62.webp"]
+        },
+        {
+          "title": "Двигатель Mercedes-Benz W163 M112",
+          "meta": "Mercedes-Benz · M112",
+          "description": "Фото фактического агрегата. Комплектность, маркировку и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Двигатели и навесное/Двигатель W163 M112.webp"],
+          "images": ["mercedes-w163-m112.webp"]
+        }
+      ]
+    },
+    {
+      "slug": "transmission",
+      "label": "АКПП",
+      "description": "Автоматические коробки передач Mercedes-Benz и BMW. Код агрегата, состояние и совместимость проверяем по маркировке и VIN.",
+      "products": [
+        {
+          "title": "АКПП BMW 525i",
+          "meta": "BMW · АКПП",
+          "description": "Фото фактической коробки передач. Маркировку, состояние и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Акпп/АКПП BMW 525i/1.webp"],
+          "images": ["bmw-525i-akpp.webp"]
+        },
+        {
+          "title": "АКПП Mercedes-Benz E-Class 2009",
+          "meta": "Mercedes-Benz · АКПП",
+          "description": "Фото фактической коробки передач. Маркировку, состояние и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Акпп/АКПП Mercedes-Benz E-Class 2009/1.webp"],
+          "images": ["mercedes-e-class-2009-akpp.webp"]
+        },
+        {
+          "title": "АКПП ZF 6HP26 BMW 550i",
+          "meta": "BMW · ZF 6HP26",
+          "description": "Фото фактической коробки передач. Маркировку, состояние и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Акпп/АКПП Zf 6HP26 BMW 550I/1.webp"],
+          "images": ["bmw-550i-zf-6hp26-akpp.webp"]
+        }
+      ]
+    },
+    {
+      "slug": "chassis",
+      "label": "Диски, подвеска, тормоза",
+      "description": "Колесные комплекты, элементы подвески и тормозные механизмы для Mercedes-Benz и BMW. Параметры и состояние уточняются по конкретной позиции.",
+      "products": [
+        {
+          "title": "Балка задней подвески BMW E39 525i",
+          "meta": "BMW · Подвеска",
+          "description": "Фото фактической детали. Состояние, комплектность и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Диски, подвеска, тормоза/Балка задней подвески BMW E39 525I.jpg"],
+          "images": ["bmw-e39-525i-rear-subframe.webp"]
+        },
+        {
+          "title": "Тормозные диски Mercedes-Benz W221 S500",
+          "meta": "Mercedes-Benz · Тормоза",
+          "description": "Фото фактического комплекта. Размеры, износ и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Диски, подвеска, тормоза/Диски тормозные Mercedes-Benz W221 S500.jpg"],
+          "images": ["mercedes-w221-s500-brake-discs.webp"]
+        },
+        {
+          "title": "Передние тормозные диски Mercedes-Benz W211 E300",
+          "meta": "Mercedes-Benz · Тормоза",
+          "description": "Фото фактического комплекта. Размеры, износ и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Диски, подвеска, тормоза/Диски тормозные передние Mercedes-Benz W211 E300.jpg"],
+          "images": ["mercedes-w211-e300-front-brake-discs.webp"]
+        },
+        {
+          "title": "Комплект дисков BMW E39 525i",
+          "meta": "BMW · Диски",
+          "description": "Фото фактического комплекта. Диаметр, вылет, состояние и состав уточняйте перед заказом.",
+          "sourceImages": ["Диски, подвеска, тормоза/Комплект дисков BMW E39 525I.jpg"],
+          "images": ["bmw-e39-525i-wheel-set.webp"]
+        },
+        {
+          "title": "Комплект дисков Mercedes-Benz W204",
+          "meta": "Mercedes-Benz · Диски",
+          "description": "Фото фактического комплекта. Диаметр, вылет, состояние и состав уточняйте перед заказом.",
+          "sourceImages": ["Диски, подвеска, тормоза/Комплект дисков Mercedes-Benz W204.jpg"],
+          "images": ["mercedes-w204-wheel-set.webp"]
+        },
+        {
+          "title": "Комплект дисков Mercedes-Benz W211",
+          "meta": "Mercedes-Benz · Диски",
+          "description": "Фото фактического комплекта. Диаметр, вылет, состояние и состав уточняйте перед заказом.",
+          "sourceImages": ["Диски, подвеска, тормоза/Комплект дисков Mercedes-Benz W211.jpg"],
+          "images": ["mercedes-w211-wheel-set.webp"]
+        },
+        {
+          "title": "Комплект колес BMW E60 550i",
+          "meta": "BMW · Колеса",
+          "description": "Фото фактического комплекта. Размеры дисков и шин, износ и состав уточняйте перед заказом.",
+          "sourceImages": ["Диски, подвеска, тормоза/Комплект колёс BMW E60 550I.jpg"],
+          "images": ["bmw-e60-550i-wheel-set.webp"]
+        },
+        {
+          "title": "Рычаги задней подвески Mercedes-Benz W203",
+          "meta": "Mercedes-Benz · Подвеска",
+          "description": "Фото фактического комплекта. Состав, состояние шарниров и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Диски, подвеска, тормоза/Рычаги задней подвески Mercedes-Benz W203.jpg"],
+          "images": ["mercedes-w203-rear-arms.webp"]
+        },
+        {
+          "title": "Рычаги задней подвески Mercedes-Benz W211",
+          "meta": "Mercedes-Benz · Подвеска",
+          "description": "Фото фактического комплекта. Состав, состояние шарниров и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Диски, подвеска, тормоза/Рычаги задней подвески Mercedes-Benz W211.jpg"],
+          "images": ["mercedes-w211-rear-arms.webp"]
+        }
+      ]
+    },
+    {
+      "slug": "body",
+      "label": "Кузова и кузовные детали",
+      "description": "Кузова и кузовные элементы с японских автомобилей-доноров. Состояние, комплектность и варианты перевозки согласовываются по фото.",
+      "products": [
+        {
+          "title": "Кузов Mercedes-Benz C-Class W204",
+          "meta": "Mercedes-Benz · Кузов",
+          "description": "Три ракурса фактической позиции. Состояние, комплектность и документы уточняйте перед сделкой.",
+          "sourceImages": [
+            "Кузова авто/W204/1.webp",
+            "Кузова авто/W204/2.webp",
+            "Кузова авто/W204/3.webp"
+          ],
+          "images": [
+            "mercedes-w204-body-01.webp",
+            "mercedes-w204-body-02.webp",
+            "mercedes-w204-body-03.webp"
+          ]
+        },
+        {
+          "title": "Пороги кузова в ассортименте",
+          "meta": "Кузов · Пороги",
+          "description": "Фото примера ассортимента. Нужную сторону, кузов, состояние и наличие уточняйте у менеджера.",
+          "sourceImages": ["Кузова авто/Пороги в ассортименте/1.webp"],
+          "images": ["body-sills-assorted.webp"]
+        },
+        {
+          "title": "Передние пороги кузова Mercedes-Benz W203",
+          "meta": "Mercedes-Benz · Пороги",
+          "description": "Три ракурса фактической позиции. Сторону установки, состояние и комплектность уточняйте перед заказом.",
+          "sourceImages": [
+            "Кузова авто/Пороги кузова передние W203/1.webp",
+            "Кузова авто/Пороги кузова передние W203/2.webp",
+            "Кузова авто/Пороги кузова передние W203/3.webp"
+          ],
+          "images": [
+            "mercedes-w203-front-sills-01.webp",
+            "mercedes-w203-front-sills-02.webp",
+            "mercedes-w203-front-sills-03.webp"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "optics",
+      "label": "Оптика",
+      "description": "Передняя и задняя оптика Mercedes-Benz и BMW. Состояние стекол, креплений, блоков и совместимость подтверждаем по фото и маркировке.",
+      "products": [
+        {
+          "title": "Комплект передних фар Mercedes-Benz W212",
+          "meta": "Mercedes-Benz · Передняя оптика",
+          "description": "Фото фактического комплекта. Состояние стекол, креплений и состав уточняйте перед заказом.",
+          "sourceImages": ["Оптика/Комплект передних фар W212/1.webp"],
+          "images": ["mercedes-w212-headlights.webp"]
+        },
+        {
+          "title": "Комплект передних фар BMW 550i 2006",
+          "meta": "BMW · Передняя оптика",
+          "description": "Фото фактического комплекта. Состояние стекол, креплений и состав уточняйте перед заказом.",
+          "sourceImages": ["Оптика/Комплект фар BMW 550i 2006/1.webp"],
+          "images": ["bmw-550i-2006-headlights.webp"]
+        },
+        {
+          "title": "Комплект ксеноновых фар Mercedes-Benz C-Class 2013",
+          "meta": "Mercedes-Benz · Ксенон",
+          "description": "Фото фактического комплекта. Маркировку, блоки, крепления и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Оптика/Комплект фар ксенон Mercedes-Benz C-Class 2013/1.webp"],
+          "images": ["mercedes-c-class-2013-xenon-headlights.webp"]
+        },
+        {
+          "title": "Ксеноновая фара Mercedes-Benz E-Class 2007",
+          "meta": "Mercedes-Benz · Ксенон",
+          "description": "Фото фактической позиции. Сторону установки, маркировку и состояние креплений уточняйте перед заказом.",
+          "sourceImages": ["Оптика/Фара ксеноновая Mercedes-Benz E-Class 2007/1.webp"],
+          "images": ["mercedes-e-class-2007-xenon-headlight.webp"]
+        },
+        {
+          "title": "Комплект задних фонарей BMW E60 550i",
+          "meta": "BMW · Задняя оптика",
+          "description": "Фото фактического комплекта. Состав, состояние стекол и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Оптика/Фонари задние BMW E60 BMW 550I/1.webp"],
+          "images": ["bmw-e60-550i-tail-lights.webp"]
+        },
+        {
+          "title": "Комплект задних фонарей Mercedes-Benz W207",
+          "meta": "Mercedes-Benz · Задняя оптика",
+          "description": "Фото фактического комплекта. Состав, состояние стекол и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Оптика/Фонари задние Mercedes-Benz W207/1.webp"],
+          "images": ["mercedes-w207-tail-lights.webp"]
+        },
+        {
+          "title": "Комплект задних фонарей Mercedes-Benz W211",
+          "meta": "Mercedes-Benz · Задняя оптика",
+          "description": "Фото фактического комплекта. Состав, состояние стекол и совместимость уточняйте перед заказом.",
+          "sourceImages": ["Оптика/Фонари задние Mercedes-Benz W211/1.webp"],
+          "images": ["mercedes-w211-tail-lights.webp"]
+        }
+      ]
+    },
+    {
+      "slug": "interior",
+      "label": "Салон",
+      "description": "Сиденья и элементы интерьера Mercedes-Benz и BMW. Цвет, состояние, комплектацию и совместимость уточняйте по фото.",
+      "products": [
+        {
+          "title": "Комплект сидений BMW 550i",
+          "meta": "BMW · Салон",
+          "description": "Фото фактического комплекта. Состав, цвет, состояние обивки и электрики уточняйте перед заказом.",
+          "sourceImages": ["Салон/Сиденья комплект BMW 550i/1.jfif"],
+          "images": ["bmw-550i-seat-set.webp"]
+        }
+      ]
+    }
+  ]
+}
