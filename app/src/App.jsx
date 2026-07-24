@@ -728,7 +728,6 @@ function App() {
     [heroCoverBackgroundImage],
   );
   const primaryMessengers = messengers.filter((item) => item.key !== 'twoGis');
-  const handleCatalogPreviewError = createImageFallbackHandler(brandBackdropImage);
   const currentStats = useMemo(
     () => createStatsWithReviews(stats, currentReviewsMeta),
     [currentReviewsMeta],
@@ -1112,18 +1111,6 @@ function App() {
           <div className="catalog">
             {catalog.map((item) => (
               <a href={item.href} onClick={(event) => handleCatalogOpen(event, item.slug)} key={item.label}>
-                {item.previewImage && (
-                  <img
-                    className="catalog__preview"
-                    src={item.previewImage}
-                    alt={item.previewAlt}
-                    width="320"
-                    height="240"
-                    loading="lazy"
-                    decoding="async"
-                    onError={handleCatalogPreviewError}
-                  />
-                )}
                 <span className="catalog__copy">
                   <strong>{item.label}</strong>
                   <small>{item.caption}</small>

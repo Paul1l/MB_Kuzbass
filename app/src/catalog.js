@@ -14,10 +14,6 @@ export const catalog = catalogProducts.categories.map((category) => ({
   caption: 'Открыть каталог',
   href: `#catalog/${category.slug}`,
   description: category.description,
-  previewImage: category.products[0]?.images[0]
-    ? catalogAsset(category.slug, category.products[0].images[0])
-    : null,
-  previewAlt: `Пример товара из категории «${category.label}»`,
   items: category.products.map((product) => ({
     title: product.title,
     meta: product.meta,
