@@ -146,6 +146,16 @@ function schedulePageAnchorScroll(hash = window.location.hash) {
   });
 }
 
+// Prevents the browser from restoring an old scroll position when the main page is opened again.
+function schedulePageTopReset() {
+  const resetScroll = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+  window.requestAnimationFrame(resetScroll);
+  [80, 240, 700].forEach((delay) => {
+    window.setTimeout(resetScroll, delay);
+  });
+}
+
 // Нужна для ручной карусели авто. Считает кратчайшее смещение слайда относительно активной карточки.
 function getCarouselOffset(index, activeIndex, total) {
   let offset = index - activeIndex;
@@ -789,8 +799,32 @@ function App() {
 
   // Синхронизирует hash URL с состоянием SPA-каталога и сбрасывает прокрутку при открытии категории.
   useEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration;
+    let isInitialNavigation = true;
+
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
     // Нужна для маршрутизации каталога. Читает hash, выбирает категорию и ставит страницу наверх.
     function handleHashChange() {
+      const isFirstRun = isInitialNavigation;
+      isInitialNavigation = false;
+      const currentHash = window.location.hash;
+
+      // Старые ссылки на обзор каталога и обычное открытие сайта должны начинаться с первого экрана.
+      if (isFirstRun && (!currentHash || currentHash === '#catalog')) {
+        if (currentHash === '#catalog') {
+          window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+        }
+
+        setActiveLegalId(null);
+        setCatalogSlug(null);
+        trackPageView();
+        schedulePageTopReset();
+        return;
+      }
+
       const legalDocId = window.location.hash.replace(/^#/, '');
       const hasLegalDoc = legalDocs.some((doc) => doc.id === legalDocId);
       trackPageView();
@@ -819,6 +853,10 @@ function App() {
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
       window.removeEventListener('popstate', handleHashChange);
+
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = previousScrollRestoration;
+      }
     };
   }, []);
 
