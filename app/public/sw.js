@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mb-kuzbass-static-v8';
+const CACHE_NAME = 'mb-kuzbass-static-v9';
 const OFFLINE_URL = './offline.html';
 const PRECACHE_URLS = [
   './',

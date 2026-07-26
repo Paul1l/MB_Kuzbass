@@ -374,21 +374,12 @@ export const reviews = [
     link: 'https://barnaul.flamp.ru/firm/mb_kuzbass_centr_avtorazbora_i_zapchastejj_iz_yaponii-70000001084067232',
   },
   {
-    author: 'Клиенты в 2ГИС',
+    author: 'Отзывы в 2ГИС',
     source: '2ГИС',
-    date: 'сводка по карточке',
+    date: 'карточка компании',
     rating: reviewsMeta.rating,
     text:
-      'В карточке компании высокий рейтинг и отдельный акцент на честной работе с Mercedes-Benz и BMW.',
-    link: contact.twoGis,
-  },
-  {
-    author: 'Клиенты в 2ГИС',
-    source: '2ГИС',
-    date: 'сводка по карточке',
-    rating: reviewsMeta.rating,
-    text:
-      'Клиенты используют карточку для звонка, маршрута, просмотра фото и быстрого перехода в Telegram или WhatsApp.',
+      'Откройте карточку MB Kuzbass, чтобы посмотреть актуальный рейтинг, отзывы клиентов, фотографии и построить маршрут.',
     link: contact.twoGis,
   },
   {
