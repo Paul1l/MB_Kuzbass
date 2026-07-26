@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   brandBackdropImage,
   brandAvatar,
@@ -760,6 +760,22 @@ function App() {
     [catalogSlug],
   );
 
+  // Closes a legal document and clears its hash so a refresh does not reopen the modal.
+  const closeLegalDocument = useCallback(() => {
+    const legalDocId = window.location.hash.replace(/^#/, '');
+    const hasLegalDocHash = legalDocs.some((doc) => doc.id === legalDocId);
+
+    if (hasLegalDocHash) {
+      window.history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${window.location.search}`,
+      );
+    }
+
+    setActiveLegalId(null);
+  }, []);
+
   // Загружает Яндекс.Метрику только после согласия и удаляет ее cookie после отзыва согласия.
   useEffect(() => {
     let isActive = true;
@@ -791,12 +807,12 @@ function App() {
   useEffect(() => {
     // Нужна для клавиатурного закрытия модалки. При Escape сбрасывает выбранный документ.
     function handleEscape(event) {
-      if (event.key === 'Escape') setActiveLegalId(null);
+      if (event.key === 'Escape') closeLegalDocument();
     }
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, []);
+  }, [closeLegalDocument]);
 
   // Синхронизирует hash URL с состоянием SPA-каталога и сбрасывает прокрутку при открытии категории.
   useEffect(() => {
@@ -1332,7 +1348,7 @@ function App() {
           onOpenDocument={setActiveLegalId}
         />
       )}
-      <LegalModal doc={activeLegalDoc} onClose={() => setActiveLegalId(null)} />
+      <LegalModal doc={activeLegalDoc} onClose={closeLegalDocument} />
     </>
   );
 }
