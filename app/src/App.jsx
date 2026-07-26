@@ -22,7 +22,8 @@ import { isOnlineReviewsConfigured, loadOnlineReviewsMeta } from './onlineReview
 import { disableAnalytics, enableAnalytics, trackGoal, trackPageView } from './analytics.js';
 import { readPrivacyPreferences, savePrivacyPreferences } from './privacyConsent.js';
 
-const defaultRequestText = 'Здравствуйте! Нужны запчасти, автомобиль с японского аукциона или поставка машинокомплекта.';
+const requestPlaceholderText =
+  'Здравствуйте! Нужны запчасти, автомобиль с японского аукциона или поставка машинокомплекта.';
 
 // Нужна для единообразного оформления ссылок-кнопок. По типу канала связи возвращает CSS-классы обычной,
 // основной или второстепенной кнопки.
@@ -1250,8 +1251,7 @@ function App() {
                   <textarea
                     name="message"
                     rows="5"
-                    placeholder="VIN, модель, год, название детали или ссылка"
-                    defaultValue={defaultRequestText}
+                    placeholder={requestPlaceholderText}
                     maxLength="1500"
                   />
                 </label>
