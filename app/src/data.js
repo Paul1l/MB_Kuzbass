@@ -168,8 +168,8 @@ export const messengers = [
 // Верхние числовые показатели. Рейтинг и количество оценок могут обновляться онлайн из 2ГИС.
 export const stats = [
   { key: 'parts', value: 'OEM', label: 'оригинальные запчасти с японских доноров' },
-  { key: 'rating', value: '5.0', label: 'рейтинг компании в карточке 2ГИС' },
-  { key: 'reviews', value: '20', label: 'оценок в 2ГИС на момент обновления сайта' },
+  { key: 'rating', value: '4.8', label: 'рейтинг компании в карточке 2ГИС' },
+  { key: 'reviews', value: '28', label: 'оценок в 2ГИС на момент обновления сайта' },
 ];
 
 // Основные направления работы компании. Отрисовываются во втором блоке лендинга.
@@ -333,18 +333,18 @@ export const garageSlides = [
 
 // Базовые данные отзывов, которые показываются, если онлайн-загрузка 2ГИС недоступна.
 export const reviewsMeta = {
-  rating: '5.0',
-  ratingCount: '20 оценок',
-  reviewCount: '14 отзывов',
-  ratingCountValue: 20,
-  reviewCountValue: 14,
+  rating: '4.8',
+  ratingCount: '28 оценок',
+  reviewCount: '17 отзывов',
+  ratingCountValue: 28,
+  reviewCountValue: 17,
   source: '2ГИС',
   sourceUrl: contact.twoGis,
   sources: [
     {
       name: '2ГИС',
       url: contact.twoGis,
-      label: '5.0 / 20 оценок',
+      label: '4.8 / 28 оценок',
     },
     {
       name: 'Drom',
