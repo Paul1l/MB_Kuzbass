@@ -1,13 +1,14 @@
 @use 'sass:color';
 
 $ink: #181818;
-$muted: #6d7178;
+$muted: #656a70;
 $line: #d8dce0;
 $paper: #f6f7f4;
 $white: #ffffff;
 $red: #c8322b;
 $green: #2f6c4f;
 $gold: #b9832f;
+$gold-on-dark: #c9953d;
 $charcoal: #232323;
 
 * {
@@ -295,7 +296,7 @@ h1 {
 }
 
 .button--primary {
-  color: $ink;
+  color: $white;
   background: $red;
   border-color: $red;
 
@@ -891,7 +892,7 @@ h1 {
   span {
     display: inline-block;
     margin-bottom: 26px;
-    color: $gold;
+    color: $gold-on-dark;
     font-weight: 800;
   }
 
@@ -1308,7 +1309,7 @@ textarea {
   }
 
   .button--primary {
-    color: $ink;
+    color: $white;
     background: $red;
     border-color: $red;
   }

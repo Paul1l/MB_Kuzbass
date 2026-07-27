@@ -5,4 +5,4 @@ Disallow: /500.html
 Disallow: /503.html
 Disallow: /offline.html
 
-Sitemap: https://paul1l.github.io/MB_Kuzbass/sitemap.xml
+Sitemap: https://mb-kuzbass.ru/sitemap.xml

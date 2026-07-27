@@ -14,7 +14,7 @@ export const site = {
   shortName: 'MB Kuzbass',
   legalName: 'ИП Пушкарев Кирилл Александрович',
   city: 'Барнаул',
-  url: 'https://paul1l.github.io/MB_Kuzbass/',
+  url: 'https://mb-kuzbass.ru/',
   title: 'МБ Кузбасс / MB Kuzbass — оригинальные запчасти Mercedes-Benz и BMW с японских доноров',
   description:
     'МБ Кузбасс / MB Kuzbass в Барнауле: оригинальные запчасти Mercedes-Benz и BMW с японских доноров, автомобили с японских аукционов, машинокомплекты и поставки для авторазборов по России.',

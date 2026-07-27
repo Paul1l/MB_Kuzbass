@@ -172,7 +172,7 @@ function getCarouselOffset(index, activeIndex, total) {
 function Header() {
   return (
     <header className="site-header">
-      <a className="brand" href="#top" aria-label={site.name}>
+      <a className="brand" href="#top">
         <span className="brand__mark">
           <img className="brand__avatar" src={brandAvatar} alt="Аватарка MB Kuzbass из Telegram" />
         </span>
@@ -382,7 +382,7 @@ function GarageCarousel() {
       />
 
       <div className="garage-carousel">
-        <div className="garage-stage" aria-label="Карусель автомобилей MB Kuzbass">
+        <div className="garage-stage" role="region" aria-label="Карусель автомобилей MB Kuzbass">
           {garageSlides.map((slide, index) => {
             const offset = getCarouselOffset(index, activeSlideIndex, garageSlides.length);
             const absoluteOffset = Math.abs(offset);
@@ -401,7 +401,7 @@ function GarageCarousel() {
                 }}
                 type="button"
                 onClick={() => setActiveSlideIndex(index)}
-                aria-label={`Показать ${slide.title}`}
+                aria-label={`${slide.meta}. Показать ${slide.title}`}
                 aria-hidden={!isVisible}
                 tabIndex={isVisible ? 0 : -1}
                 key={slide.title}
@@ -417,7 +417,7 @@ function GarageCarousel() {
           <div>
             <span>{activeSlide.meta}</span>
             <h3>{activeSlide.title}</h3>
-            <p className="garage-description-slot" aria-label="Место под описание автомобиля" />
+            <p className="garage-description-slot" aria-hidden="true" />
           </div>
           <div className="garage-controls">
             <button type="button" onClick={setPreviousSlide} aria-label="Предыдущее авто">
@@ -633,7 +633,7 @@ function Footer({ onOpenLegal, onOpenPrivacySettings }) {
     <footer className="footer">
       <div className="footer__main">
         <div className="footer__brand">
-          <a className="footer-brand" href="#top" aria-label="На главную MB Kuzbass">
+          <a className="footer-brand" href="#top">
             <span className="footer-brand__mark">
               <img src={brandAvatar} alt="Логотип MB Kuzbass" />
             </span>

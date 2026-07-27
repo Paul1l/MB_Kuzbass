@@ -2,6 +2,8 @@ import { access, readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 const distDirectory = path.resolve('dist');
+const productionOrigin = 'https://mb-kuzbass.ru';
+const legacyOrigin = 'https://paul1l.github.io/MB_Kuzbass';
 const catalogManifest = JSON.parse(await readFile(path.resolve('catalog-products.json'), 'utf8'));
 const requiredFiles = [
   'index.html',
@@ -11,6 +13,8 @@ const requiredFiles = [
   'offline.html',
   '_headers',
   'analytics-config.js',
+  'robots.txt',
+  'sitemap.xml',
   'assets/mb-kuzbass-label-background.webp',
   ...catalogManifest.categories.flatMap((category) =>
     category.products.flatMap((product) =>
@@ -27,6 +31,28 @@ if (indexHtml.includes('/src/main.jsx')) throw new Error('В dist осталас
 if (!indexHtml.includes('analytics-config.js')) throw new Error('Конфигурация аналитики не подключена.');
 
 // Собирает вложенные файлы, чтобы проверка охватывала не только корень assets, но и каталог товаров.
+const robotsTxt = await readFile(path.join(distDirectory, 'robots.txt'), 'utf8');
+const sitemapXml = await readFile(path.join(distDirectory, 'sitemap.xml'), 'utf8');
+const publicSeoFiles = [
+  ['index.html', indexHtml],
+  ['robots.txt', robotsTxt],
+  ['sitemap.xml', sitemapXml],
+];
+
+// Keep every public SEO reference on the production domain.
+for (const [fileName, contents] of publicSeoFiles) {
+  if (!contents.includes(productionOrigin)) {
+    throw new Error(`${fileName} does not reference the production domain ${productionOrigin}.`);
+  }
+  if (contents.includes(legacyOrigin)) {
+    throw new Error(`${fileName} still references the legacy GitHub Pages URL.`);
+  }
+}
+
+if (!indexHtml.includes(`<link rel="canonical" href="${productionOrigin}/"`)) {
+  throw new Error('index.html does not contain the expected production canonical URL.');
+}
+
 async function collectFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const nestedFiles = await Promise.all(
