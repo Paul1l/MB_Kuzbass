@@ -15,6 +15,7 @@ const requiredFiles = [
   'analytics-config.js',
   'robots.txt',
   'sitemap.xml',
+  'yandex_069c92c8aa409d72.html',
   'assets/mb-kuzbass-label-background.webp',
   ...catalogManifest.categories.flatMap((category) =>
     category.products.flatMap((product) =>
@@ -29,6 +30,9 @@ await Promise.all(requiredFiles.map((fileName) => access(path.join(distDirectory
 const indexHtml = await readFile(path.join(distDirectory, 'index.html'), 'utf8');
 if (indexHtml.includes('/src/main.jsx')) throw new Error('В dist осталась ссылка на исходный JSX.');
 if (!indexHtml.includes('analytics-config.js')) throw new Error('Конфигурация аналитики не подключена.');
+if (!indexHtml.includes('name="msvalidate.01" content="192BAF445B30A248D9D63FB12022235D"')) {
+  throw new Error('Bing Webmaster verification meta tag is missing or invalid.');
+}
 if (indexHtml.includes('mc.yandex.ru/watch/')) {
   throw new Error('В HTML найден пиксель Метрики, который может сработать до согласия пользователя.');
 }
