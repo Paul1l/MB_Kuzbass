@@ -9,8 +9,9 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "import:catalog": "node scripts/import-catalog-images.mjs",
+    "generate:favicons": "node scripts/generate-favicons.mjs",
     "optimize:images": "node scripts/optimize-images.mjs",
-    "build": "npm run optimize:images && vite build && node scripts/prepare-dist.mjs && node scripts/verify-build.mjs",
+    "build": "npm run generate:favicons && npm run optimize:images && vite build && node scripts/prepare-dist.mjs && node scripts/verify-build.mjs",
     "lint": "eslint .",
     "check": "npm run lint && npm run build && npm audit --audit-level=high",
     "preview": "vite preview --host 127.0.0.1"

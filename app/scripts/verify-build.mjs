@@ -16,6 +16,12 @@ const requiredFiles = [
   'robots.txt',
   'sitemap.xml',
   'yandex_069c92c8aa409d72.html',
+  'favicon.ico',
+  'favicon.svg',
+  'favicon-96x96.png',
+  'apple-touch-icon.png',
+  'favicon-192x192.png',
+  'favicon-512x512.png',
   'assets/mb-kuzbass-label-background.webp',
   ...catalogManifest.categories.flatMap((category) =>
     category.products.flatMap((product) =>
@@ -32,6 +38,9 @@ if (indexHtml.includes('/src/main.jsx')) throw new Error('В dist осталас
 if (!indexHtml.includes('analytics-config.js')) throw new Error('Конфигурация аналитики не подключена.');
 if (!indexHtml.includes('name="msvalidate.01" content="192BAF445B30A248D9D63FB12022235D"')) {
   throw new Error('Bing Webmaster verification meta tag is missing or invalid.');
+}
+if (!indexHtml.includes('rel="icon" href="./favicon-96x96.png"')) {
+  throw new Error('Google Search favicon link is missing or invalid.');
 }
 if (indexHtml.includes('mc.yandex.ru/watch/')) {
   throw new Error('В HTML найден пиксель Метрики, который может сработать до согласия пользователя.');

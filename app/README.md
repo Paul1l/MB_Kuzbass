@@ -32,7 +32,7 @@ npm run build
 - `404.html`, `500.html`, `503.html`, `offline.html`: страницы ошибок.
 - `.htaccess`: ошибки, кеширование и защитные HTTP-заголовки для Apache-хостинга.
 - `_headers`: CSP и остальные защитные заголовки для Netlify-подобных хостингов.
-- `site.webmanifest`, `favicon.svg`, `sw.js`: manifest, иконка и офлайн-страница после первого посещения сайта.
+- `site.webmanifest`, `favicon.svg`, `favicon.ico`, `favicon-*.png`, `sw.js`: manifest, поисковые иконки и офлайн-страница после первого посещения сайта.
 
 ## Онлайн-рейтинг 2ГИС
 
@@ -102,7 +102,8 @@ GitHub Pages сам выдает HTTPS и HSTS, но не применяет ф�
 - `public/robots.txt` и `public/sitemap.xml`: адрес сайта для поисковиков.
 - `public/404.html`, `public/500.html`, `public/503.html`, `public/offline.html`: страницы ошибок.
 - `public/assets`: фотографии из 2ГИС и новые изображения.
-- `public/assets/telegram-avatar.jpg`: аватарка из Telegram-канала `t.me/mbc_kuzbass`, используется в шапке, favicon, manifest и SEO `logo`.
+- `public/assets/telegram-avatar.jpg`: аватарка из Telegram-канала `t.me/mbc_kuzbass`, используется в шапке и SEO `logo`.
+- `public/favicon.svg`: исходник компактной иконки сайта. Команда `npm run build` автоматически создаёт из него PNG-размеры и `favicon.ico`.
 
 ## Слайдер автомобилей
 
