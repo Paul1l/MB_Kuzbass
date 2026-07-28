@@ -29,6 +29,30 @@ await Promise.all(requiredFiles.map((fileName) => access(path.join(distDirectory
 const indexHtml = await readFile(path.join(distDirectory, 'index.html'), 'utf8');
 if (indexHtml.includes('/src/main.jsx')) throw new Error('В dist осталась ссылка на исходный JSX.');
 if (!indexHtml.includes('analytics-config.js')) throw new Error('Конфигурация аналитики не подключена.');
+if (indexHtml.includes('mc.yandex.ru/watch/')) {
+  throw new Error('В HTML найден пиксель Метрики, который может сработать до согласия пользователя.');
+}
+
+const analyticsConfig = await readFile(path.join(distDirectory, 'analytics-config.js'), 'utf8');
+if (!analyticsConfig.includes('counterId: 111089917')) {
+  throw new Error('В production-конфигурации отсутствует счетчик Яндекс.Метрики 111089917.');
+}
+
+const builtAssetNames = await readdir(path.join(distDirectory, 'assets'));
+const javascriptBundleName = builtAssetNames.find(
+  (fileName) => fileName.startsWith('index-') && fileName.endsWith('.js'),
+);
+if (!javascriptBundleName) throw new Error('Не найден production JavaScript bundle.');
+
+const javascriptBundle = await readFile(
+  path.join(distDirectory, 'assets', javascriptBundleName),
+  'utf8',
+);
+for (const requiredMarker of ['tag.js?id=', 'ym-hide-content', 'ym-disable-keys']) {
+  if (!javascriptBundle.includes(requiredMarker)) {
+    throw new Error(`В production JavaScript отсутствует защита аналитики: ${requiredMarker}`);
+  }
+}
 
 // Собирает вложенные файлы, чтобы проверка охватывала не только корень assets, но и каталог товаров.
 const robotsTxt = await readFile(path.join(distDirectory, 'robots.txt'), 'utf8');

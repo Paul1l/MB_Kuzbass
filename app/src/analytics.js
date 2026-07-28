@@ -1,6 +1,7 @@
 const METRIKA_SCRIPT_ID = 'mb-yandex-metrika';
 let initializationPromise = null;
 let initializedCounterId = null;
+let lastTrackedUrl = null;
 
 // Читает публичную конфигурацию. Номер счетчика не является секретом, но по умолчанию равен нулю.
 function getConfig() {
@@ -14,7 +15,7 @@ export function isAnalyticsConfigured() {
 }
 
 // Загружает внешний скрипт Метрики только после явного согласия пользователя.
-function loadMetrikaScript() {
+function loadMetrikaScript(counterId) {
   if (window.ym) return Promise.resolve();
   if (initializationPromise) return initializationPromise;
 
@@ -27,7 +28,7 @@ function loadMetrikaScript() {
     const script = document.createElement('script');
     script.id = METRIKA_SCRIPT_ID;
     script.async = true;
-    script.src = 'https://mc.yandex.ru/metrika/tag.js';
+    script.src = `https://mc.yandex.ru/metrika/tag.js?id=${counterId}`;
     script.addEventListener('load', resolve, { once: true });
     script.addEventListener('error', () => {
       initializationPromise = null;
@@ -41,19 +42,26 @@ function loadMetrikaScript() {
   return initializationPromise;
 }
 
-// Инициализирует Метрику в ограниченном режиме без Вебвизора и автоматической аналитики форм.
+// Инициализирует счетчик после согласия. Первый и последующие SPA-просмотры
+// отправляются вручную через trackPageView, поэтому автоматический hit отключен.
 export async function enableAnalytics() {
   if (!isAnalyticsConfigured()) return false;
-  const counterId = Number(getConfig().counterId);
+  const config = getConfig();
+  const counterId = Number(config.counterId);
   if (initializedCounterId === counterId) return true;
 
-  await loadMetrikaScript();
+  await loadMetrikaScript(counterId);
+  window.dataLayer = window.dataLayer || [];
   window.ym(counterId, 'init', {
     defer: true,
+    ssr: true,
+    webvisor: config.webvisor === true,
     clickmap: true,
+    ecommerce: config.ecommerceContainer || false,
+    referrer: document.referrer,
+    url: window.location.href,
     trackLinks: true,
     accurateTrackBounce: true,
-    webvisor: false,
   });
   initializedCounterId = counterId;
   return true;
@@ -65,6 +73,7 @@ export function disableAnalytics() {
   if (counterId && window.ym) window.ym(counterId, 'destruct');
   initializedCounterId = null;
   initializationPromise = null;
+  lastTrackedUrl = null;
   document.getElementById(METRIKA_SCRIPT_ID)?.remove();
   delete window.ym;
 
@@ -79,8 +88,13 @@ export function disableAnalytics() {
 
 // Отправляет виртуальный просмотр текущего SPA/hash-адреса после инициализации счетчика.
 export function trackPageView(url = window.location.href, title = document.title) {
-  if (!initializedCounterId || !window.ym) return;
-  window.ym(initializedCounterId, 'hit', url, { title, referer: document.referrer });
+  if (!initializedCounterId || !window.ym || lastTrackedUrl === url) return;
+
+  window.ym(initializedCounterId, 'hit', url, {
+    title,
+    referer: lastTrackedUrl || document.referrer,
+  });
+  lastTrackedUrl = url;
 }
 
 // Отправляет только заранее определенные обезличенные цели по действиям с кнопками.

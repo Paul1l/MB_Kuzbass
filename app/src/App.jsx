@@ -776,7 +776,8 @@ function App() {
     setActiveLegalId(null);
   }, []);
 
-  // Загружает Яндекс.Метрику только после согласия и удаляет ее cookie после отзыва согласия.
+  // Загружает Метрику только после согласия, учитывает смену SPA-страницы и
+  // удаляет доступные cookie счетчика после отзыва согласия.
   useEffect(() => {
     let isActive = true;
 
@@ -785,9 +786,17 @@ function App() {
       return undefined;
     }
 
+    const analyticsTitle = activeCatalogCategory
+      ? `${activeCatalogCategory.label} — каталог MB Kuzbass`
+      : activeLegalDoc
+        ? `${activeLegalDoc.title} — ${site.shortName}`
+        : document.title;
+
     enableAnalytics()
       .then((enabled) => {
-        if (isActive && enabled) trackPageView();
+        if (isActive && enabled) {
+          trackPageView(window.location.href, analyticsTitle);
+        }
       })
       .catch(() => {
         // Сбой внешней аналитики не влияет на работу витрины и формы.
@@ -796,12 +805,7 @@ function App() {
     return () => {
       isActive = false;
     };
-  }, [privacyPreferences?.analytics]);
-
-  // Учитывает отдельные SPA-страницы каталога и юридические документы после инициализации аналитики.
-  useEffect(() => {
-    if (privacyPreferences?.analytics) trackPageView();
-  }, [activeLegalId, catalogSlug, privacyPreferences?.analytics]);
+  }, [activeCatalogCategory, activeLegalDoc, privacyPreferences?.analytics]);
 
   // Закрывает модальное окно документов по Escape, чтобы юридические страницы не блокировали просмотр сайта.
   useEffect(() => {
@@ -837,14 +841,12 @@ function App() {
 
         setActiveLegalId(null);
         setCatalogSlug(null);
-        trackPageView();
         schedulePageTopReset();
         return;
       }
 
       const legalDocId = window.location.hash.replace(/^#/, '');
       const hasLegalDoc = legalDocs.some((doc) => doc.id === legalDocId);
-      trackPageView();
 
       if (hasLegalDoc) {
         setActiveLegalId(legalDocId);
@@ -1239,7 +1241,7 @@ function App() {
                 <h3>Быстрая заявка в Telegram</h3>
                 <p>Заполните основные данные, текст заявки скопируется и откроется основной канал связи.</p>
               </div>
-              <form onSubmit={handleRequestSubmit}>
+              <form className="ym-hide-content" onSubmit={handleRequestSubmit}>
                 <div className="form-row">
                   <label>
                     Имя
@@ -1249,6 +1251,7 @@ function App() {
                       placeholder="Как к вам обращаться"
                       autoComplete="name"
                       maxLength="80"
+                      className="ym-disable-keys"
                     />
                   </label>
                   <label>
@@ -1259,6 +1262,7 @@ function App() {
                       placeholder="Телефон, Telegram или VK"
                       autoComplete="tel"
                       maxLength="120"
+                      className="ym-disable-keys"
                     />
                   </label>
                 </div>
@@ -1269,6 +1273,7 @@ function App() {
                     rows="5"
                     placeholder={requestPlaceholderText}
                     maxLength="1500"
+                    className="ym-disable-keys"
                   />
                 </label>
                 <label className="privacy-check">
