@@ -5,6 +5,9 @@ const distDirectory = path.resolve('dist');
 const productionOrigin = 'https://mb-kuzbass.ru';
 const legacyOrigin = 'https://paul1l.github.io/MB_Kuzbass';
 const catalogManifest = JSON.parse(await readFile(path.resolve('catalog-products.json'), 'utf8'));
+const appSource = await readFile(path.resolve('src/App.jsx'), 'utf8');
+const dataSource = await readFile(path.resolve('src/data.js'), 'utf8');
+const privacyConsentSource = await readFile(path.resolve('src/privacyConsent.js'), 'utf8');
 const requiredFiles = [
   'index.html',
   '404.html',
@@ -15,6 +18,7 @@ const requiredFiles = [
   'analytics-config.js',
   'robots.txt',
   'sitemap.xml',
+  'sw.js',
   'yandex_069c92c8aa409d72.html',
   'favicon.ico',
   'favicon.svg',
@@ -29,6 +33,29 @@ const requiredFiles = [
     ),
   ),
 ];
+
+// Защищает юридически значимые элементы интерфейса от случайного отката при следующих правках.
+for (const [sourceName, source, forbiddenText] of [
+  ['App.jsx', appSource, 'Согласен на обработку персональных данных по'],
+  ['data.js', dataSource, 'Yura Shishkin'],
+]) {
+  if (source.includes(forbiddenText)) {
+    throw new Error(`${sourceName} содержит запрещенную устаревшую формулировку: ${forbiddenText}`);
+  }
+}
+
+for (const [sourceName, source, requiredText] of [
+  ['App.jsx', appSource, 'Даю отдельное согласие на обработку персональных данных'],
+  ['App.jsx', appSource, 'Редакция согласия:'],
+  ['App.jsx', appSource, 'Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется'],
+  ['data.js', dataSource, 'Клиент на Флампе'],
+  ['data.js', dataSource, "updatedAt: '03.08.2026'"],
+  ['privacyConsent.js', privacyConsentSource, "PRIVACY_CONSENT_VERSION = '2026-08-03'"],
+]) {
+  if (!source.includes(requiredText)) {
+    throw new Error(`${sourceName} не содержит обязательный контрольный текст: ${requiredText}`);
+  }
+}
 
 // Останавливает CI, если обязательный файл не попал в production-сборку.
 await Promise.all(requiredFiles.map((fileName) => access(path.join(distDirectory, fileName))));
@@ -49,6 +76,14 @@ if (indexHtml.includes('mc.yandex.ru/watch/')) {
 const analyticsConfig = await readFile(path.join(distDirectory, 'analytics-config.js'), 'utf8');
 if (!analyticsConfig.includes('counterId: 111089917')) {
   throw new Error('В production-конфигурации отсутствует счетчик Яндекс.Метрики 111089917.');
+}
+if (!analyticsConfig.includes('webvisor: true')) {
+  throw new Error('Production-конфигурация должна явно фиксировать текущий режим Вебвизора.');
+}
+
+const serviceWorker = await readFile(path.join(distDirectory, 'sw.js'), 'utf8');
+if (!serviceWorker.includes("CACHE_NAME = 'mb-kuzbass-static-v11'")) {
+  throw new Error('Версия service worker не обновлена для новой редакции документов.');
 }
 
 const builtAssetNames = await readdir(path.join(distDirectory, 'assets'));

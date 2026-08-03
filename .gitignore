@@ -4,6 +4,12 @@ app/.npm-cache/
 app/*.log
 screenshots/
 
+# Приватные рабочие копии документов Роскомнадзора не должны попадать в публичный репозиторий.
+docs/personal-data/private/
+docs/personal-data/*-filled.*
+docs/personal-data/*-signed.*
+docs/personal-data/*-submitted.*
+
 # WebP-файлы ниже генерируются из редактируемых JPG/PNG командой npm run build.
 app/public/assets/2gis-photo-*.webp
 app/public/assets/client-car-*.webp

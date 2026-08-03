@@ -38,12 +38,16 @@ function createRequestText(formData) {
   const name = formData.get('name') || 'не указано';
   const userContact = formData.get('contact') || 'не указан';
   const message = formData.get('message') || 'без описания';
+  const consentTimestamp = new Date().toISOString();
 
   return [
     'Заявка с сайта MB Kuzbass',
     `Имя: ${name}`,
     `Контакт: ${userContact}`,
     `Задача: ${message}`,
+    `Согласие на обработку ПДн: дано ${consentTimestamp}`,
+    `Редакция согласия: ${site.updatedAt}`,
+    `Документ: ${new URL('#consent', site.url).href}`,
   ].join('\n');
 }
 
@@ -1279,11 +1283,15 @@ function App() {
                 <label className="privacy-check">
                   <input type="checkbox" name="agree" required />
                   <span>
-                    Согласен на обработку персональных данных по{' '}
-                    <LegalLink doc={legalDocs.find((doc) => doc.id === 'privacy')} onOpen={setActiveLegalId} /> и{' '}
+                    Даю отдельное согласие на обработку персональных данных на условиях документа{' '}
                     <LegalLink doc={legalDocs.find((doc) => doc.id === 'consent')} onOpen={setActiveLegalId} />.
                   </span>
                 </label>
+                <p className="form-local-note">
+                  Перед отправкой ознакомьтесь с документом{' '}
+                  <LegalLink doc={legalDocs.find((doc) => doc.id === 'privacy')} onOpen={setActiveLegalId} />.
+                  Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется.
+                </p>
                 <div className="form-actions">
                   <button className="button button--primary" type="submit">
                     Открыть Telegram

@@ -1,6 +1,6 @@
 import { site } from './data.js';
 
-export const PRIVACY_CONSENT_VERSION = '2026-07-28';
+export const PRIVACY_CONSENT_VERSION = '2026-08-03';
 const PREFERENCES_COOKIE = 'mb_privacy_preferences';
 const PREFERENCES_MAX_AGE = 60 * 60 * 24 * 180;
 
