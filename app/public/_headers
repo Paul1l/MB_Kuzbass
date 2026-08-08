@@ -8,7 +8,7 @@
   Cross-Origin-Resource-Policy: same-site
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://mc.yandex.ru https://mc.yandex.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://mc.yandex.ru https://mc.yandex.com; font-src 'self' data:; connect-src 'self' https://catalog.api.2gis.com https://mc.yandex.ru https://mc.yandex.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; worker-src 'self'; manifest-src 'self'; media-src 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://mc.yandex.ru https://mc.yandex.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://mc.yandex.ru https://mc.yandex.com; font-src 'self' data:; connect-src 'self' https://catalog.api.2gis.com https://mc.yandex.ru https://mc.yandex.com wss://mc.yandex.ru wss://mc.yandex.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; worker-src 'self'; manifest-src 'self'; media-src 'self'; upgrade-insecure-requests
 
 /assets/*
   Cache-Control: public, max-age=604800

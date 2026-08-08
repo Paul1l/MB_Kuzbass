@@ -17,7 +17,7 @@ server {
     add_header Cross-Origin-Opener-Policy "same-origin" always;
     add_header Cross-Origin-Resource-Policy "same-site" always;
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()" always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://mc.yandex.ru https://mc.yandex.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://mc.yandex.ru https://mc.yandex.com; font-src 'self' data:; connect-src 'self' https://catalog.api.2gis.com https://mc.yandex.ru https://mc.yandex.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; worker-src 'self'; manifest-src 'self'; media-src 'self'; upgrade-insecure-requests" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://mc.yandex.ru https://mc.yandex.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://mc.yandex.ru https://mc.yandex.com; font-src 'self' data:; connect-src 'self' https://catalog.api.2gis.com https://mc.yandex.ru https://mc.yandex.com wss://mc.yandex.ru wss://mc.yandex.com; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; worker-src 'self'; manifest-src 'self'; media-src 'self'; upgrade-insecure-requests" always;
 
     location / {
         try_files $uri $uri/ =404;
