@@ -2,7 +2,7 @@ import { readdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 
 const assetsDirectory = path.resolve('dist/assets');
-const keepLegacyFiles = new Set(['telegram-avatar.jpg', '2gis-photo-02.jpg']);
+const keepLegacyFiles = new Set(['telegram-avatar.jpg']);
 const legacyExtensions = new Set(['.jpg', '.jpeg', '.png']);
 const redundantWebpFiles = new Set([
   'parallax-car-hero.webp',

@@ -47,7 +47,6 @@ export const owner = {
 };
 
 // Основные визуальные ассеты сайта. Для замены фото достаточно положить файл в assets и поменять имя здесь.
-export const heroImage = asset('2gis-photo-02.webp');
 export const brandAvatar = asset('telegram-avatar.jpg');
 export const brandBackdropImage = asset('mb-kuzbass-label-background.webp');
 export const parallaxBackgrounds = [
