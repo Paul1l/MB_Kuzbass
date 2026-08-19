@@ -1,7 +1,7 @@
 import catalogProducts from '../catalog-products.json';
 import { getAssetUrl } from './assetUrl.js';
 
-// Преобразует имя подготовленного изображения в URL, совместимый с локальным запуском и GitHub Pages.
+// Преобразует имя подготовленного изображения в URL, совместимый с локальным запуском и размещением сайта в подпапке.
 function catalogAsset(categorySlug, fileName) {
   return getAssetUrl(`assets/catalog/${categorySlug}/${fileName}`);
 }

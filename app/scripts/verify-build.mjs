@@ -117,7 +117,7 @@ for (const [fileName, contents] of publicSeoFiles) {
     throw new Error(`${fileName} does not reference the production domain ${productionOrigin}.`);
   }
   if (contents.includes(legacyOrigin)) {
-    throw new Error(`${fileName} still references the legacy GitHub Pages URL.`);
+  throw new Error(`${fileName} still references the legacy site URL.`);
   }
 }
 

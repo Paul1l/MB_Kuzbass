@@ -4,7 +4,7 @@ export const PRIVACY_CONSENT_VERSION = '2026-08-03';
 const PREFERENCES_COOKIE = 'mb_privacy_preferences';
 const PREFERENCES_MAX_AGE = 60 * 60 * 24 * 180;
 
-// Ограничивает cookie каталогом проекта на GitHub Pages и корнем сайта на собственном домене.
+// Ограничивает cookie каталогом развертывания или корнем сайта на основном домене.
 function getCookiePath() {
   if (typeof window === 'undefined') return '/';
 
