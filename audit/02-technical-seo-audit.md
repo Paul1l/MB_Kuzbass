@@ -86,6 +86,7 @@
 | `X-Robots-Tag` | Задан только в `_headers` (Netlify-формат) — на Apache не применяется | Не влияет: на error-страницах есть meta `noindex` | Удалить `_headers` или пометить как неиспользуемый |
 | canonical | `https://mb-kuzbass.ru/`, статично | Корректно для одной страницы | После SSG — свой canonical на каждой странице |
 | Дубли хостов | HTTP и `www` → 301 на `https://mb-kuzbass.ru` **только в корневом `.htaccess`** | Риск регрессии | C-04 |
+| DNS | Корень и `www` → `141.8.192.25` (Спринтхост), IPv6 есть; Cloudflare нет ([evidence/dns-2026-10-02.txt](evidence/dns-2026-10-02.txt)) | Проверено | — |
 | Дубль на другом хосте | `paul1l.github.io/MB_Kuzbass/` публикуется GitHub Pages | Дубль + внутренние документы | C-03 |
 | `/index.html` | По конфигурации Apache отдаётся с кодом 200 как копия `/` | Смягчено canonical | После SSG: 301 `/index.html` → `/` |
 | Параметры URL | Не используются | — | `Clean-param` (см. выше) |
@@ -162,7 +163,7 @@
 
 | Приоритет | Задачи |
 |---|---|
-| P0 | C-01 доступность из РФ; C-02 SSG и реальные URL; C-03 GitHub Pages; C-04 редиректы в исходниках |
+| P0 | C-06 синхронизация с production; C-02 SSG и реальные URL; C-03 GitHub Pages; C-04 редиректы в исходниках (C-01 Cloudflare — закрыто: DNS на Спринтхосте) |
 | P1 | H-02 разметка рейтинга; H-03 Title, Description, H1; H-04 регион сайта и гео-сигналы; H-13 посадочные страницы; H-09 скорость |
 | P2 | M-02 sitemap; M-03 JSON-LD; M-04 404; `Clean-param`; 301 `/index.html` → `/`; image sitemap |
 | P3 | L-01 keywords; L-05 имена файлов |
