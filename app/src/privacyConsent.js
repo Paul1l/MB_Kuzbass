@@ -21,7 +21,13 @@ function readCookie(name) {
   if (typeof document === 'undefined') return null;
   const prefix = `${name}=`;
   const item = document.cookie.split('; ').find((cookie) => cookie.startsWith(prefix));
-  return item ? decodeURIComponent(item.slice(prefix.length)) : null;
+  if (!item) return null;
+
+  try {
+    return decodeURIComponent(item.slice(prefix.length));
+  } catch {
+    return null;
+  }
 }
 
 // Читает сохраненный выбор только для текущей версии документа о cookie.

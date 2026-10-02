@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mb-kuzbass-static-v11';
+const CACHE_NAME = 'mb-kuzbass-static-v12';
 const OFFLINE_URL = './offline.html';
 const PRECACHE_URLS = [
   './',
@@ -27,20 +27,25 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Пути заранее сохраненных файлов: без сети офлайн-страница берет из кеша и свои стили.
+const PRECACHE_PATHS = new Set(PRECACHE_URLS.map((url) => new URL(url, self.location).pathname));
+
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
-  // Обрабатывает только переходы внутри этого сайта. Внешние и служебные запросы не попадают
+  // Обрабатывает только запросы к этому сайту. Внешние и служебные запросы не попадают
   // под управление кеша и не могут подменить offline-ответ.
-  if (
-    event.request.method !== 'GET' ||
-    event.request.mode !== 'navigate' ||
-    requestUrl.origin !== self.location.origin
-  ) {
+  if (event.request.method !== 'GET' || requestUrl.origin !== self.location.origin) return;
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(OFFLINE_URL)),
+    );
     return;
   }
 
-  event.respondWith(
-    fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(OFFLINE_URL)),
-  );
+  // Остальное — как обычно из сети; кеш только для сохраненных файлов и только без сети.
+  if (PRECACHE_PATHS.has(requestUrl.pathname)) {
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request, { ignoreSearch: true })));
+  }
 });

@@ -20,6 +20,29 @@ html {
   scroll-padding-top: 72px;
 }
 
+// На телефоне шапка в две строки (около 105px): якорь не должен уходить под неё.
+@media (max-width: 560px) {
+  html {
+    scroll-padding-top: 116px;
+  }
+}
+
+// Плавная прокрутка, параллакс и смена слайдов — без движения, если его просили убрать.
+@media (prefers-reduced-motion: reduce) {
+  html {
+    --parallax-y: 0px !important;
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 body {
   margin: 0;
   font-family: Inter, Arial, sans-serif;
@@ -1238,6 +1261,19 @@ textarea {
   color: $green;
   font-size: 14px;
   line-height: 1.5;
+
+  &:empty {
+    display: none;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    color: inherit;
+    font-weight: 800;
+  }
 }
 
 .contact-info {

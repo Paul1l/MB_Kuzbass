@@ -119,16 +119,26 @@ function resolveAssetUrl(url) {
   return new URL(url, window.location.href).href;
 }
 
+// Битый адрес вида #catalog/%E0%A4%A не должен ронять приложение: decodeURIComponent
+// бросает URIError, а ошибка при первом рендере оставляла пустую страницу.
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 // Нужна для SPA-каталога. Достает slug категории из hash вида #catalog/engines.
 function getCatalogSlugFromHash(hash) {
   const cleanHash = (hash || '').replace(/^#/, '');
   if (!cleanHash.startsWith('catalog/')) return null;
-  return decodeURIComponent(cleanHash.slice('catalog/'.length));
+  return safeDecode(cleanHash.slice('catalog/'.length));
 }
 
 // Keeps hash navigation stable after images and responsive sections change page height.
 function scrollToPageAnchor(hash = window.location.hash) {
-  const targetId = decodeURIComponent((hash || '').replace(/^#/, ''));
+  const targetId = safeDecode((hash || '').replace(/^#/, ''));
   if (!targetId || targetId.startsWith('catalog/')) return;
 
   const target = document.getElementById(targetId);
@@ -550,12 +560,21 @@ function LegalModal({ doc, onClose }) {
 function CookieBanner({ preferences, initialSettings = false, onSave, onClose, onOpenDocument }) {
   const [showSettings, setShowSettings] = useState(initialSettings);
   const [analyticsAllowed, setAnalyticsAllowed] = useState(Boolean(preferences?.analytics));
+  const settingsTitleRef = useRef(null);
+
+  // Настройки открыли из подвала или кнопкой «Настроить» (она при этом исчезает):
+  // фокус — на заголовок панели, иначе он терялся и клавиатура начинала с начала страницы.
+  useEffect(() => {
+    if (showSettings) settingsTitleRef.current?.focus({ preventScroll: true });
+  }, [showSettings]);
 
   if (showSettings) {
     return (
       <div className="cookie-banner" role="region" aria-labelledby="cookie-settings-title">
         <div className="cookie-banner__copy">
-          <h2 id="cookie-settings-title">Настройки cookie</h2>
+          <h2 id="cookie-settings-title" tabIndex="-1" ref={settingsTitleRef}>
+            Настройки cookie
+          </h2>
           <p>Вы можете изменить необязательные настройки в любое время через ссылку в подвале сайта.</p>
         </div>
         <div className="cookie-options">
@@ -724,6 +743,7 @@ function App() {
   const [activeLegalId, setActiveLegalId] = useState(null);
   const [privacyPreferences, setPrivacyPreferences] = useState(() => readPrivacyPreferences());
   const [privacyPanelOpen, setPrivacyPanelOpen] = useState(() => !readPrivacyPreferences());
+  const privacySettingsOpenerRef = useRef(null);
   const [currentReviewsMeta, setCurrentReviewsMeta] = useState(() => ({ ...reviewsMeta, isLive: false }));
   const onlineReviewsConfigured = useMemo(() => isOnlineReviewsConfigured(reviewsProvider), []);
   const [reviewsSyncStatus, setReviewsSyncStatus] = useState(onlineReviewsConfigured ? 'loading' : 'static');
@@ -1038,11 +1058,26 @@ function App() {
     window.setTimeout(resetScroll, 80);
   }
 
+  // Открывает настройки cookie из подвала и запоминает кнопку, чтобы вернуть на нее фокус.
+  function openPrivacySettings(event) {
+    privacySettingsOpenerRef.current = event?.currentTarget ?? null;
+    setPrivacyPanelOpen(true);
+  }
+
+  // Закрывает панель cookie. Если ее открыли из подвала, фокус возвращается на ту кнопку:
+  // иначе после «Сохранить» или «Отмена» он падал на body.
+  function closePrivacyPanel() {
+    const opener = privacySettingsOpenerRef.current;
+    privacySettingsOpenerRef.current = null;
+    setPrivacyPanelOpen(false);
+    if (opener) window.requestAnimationFrame(() => opener.isConnected && opener.focus());
+  }
+
   // Фиксирует выбор cookie и закрывает панель. Отдельное согласие на аналитику можно отозвать в footer.
   function handlePrivacySave(analyticsAllowed) {
     const nextPreferences = savePrivacyPreferences(analyticsAllowed);
     setPrivacyPreferences(nextPreferences);
-    setPrivacyPanelOpen(false);
+    closePrivacyPanel();
   }
 
   return (
@@ -1089,10 +1124,7 @@ function App() {
             </p>
           </div>
 
-          <div
-            className="hero__visual"
-            aria-label="MB Kuzbass — оригинальные запчасти с японских доноров"
-          >
+          <div className="hero__visual">
             <div className="hero-cover__content">
               <span>{site.name}</span>
               <h2>Mercedes-Benz / BMW / Аукционы Японии</h2>
@@ -1300,7 +1332,17 @@ function App() {
                     Позвонить
                   </a>
                 </div>
-                {formStatus && <p className="form-status">{formStatus}</p>}
+                <div className="form-status" role="status">
+                  {formStatus && (
+                    <p>
+                      {formStatus} Если вкладка не открылась —{' '}
+                      <a href={contact.telegram} target="_blank" rel="noopener noreferrer">
+                        открыть Telegram
+                      </a>
+                      .
+                    </p>
+                  )}
+                </div>
                 <p className="form-local-note">
                   Данные не отправляются на сервер сайта. Форма только копирует текст в вашем браузере;
                   сообщение отправляете вы сами в Telegram.
@@ -1351,13 +1393,13 @@ function App() {
         )}
       </main>
 
-      <Footer onOpenLegal={setActiveLegalId} onOpenPrivacySettings={() => setPrivacyPanelOpen(true)} />
+      <Footer onOpenLegal={setActiveLegalId} onOpenPrivacySettings={openPrivacySettings} />
       {privacyPanelOpen && (
         <CookieBanner
           preferences={privacyPreferences}
           initialSettings={Boolean(privacyPreferences)}
           onSave={handlePrivacySave}
-          onClose={() => setPrivacyPanelOpen(false)}
+          onClose={closePrivacyPanel}
           onOpenDocument={setActiveLegalId}
         />
       )}

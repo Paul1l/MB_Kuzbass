@@ -1,6 +1,7 @@
 const METRIKA_SCRIPT_ID = 'mb-yandex-metrika';
 let initializationPromise = null;
 let initializedCounterId = null;
+let enableJob = null;
 let lastTrackedUrl = null;
 
 // Читает публичную конфигурацию. Номер счетчика не является секретом, но по умолчанию равен нулю.
@@ -44,27 +45,65 @@ function loadMetrikaScript(counterId) {
 
 // Инициализирует счетчик после согласия. Первый и последующие SPA-просмотры
 // отправляются вручную через trackPageView, поэтому автоматический hit отключен.
-export async function enableAnalytics() {
-  if (!isAnalyticsConfigured()) return false;
+// Повторные вызовы, пока скрипт грузится (смена страницы SPA сразу после согласия),
+// ждут ту же загрузку: иначе init уходил дважды. Отзыв согласия во время загрузки
+// отменяет init.
+export function enableAnalytics() {
+  if (!isAnalyticsConfigured()) return Promise.resolve(false);
   const config = getConfig();
   const counterId = Number(config.counterId);
-  if (initializedCounterId === counterId) return true;
+  if (initializedCounterId === counterId) return Promise.resolve(true);
+  if (enableJob) return enableJob;
 
-  await loadMetrikaScript(counterId);
-  window.dataLayer = window.dataLayer || [];
-  window.ym(counterId, 'init', {
-    defer: true,
-    ssr: true,
-    webvisor: config.webvisor === true,
-    clickmap: true,
-    ecommerce: config.ecommerceContainer || false,
-    referrer: document.referrer,
-    url: window.location.href,
-    trackLinks: true,
-    accurateTrackBounce: true,
+  const job = loadMetrikaScript(counterId).then(() => {
+    if (enableJob !== job) return false;
+    window.dataLayer = window.dataLayer || [];
+    window.ym(counterId, 'init', {
+      defer: true,
+      ssr: true,
+      webvisor: config.webvisor === true,
+      clickmap: true,
+      ecommerce: config.ecommerceContainer || false,
+      referrer: document.referrer,
+      url: window.location.href,
+      trackLinks: true,
+      accurateTrackBounce: true,
+    });
+    initializedCounterId = counterId;
+    enableJob = null;
+    return true;
   });
-  initializedCounterId = counterId;
-  return true;
+  enableJob = job;
+  job.catch(() => {
+    if (enableJob === job) enableJob = null;
+  });
+  return job;
+}
+
+// Метрика ставит cookie на домен второго уровня (.mb-kuzbass.ru): без Domain такую
+// cookie удалить нельзя. Пробуем все варианты — лишние браузер просто игнорирует.
+function forgetMetrikaCookies() {
+  const hostname = window.location.hostname;
+  const domains = ['', hostname, `.${hostname}`, `.${hostname.split('.').slice(-2).join('.')}`];
+
+  document.cookie
+    .split('; ')
+    .map((cookie) => cookie.split('=')[0])
+    .filter((name) => name.startsWith('_ym'))
+    .forEach((name) => {
+      domains.forEach((domain) => {
+        document.cookie = `${name}=; Max-Age=0; Path=/${domain ? `; Domain=${domain}` : ''}; SameSite=Lax`;
+      });
+    });
+
+  // Идентификатор посетителя Метрика дублирует в localStorage (_ym_uid и др.).
+  try {
+    Object.keys(window.localStorage)
+      .filter((key) => key.startsWith('_ym'))
+      .forEach((key) => window.localStorage.removeItem(key));
+  } catch {
+    // Хранилище недоступно (приватный режим) — удалять нечего.
+  }
 }
 
 // Удаляет известные first-party cookie Метрики после отзыва согласия и останавливает счетчик.
@@ -73,17 +112,11 @@ export function disableAnalytics() {
   if (counterId && window.ym) window.ym(counterId, 'destruct');
   initializedCounterId = null;
   initializationPromise = null;
+  enableJob = null;
   lastTrackedUrl = null;
   document.getElementById(METRIKA_SCRIPT_ID)?.remove();
   delete window.ym;
-
-  document.cookie
-    .split('; ')
-    .map((cookie) => cookie.split('=')[0])
-    .filter((name) => name.startsWith('_ym_'))
-    .forEach((name) => {
-      document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
-    });
+  forgetMetrikaCookies();
 }
 
 // Отправляет виртуальный просмотр текущего SPA/hash-адреса после инициализации счетчика.

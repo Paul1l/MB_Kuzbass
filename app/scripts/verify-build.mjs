@@ -94,7 +94,7 @@ for (const requiredRule of [
 }
 
 const serviceWorker = await readFile(path.join(distDirectory, 'sw.js'), 'utf8');
-if (!serviceWorker.includes("CACHE_NAME = 'mb-kuzbass-static-v11'")) {
+if (!serviceWorker.includes("CACHE_NAME = 'mb-kuzbass-static-v12'")) {
   throw new Error('Версия service worker не обновлена для новой редакции документов.');
 }
 
