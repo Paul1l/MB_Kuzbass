@@ -1,0 +1,58 @@
+{
+  "mobile": {
+    "lighthouseVersion": "12.8.2",
+    "fetchTime": "2026-10-02T13:04:14.787Z",
+    "requestedUrl": "local static copy of repository root (production build a6abb98) served by python http.server, no gzip/brotli, no Cloudflare",
+    "scores": {
+      "performance": 0.7,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "metrics": {
+      "first-contentful-paint": "2.3 s",
+      "largest-contentful-paint": "10.2 s",
+      "total-blocking-time": "160 ms",
+      "cumulative-layout-shift": "0",
+      "speed-index": "2.3 s",
+      "interactive": "10.2 s",
+      "total-byte-weight": "Total size was 1,727 KiB"
+    },
+    "lcpElement": "section.hero",
+    "opportunities": {
+      "uses-responsive-images": "Est savings of 447 KiB",
+      "image-delivery-insight": "Est savings of 450 KiB",
+      "unused-javascript": "Est savings of 71 KiB",
+      "uses-text-compression": "Est savings of 185 KiB",
+      "render-blocking-insight": "Est savings of 150 ms"
+    }
+  },
+  "desktop": {
+    "lighthouseVersion": "12.8.2",
+    "fetchTime": "2026-10-02T13:04:27.384Z",
+    "requestedUrl": "local static copy of repository root (production build a6abb98) served by python http.server, no gzip/brotli, no Cloudflare",
+    "scores": {
+      "performance": 0.93,
+      "accessibility": 0.96,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "metrics": {
+      "first-contentful-paint": "0.5 s",
+      "largest-contentful-paint": "1.8 s",
+      "total-blocking-time": "0 ms",
+      "cumulative-layout-shift": "0",
+      "speed-index": "0.5 s",
+      "interactive": "1.8 s",
+      "total-byte-weight": "Total size was 1,727 KiB"
+    },
+    "lcpElement": "section.hero",
+    "opportunities": {
+      "uses-responsive-images": "Est savings of 451 KiB",
+      "image-delivery-insight": "Est savings of 424 KiB",
+      "unused-javascript": "Est savings of 71 KiB",
+      "uses-text-compression": "Est savings of 185 KiB",
+      "render-blocking-insight": "Est savings of 80 ms"
+    }
+  }
+}
