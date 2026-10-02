@@ -37,6 +37,11 @@ jobs:
         working-directory: app
         run: npm run check
 
+      # Корень репозитория загружается на хостинг: он должен совпадать со свежей сборкой.
+      - name: Repository root matches build
+        working-directory: app
+        run: npm run verify:root
+
       - name: Upload verified build
         uses: actions/upload-artifact@v4
         with:

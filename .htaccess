@@ -1,13 +1,25 @@
 Options -Indexes
 DirectoryIndex index.html
 
+# Единственный адрес сайта — https://mb-kuzbass.ru/. За Cloudflare (режим Flexible) или
+# фронтовым nginx хостинга Apache видит HTTP, хотя посетитель пришёл по HTTPS: тогда
+# протокол посетителя — в X-Forwarded-Proto / CF-Visitor, и без их проверки правило
+# зациклило бы переадресацию.
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  RewriteCond %{HTTPS} !=on [OR]
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteCond %{HTTP:CF-Visitor} !https
+  RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI} [R=301,L,NE]
+
   RewriteCond %{HTTP_HOST} !^mb-kuzbass\.ru$ [NC]
   RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI} [R=301,L,NE]
 </IfModule>
+
+# Если на хостинг попал весь репозиторий, а не только сборка, исходники, черновики
+# документов по ПДн и служебные файлы снаружи недоступны.
+RedirectMatch 404 "^/(?:app|docs|\.git|\.github)(?:/|$)|\.md$"
 
 ErrorDocument 404 /404.html
 ErrorDocument 500 /500.html

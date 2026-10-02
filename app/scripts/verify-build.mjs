@@ -10,6 +10,7 @@ const dataSource = await readFile(path.resolve('src/data.js'), 'utf8');
 const privacyConsentSource = await readFile(path.resolve('src/privacyConsent.js'), 'utf8');
 const requiredFiles = [
   'index.html',
+  '.htaccess',
   '404.html',
   '500.html',
   '503.html',
@@ -79,6 +80,17 @@ if (!analyticsConfig.includes('counterId: 111089917')) {
 }
 if (!analyticsConfig.includes('webvisor: true')) {
   throw new Error('Production-конфигурация должна явно фиксировать текущий режим Вебвизора.');
+}
+
+// Переадресация на https://mb-kuzbass.ru/ должна приходить из исходников, а не жить только в
+// корне репозитория: иначе следующая выкладка app/dist молча ее убирает.
+const htaccess = await readFile(path.join(distDirectory, '.htaccess'), 'utf8');
+for (const requiredRule of [
+  'RewriteCond %{HTTP:X-Forwarded-Proto} !=https',
+  'RewriteCond %{HTTP_HOST} !^mb-kuzbass\\.ru$ [NC]',
+  'RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI} [R=301,L,NE]',
+]) {
+  if (!htaccess.includes(requiredRule)) throw new Error(`.htaccess: нет правила «${requiredRule}»`);
 }
 
 const serviceWorker = await readFile(path.join(distDirectory, 'sw.js'), 'utf8');
