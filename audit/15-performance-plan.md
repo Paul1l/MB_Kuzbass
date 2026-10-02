@@ -2,6 +2,8 @@
 
 ## Замеры
 
+> **Production, 02.10.2026** (Lighthouse из облачного окружения через прокси, не из России): главная — mobile 93 (LCP 2,4 с, TBT 70 мс, CLS 0, вес 1,56 МБ), desktop 94 (LCP 1,0 с); посадочная `/zapchasti-mercedes-barnaul/` — mobile 90 (LCP 3,4 с, блокирующий CSS ≈ 600 мс, вес 224 КБ). `gzip` включён. Остаются лишние ≈ 450 КБ изображений на главной. Сырые данные: [evidence/production-2026-10-02/lighthouse-live-summary.json](evidence/production-2026-10-02/lighthouse-live-summary.json). Ниже — исходный замер локальной копии репозитория (без сжатия), он хуже production.
+
 | Метрика | Mobile (лаб.) | Desktop (лаб.) | Поле (CrUX / RUM) |
 |---|---|---|---|
 | Performance | 70 | 93 | — |

@@ -9,11 +9,12 @@
 Иерархия отражает только то, что подтверждено наличием в каталоге или направлениями бизнеса на сайте. Ветки с пометкой «условно» становятся страницами только при подтверждённом спросе и регулярном наличии.
 
 ```text
-Главная / — NAV-BRAND, BR-BOTH-LOCAL, USP, VIN
-│   «б/у (контрактные) запчасти Mercedes-Benz и BMW с японских доноров, Барнаул, доставка по России»
+Главная / — NAV-BRAND, BR-BOTH-LOCAL (общий), USP, VIN
+│   «запчасти Mercedes-Benz и BMW с японских доноров, Барнаул, доставка по России»
+├── /kontraktnye-zapchasti-barnaul/ (есть) — «контрактные запчасти (+ Барнаул)»; развести с главной (H-16)
 │
-├── Mercedes-Benz /mercedes/ — BR-MB, BR-MB-LOCAL
-│   ├── W211 (E-Class)  [условно /mercedes/w211/] — MODEL-W211
+├── Mercedes-Benz /zapchasti-mercedes-barnaul/ (есть) — BR-MB, BR-MB-LOCAL
+│   ├── W211 (E-Class)  [условно /zapchasti-mercedes-w211/] — MODEL-W211
 │   │     двигатель M272 (ENG-M272) · фара ксенон (OPT-W211) · задние фонари (OPT-W211)
 │   │     диски (CH-W211) · рычаги задние (CH-W211) · тормозные диски E300 (CH-W211)
 │   ├── W204 (C-Class)  [условно] — MODEL-W204
@@ -26,30 +27,29 @@
 │   ├── W163 (M-Class)  [условно] — MODEL-W163 · двигатель M112 (ENG-M112)
 │   └── W207 (E-Class Coupe/Cabrio)  [условно] — MODEL-W207 · задние фонари (OPT-W207)
 │
-├── BMW /bmw/ — BR-BMW, BR-BMW-LOCAL
-│   ├── E60 (5 Series)  [условно /bmw/e60/] — MODEL-E60
+├── BMW /zapchasti-bmw-barnaul/ (есть) — BR-BMW, BR-BMW-LOCAL
+│   ├── E60 (5 Series)  [условно /zapchasti-bmw-e60/] — MODEL-E60
 │   │     двигатель N62 (ENG-N62) · АКПП ZF 6HP26 (AKPP-6HP26) · фары и фонари (OPT-E60)
 │   │     колёса (CH-E60) · сиденья (INT-E60)
 │   ├── E39 (5 Series)  [условно] — MODEL-E39
 │   │     двигатель M54 (ENG-M54) · АКПП 525i (AKPP-E39) · балка задняя, диски (CH-E39)
-│   └── X3 (поколение уточнить)  [условно] — MODEL-X3 · двигатель N52 (ENG-N52)
+│   └── X3 E83 (по Drom — много позиций)  [условно] — MODEL-X3 · двигатель N52 (ENG-N52)
 │
-├── Категории /katalog/<категория>/ (оба бренда)
-│   ├── Двигатели — CAT-ENG, ENG-MODEL → товары ENG-M111 … ENG-N62
-│   ├── АКПП — CAT-AKPP → товары AKPP-6HP26, AKPP-E39, AKPP-ECLASS2009
-│   ├── Оптика — CAT-OPTICS → товары OPT-*
-│   ├── Кузов — CAT-BODY → товары BODY-*
-│   ├── Диски, подвеска, тормоза — CAT-CHASSIS → товары CH-*  (возможное разделение «Диски и колёса»)
-│   └── Салон — CAT-INTERIOR → товар INT-E60  (тонкая: 1 позиция)
+├── Категории (оба бренда)
+│   ├── /dvigateli-akpp-mercedes-bmw-barnaul/ (есть) — CAT-ENG, ENG-MODEL, CAT-AKPP → товары ENG-*, AKPP-*
+│   ├── /kuzovnye-detali-optika-mercedes-bmw-barnaul/ (есть) — CAT-OPTICS, CAT-BODY, CAT-INTERIOR → товары OPT-*, BODY-*, INT-*
+│   └── /diski-podveska-tormoza-mercedes-bmw-barnaul/ (новая) — CAT-CHASSIS → товары CH-*
 │
-├── Авто из Японии /avto-iz-yaponii/ — AUCTION
-├── Поставки для авторазборов /postavki-dlya-avtorazborov/ — B2B
+├── Товары /zapchasti/<slug>-<id>/ (новые, из выгрузки наличия; на Drom 8 123 объявления)
+│
+├── Авто из Японии /avtomobili-iz-yaponii-barnaul/ (есть) — AUCTION
+├── Поставки для авторазборов /postavki-dlya-avtorazborov-barnaul/ (есть) — B2B
 ├── Доставка и оплата /dostavka-i-oplata/ — DELIVERY
 ├── Гарантия и возврат /garantiya-i-vozvrat/ — TRUST (только при реальных условиях)
 ├── Статьи /stati/<slug>/ [условно] — INFO-ENG, INFO-AKPP, INFO-OPTICS, INFO-VIN, INFO-TRUST
 │
-├── Ожидает данных о наличии — NOT-IN-CATALOG (МКПП, редукторы, электрика, двери, бамперы, капоты)
-├── Номера деталей — PART-NUMBER (нужны OEM-номера от владельца)
+├── NOT-IN-CATALOG (МКПП, редукторы, электрика, двери, бамперы, капоты) — на Drom такие позиции есть; появятся с импортом
+├── Номера деталей — PART-NUMBER (OEM-номера есть в 59% заголовков Drom в выборке)
 └── Только исследование — GEO-RESEARCH (Кемерово, Новокузнецк, Кузбасс, Новосибирск — спрос на доставку; Алтайский край — те же страницы, что и Барнаул). Точек вне Барнаула нет — отдельных гео-страниц не будет
 ```
 

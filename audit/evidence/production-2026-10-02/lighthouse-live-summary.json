@@ -1,0 +1,83 @@
+{
+  "live-home-mobile": {
+    "url": "https://mb-kuzbass.ru/",
+    "fetchTime": "2026-10-02T18:28:10.181Z",
+    "note": "Lighthouse 12.8.2 из облачного окружения через сетевой прокси (не из РФ); TTFB и HTTP/2-аудиты искажены прокси",
+    "scores": {
+      "performance": 0.93,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "metrics": {
+      "first-contentful-paint": "2.2 s",
+      "largest-contentful-paint": "2.4 s",
+      "total-blocking-time": "70 ms",
+      "cumulative-layout-shift": "0",
+      "speed-index": "4.5 s",
+      "server-response-time": "Root document took 580 ms",
+      "total-byte-weight": "Total size was 1,560 KiB"
+    },
+    "opportunities": {
+      "uses-responsive-images": "Est savings of 447 KiB",
+      "image-delivery-insight": "Est savings of 450 KiB",
+      "unused-javascript": "Est savings of 23 KiB",
+      "render-blocking-insight": null,
+      "uses-long-cache-ttl": "10 resources found"
+    }
+  },
+  "live-home-desktop": {
+    "url": "https://mb-kuzbass.ru/",
+    "fetchTime": "2026-10-02T18:28:28.773Z",
+    "note": "Lighthouse 12.8.2 из облачного окружения через сетевой прокси (не из РФ); TTFB и HTTP/2-аудиты искажены прокси",
+    "scores": {
+      "performance": 0.94,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "metrics": {
+      "first-contentful-paint": "1.0 s",
+      "largest-contentful-paint": "1.0 s",
+      "total-blocking-time": "0 ms",
+      "cumulative-layout-shift": "0",
+      "speed-index": "1.9 s",
+      "server-response-time": "Root document took 640 ms",
+      "total-byte-weight": "Total size was 1,560 KiB"
+    },
+    "opportunities": {
+      "uses-responsive-images": "Est savings of 451 KiB",
+      "image-delivery-insight": "Est savings of 424 KiB",
+      "unused-javascript": "Est savings of 23 KiB",
+      "render-blocking-insight": null,
+      "uses-long-cache-ttl": "10 resources found"
+    }
+  },
+  "live-landing-mobile": {
+    "url": "https://mb-kuzbass.ru/zapchasti-mercedes-barnaul/",
+    "fetchTime": "2026-10-02T18:28:46.757Z",
+    "note": "Lighthouse 12.8.2 из облачного окружения через сетевой прокси (не из РФ); TTFB и HTTP/2-аудиты искажены прокси",
+    "scores": {
+      "performance": 0.9,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    },
+    "metrics": {
+      "first-contentful-paint": "1.9 s",
+      "largest-contentful-paint": "3.4 s",
+      "total-blocking-time": "0 ms",
+      "cumulative-layout-shift": "0",
+      "speed-index": "3.1 s",
+      "server-response-time": "Root document took 510 ms",
+      "total-byte-weight": "Total size was 224 KiB"
+    },
+    "opportunities": {
+      "uses-responsive-images": "Est savings of 149 KiB",
+      "image-delivery-insight": "Est savings of 193 KiB",
+      "unused-javascript": "",
+      "render-blocking-insight": "Est savings of 600 ms",
+      "uses-long-cache-ttl": "3 resources found"
+    }
+  }
+}
