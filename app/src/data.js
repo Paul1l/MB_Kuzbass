@@ -20,7 +20,7 @@ export const site = {
     'Контрактные оригинальные б/у запчасти Mercedes-Benz и BMW с японских автомобилей-доноров в Барнауле. Подбор по VIN, фото состояния и доставка по России.',
   keywords:
     'контрактные запчасти Барнаул, контрактные запчасти Mercedes-Benz, запчасти Мерседес Барнаул, контрактные запчасти BMW, запчасти БМВ Барнаул, оригинальные б/у запчасти, японские доноры, авторазбор Mercedes BMW',
-  updatedAt: '03.08.2026',
+  updatedAt: '03.10.2026',
 };
 
 // Режим работы сайта. Эти флаги фиксируют текущую модель витрины и подсказывают,
@@ -43,7 +43,7 @@ export const owner = {
   okvedMain: '45.32 - торговля розничная автомобильными деталями, узлами и принадлежностями',
   okvedAdditional: '45.20.1 - техническое обслуживание и ремонт легковых автомобилей и легких грузовых автотранспортных средств',
   taxMode: 'УСН, ПСН',
-  personalDataContact: 'Telegram https://t.me/mbc_kuzbass, телефон +7 923 536-27-77',
+  personalDataContact: 'Telegram https://t.me/MB_Kuzbass, телефон +7 923 536-27-77',
 };
 
 // Основные визуальные ассеты сайта. Для замены фото достаточно положить файл в assets и поменять имя здесь.
@@ -118,10 +118,13 @@ export const engineCards = [
 ];
 
 // Основные контакты компании. Используются в кнопках, форме заявки и SEO-разметке.
+// Заявки принимает личный аккаунт @MB_Kuzbass. Группа mbc_kuzbass открыта всем участникам,
+// поэтому туда ведет только кнопка «Группа в Telegram», а не заявки.
 export const contact = {
   phone: '+7 923 536-27-77',
   phoneHref: 'tel:+79235362777',
-  telegram: 'https://t.me/mbc_kuzbass',
+  telegram: 'https://t.me/MB_Kuzbass',
+  telegramGroup: 'https://t.me/mbc_kuzbass',
   whatsapp: 'https://wa.me/79235362777',
   vk: 'https://vk.ru/mb_kuzbass',
   twoGis: 'https://2gis.ru/barnaul/firm/70000001084067232',
@@ -132,19 +135,26 @@ export const contact = {
   longitude: 83.756222,
 };
 
+// Нужна для кнопок мессенджеров. Подставляет первое сообщение: клиенту проще начать диалог, а менеджер видит,
+// что обращение пришло с сайта и по какой теме. Данные из формы заявки в ссылку не попадают.
+export function createMessengerUrl(baseUrl, topic = '') {
+  const text = ['Здравствуйте! Пишу с сайта mb-kuzbass.ru.', topic].filter(Boolean).join(' ');
+  return `${baseUrl}?text=${encodeURIComponent(text)}`;
+}
+
 // Каналы связи на главном экране и в контактном блоке. Telegram стоит первым как основной канал.
 export const messengers = [
   {
     key: 'telegram',
     label: 'Telegram',
-    href: contact.telegram,
+    href: createMessengerUrl(contact.telegram),
     variant: 'primary',
     description: 'Основной канал для быстрых заявок, фото деталей и уточнения наличия.',
   },
   {
     key: 'whatsapp',
     label: 'WhatsApp',
-    href: contact.whatsapp,
+    href: createMessengerUrl(contact.whatsapp),
     variant: 'default',
     description: 'Дополнительный мессенджер для связи и отправки материалов.',
   },
@@ -154,6 +164,13 @@ export const messengers = [
     href: contact.vk,
     variant: 'default',
     description: 'Группа компании с новостями, примерами авто и запчастей.',
+  },
+  {
+    key: 'telegramGroup',
+    label: 'Группа в Telegram',
+    href: contact.telegramGroup,
+    variant: 'default',
+    description: 'Открытая группа компании. Заявки лучше отправлять в личные сообщения.',
   },
   {
     key: 'twoGis',
@@ -171,19 +188,34 @@ export const stats = [
   { key: 'reviews', value: '28', label: 'оценок в 2ГИС на момент обновления сайта' },
 ];
 
+// Статичные посадочные страницы из public/<адрес>/index.html. Обычные ссылки на них с главной помогают
+// посетителям и поисковым роботам найти разделы; verify-build.mjs сверяет список с sitemap.xml.
+export const landingPages = [
+  { href: '/kontraktnye-zapchasti-barnaul/', label: 'Что такое контрактные запчасти и как их проверить' },
+  { href: '/zapchasti-mercedes-barnaul/', label: 'Запчасти Mercedes-Benz' },
+  { href: '/zapchasti-bmw-barnaul/', label: 'Запчасти BMW' },
+  { href: '/dvigateli-akpp-mercedes-bmw-barnaul/', label: 'Двигатели и АКПП' },
+  { href: '/kuzovnye-detali-optika-mercedes-bmw-barnaul/', label: 'Кузовные детали и оптика' },
+  { href: '/avtomobili-iz-yaponii-barnaul/', label: 'Автомобили с аукционов Японии' },
+  { href: '/postavki-dlya-avtorazborov-barnaul/', label: 'Поставки для авторазборов' },
+];
+
 // Основные направления работы компании. Отрисовываются во втором блоке лендинга.
 export const directions = [
   {
     title: 'Контрактные запчасти с японских доноров',
     text: 'Продаем оригинальные б/у детали для Mercedes-Benz и BMW: кузов, оптику, агрегаты, салон, подвеску и редкие позиции.',
+    href: '/kontraktnye-zapchasti-barnaul/',
   },
   {
     title: 'Автомобили с японских аукционов',
     text: 'Занимаемся выбором, покупкой и доставкой автомобилей с японских аукционов в любую точку России.',
+    href: '/avtomobili-iz-yaponii-barnaul/',
   },
   {
     title: 'Поставки для авторазборов',
     text: 'Сотрудничаем с авторазборами и предлагаем поставки от одного машинокомплекта до целого контейнера.',
+    href: '/postavki-dlya-avtorazborov-barnaul/',
   },
   {
     title: 'Проверка и отправка',
@@ -587,7 +619,7 @@ export const legalDocs = [
       {
         heading: 'Получатели и внешние сервисы',
         text:
-          'Файлы сайта размещены на хостинге Спринтхост. Для управления DNS, защиты соединения и доставки веб-страниц используется Cloudflare, который может получать технические данные соединения и журналы запросов в соответствии со своими условиями. После отдельного согласия используется Яндекс.Метрика. Telegram, WhatsApp и VK используются только после самостоятельного выбора канала пользователем; сайт не отправляет в них заполненные поля автоматически. Работа внешних сервисов может предполагать обработку данных за пределами РФ по их собственным правилам. Данные для доставки передаются выбранной транспортной компании только после согласования заказа и только в необходимом объеме.',
+          'Файлы сайта и DNS-зона домена размещены на хостинге Спринтхост. После отдельного согласия используется Яндекс.Метрика. Telegram, WhatsApp и VK используются только после самостоятельного выбора канала пользователем; сайт не отправляет в них заполненные поля автоматически. Работа внешних сервисов может предполагать обработку данных за пределами РФ по их собственным правилам. Данные для доставки передаются выбранной транспортной компании только после согласования заказа и только в необходимом объеме.',
       },
       {
         heading: 'Способы обработки и место хранения',
@@ -748,35 +780,3 @@ export const legalDocs = [
     ],
   },
 ];
-
-// Базовая JSON-LD разметка для поисковиков. Рейтинг обновляется в App.jsx, если 2ГИС отдал актуальные данные.
-export const seoJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'AutoPartsStore',
-  name: site.name,
-  legalName: owner.name,
-  taxID: owner.inn,
-  identifier: owner.ogrnip,
-  description: site.description,
-  url: site.url,
-  image: `${site.url}assets/telegram-avatar.jpg`,
-  telephone: contact.phone,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'Северо-Западная улица, 4р',
-    addressLocality: 'Барнаул',
-    addressCountry: 'RU',
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: contact.latitude,
-    longitude: contact.longitude,
-  },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: reviewsMeta.rating,
-    ratingCount: 17,
-    bestRating: 5,
-  },
-  sameAs: [contact.telegram, contact.vk, contact.twoGis, contact.drom],
-};
