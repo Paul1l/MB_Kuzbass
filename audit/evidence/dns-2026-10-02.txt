@@ -1,0 +1,19 @@
+DNS-проверка mb-kuzbass.ru — 02.10.2026, резолвер 8.8.8.8 (dnspython)
+
+mb-kuzbass.ru NS:    ns1.sprinthost.ru, ns2.sprinthost.ru, ns3.sprinthost.net, ns4.sprinthost.net
+mb-kuzbass.ru SOA:   ns1.sprinthost.ru. admin.sprinthost.ru. 2026091300 14400 7200 1209600 86400
+mb-kuzbass.ru A:     141.8.192.25
+mb-kuzbass.ru AAAA:  2a0a:2b42:11e:8039::
+www.mb-kuzbass.ru A: 141.8.192.25 (CNAME нет)
+mb-kuzbass.ru MX:    10 mail.mb-kuzbass.ru.
+mb-kuzbass.ru TXT:   "google-site-verification=7oASp93rKMNzFbpwCDYWurKlke5SXJBAWXqmkdDtCXQ"
+                     "v=spf1 a mx ip4:141.8.192.25 ip6:2a0a:2b42:11e:8039:: ~all"
+mb-kuzbass.ru CAA:   нет
+
+Выводы:
+- DNS обслуживает Спринтхост; A и AAAA указывают на сервер Спринтхоста. Cloudflare в цепочке нет
+  (адреса не входят в диапазоны Cloudflare; NS не cloudflare.com). Риск C-01 не применим.
+- Серийный номер SOA 2026091300 — зона последний раз менялась 13.09.2026.
+- Google Search Console подтверждён через DNS (TXT google-site-verification).
+- На домене настроена почта (MX mail.mb-kuzbass.ru, SPF).
+- Регистратор домена — Webnames (со слов владельца; WHOIS не проверялся).

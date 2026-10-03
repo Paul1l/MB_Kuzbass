@@ -49,7 +49,7 @@ for (const [sourceName, source, requiredText] of [
   ['App.jsx', appSource, 'Редакция согласия:'],
   ['App.jsx', appSource, 'Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется'],
   ['data.js', dataSource, 'Клиент на Флампе'],
-  ['data.js', dataSource, "updatedAt: '03.08.2026'"],
+  ['data.js', dataSource, "updatedAt: '03.10.2026'"],
   ['privacyConsent.js', privacyConsentSource, "PRIVACY_CONSENT_VERSION = '2026-08-03'"],
 ]) {
   if (!source.includes(requiredText)) {
@@ -71,6 +71,10 @@ if (!indexHtml.includes('rel="icon" href="./favicon-96x96.png"')) {
 }
 if (indexHtml.includes('mc.yandex.ru/watch/')) {
   throw new Error('В HTML найден пиксель Метрики, который может сработать до согласия пользователя.');
+}
+// Рейтинг 2ГИС — оценки другой площадки, их нельзя размечать как собственный aggregateRating сайта.
+if (indexHtml.includes('aggregateRating')) {
+  throw new Error('index.html снова содержит aggregateRating с рейтингом стороннего сервиса.');
 }
 
 const analyticsConfig = await readFile(path.join(distDirectory, 'analytics-config.js'), 'utf8');
@@ -102,6 +106,12 @@ for (const requiredMarker of ['tag.js?id=', 'ym-hide-content', 'ym-disable-keys'
   }
 }
 
+// Заявки принимает личный аккаунт; открытая группа не должна снова стать основным каналом.
+const leadTelegramUrl = 'https://t.me/MB_Kuzbass';
+if (!javascriptBundle.includes(leadTelegramUrl)) {
+  throw new Error(`В production JavaScript нет аккаунта для заявок ${leadTelegramUrl}.`);
+}
+
 // Собирает вложенные файлы, чтобы проверка охватывала не только корень assets, но и каталог товаров.
 const robotsTxt = await readFile(path.join(distDirectory, 'robots.txt'), 'utf8');
 const sitemapXml = await readFile(path.join(distDirectory, 'sitemap.xml'), 'utf8');
@@ -123,6 +133,42 @@ for (const [fileName, contents] of publicSeoFiles) {
 
 if (!indexHtml.includes(`<link rel="canonical" href="${productionOrigin}/"`)) {
   throw new Error('index.html does not contain the expected production canonical URL.');
+}
+
+// Каждый адрес из sitemap.xml должен быть в сборке: посадочные страницы лежат в public/<адрес>/index.html
+// и иначе тихо пропадут при следующей выкладке.
+const landingPaths = [];
+for (const [, location] of sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+  const { pathname } = new URL(location);
+  const pageFile = pathname === '/' ? 'index.html' : `${pathname.replace(/^\/+|\/+$/g, '')}/index.html`;
+  await access(path.join(distDirectory, pageFile)).catch(() => {
+    throw new Error(`sitemap.xml ссылается на страницу, которой нет в сборке: ${pathname}`);
+  });
+  if (pathname !== '/') landingPaths.push(pathname);
+}
+
+// Посадочные связаны с главной и друг с другом обычными ссылками, а заявки с них идут в личный аккаунт.
+for (const landingPath of landingPaths) {
+  if (!javascriptBundle.includes(landingPath)) {
+    throw new Error(`Главная не ссылается на посадочную страницу ${landingPath}.`);
+  }
+
+  const landingHtml = await readFile(path.join(distDirectory, landingPath, 'index.html'), 'utf8');
+  const missingLinks = landingPaths.filter(
+    (otherPath) => otherPath !== landingPath && !landingHtml.includes(`href="${otherPath}"`),
+  );
+  if (missingLinks.length) {
+    throw new Error(`${landingPath} не ссылается на посадочные: ${missingLinks.join(', ')}`);
+  }
+  if (!landingHtml.includes(`href="${leadTelegramUrl}`)) {
+    throw new Error(`${landingPath}: кнопка Telegram не ведет в аккаунт для заявок ${leadTelegramUrl}.`);
+  }
+}
+
+// Редирект на https://mb-kuzbass.ru должен приходить из исходников, а не из ручной правки корня репозитория.
+const htaccess = await readFile(path.join(distDirectory, '.htaccess'), 'utf8');
+if (!htaccess.includes('RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI} [R=301,L,NE]')) {
+  throw new Error('.htaccess в сборке не содержит редирект на https://mb-kuzbass.ru.');
 }
 
 async function collectFiles(directory) {

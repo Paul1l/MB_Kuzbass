@@ -1,0 +1,303 @@
+{
+  "noJsRawHtml": {
+    "title": "МБ Кузбасс / MB Kuzbass — оригинальные запчасти Mercedes-Benz и BMW с японских доноров",
+    "description": "МБ Кузбасс / MB Kuzbass в Барнауле: оригинальные запчасти Mercedes-Benz и BMW с японских доноров, автомобили с японских аукционов, машинокомплекты и поставки для авторазборов по России.",
+    "canonical": "https://mb-kuzbass.ru/",
+    "robots": "index, follow, max-image-preview:large",
+    "textLen": 0,
+    "words": 0,
+    "headings": [],
+    "links": []
+  },
+  "renderedDesktop": {
+    "title": "МБ Кузбасс / MB Kuzbass — оригинальные запчасти Mercedes-Benz и BMW с японских доноров",
+    "words": 754,
+    "headings": [
+      "H1: МБ Кузбасс / MB Kuzbass",
+      "H2: Mercedes-Benz / BMW / Аукционы Японии",
+      "H2: Продаем оригинальные запчасти с японских доноров и привозим автомобили с аукционов.",
+      "H3: Что делаем",
+      "H3: Как работаем",
+      "H3: Кому подходит",
+      "H2: Основные задачи, с которыми можно обратиться.",
+      "H3: Оригинальные запчасти с японских доноров",
+      "H3: Автомобили с японских аукционов",
+      "H3: Поставки для авторазборов",
+      "H3: Проверка и отправка",
+      "H2: Частые категории запчастей.",
+      "H2: Что получает клиент перед покупкой.",
+      "H3: Проверка по VIN",
+      "H3: Фото и видео до сделки",
+      "H3: Прямой контакт",
+      "H3: Доставка по России",
+      "H2: Автомобили доноры",
+      "H3: Mercedes-Benz C-Class",
+      "H2: Рейтинг и впечатления клиентов.",
+      "H2: Пришлите VIN, фото детали, ссылку на авто или объем поставки.",
+      "H3: Быстрая заявка в Telegram",
+      "H3: Контакты MB Kuzbass",
+      "H3: Контакты",
+      "H3: Разделы",
+      "H3: Документы",
+      "H2: Управление cookie"
+    ],
+    "landmarks": {
+      "header": 1,
+      "nav": 3,
+      "main": 1,
+      "footer": 1
+    },
+    "skipLink": false,
+    "inputs": [
+      {
+        "name": "name",
+        "type": "text",
+        "label": "wrapped-label",
+        "required": false
+      },
+      {
+        "name": "contact",
+        "type": "text",
+        "label": "wrapped-label",
+        "required": false
+      },
+      {
+        "name": "message",
+        "type": "textarea",
+        "label": "wrapped-label",
+        "required": false
+      },
+      {
+        "name": "agree",
+        "type": "checkbox",
+        "label": "wrapped-label",
+        "required": true
+      }
+    ]
+  },
+  "renderedDesktopImages": [
+    {
+      "src": "/assets/telegram-avatar.jpg",
+      "alt": "Аватарка MB Kuzbass из Telegram",
+      "w": null,
+      "h": null,
+      "loading": "auto",
+      "natural": "320x320"
+    },
+    {
+      "src": "/assets/client-car-02.webp",
+      "alt": "Серебристый Mercedes-Benz C-Class на площадке MB Kuzbass",
+      "w": null,
+      "h": null,
+      "loading": "eager",
+      "natural": "1280x960"
+    },
+    {
+      "src": "/assets/client-car-03.webp",
+      "alt": "Несколько автомобилей Mercedes-Benz на площадке MB Kuzbass",
+      "w": null,
+      "h": null,
+      "loading": "lazy",
+      "natural": "1280x960"
+    },
+    {
+      "src": "/assets/client-car-05.webp",
+      "alt": "Серебристый седан Mercedes-Benz под поставку",
+      "w": null,
+      "h": null,
+      "loading": "lazy",
+      "natural": "1280x960"
+    },
+    {
+      "src": "/assets/client-car-06.webp",
+      "alt": "Купе Mercedes-Benz на площадке MB Kuzbass",
+      "w": null,
+      "h": null,
+      "loading": "lazy",
+      "natural": "1280x960"
+    },
+    {
+      "src": "/assets/client-car-08.webp",
+      "alt": "Белый Mercedes-Benz в чистом боксе перед отправкой",
+      "w": null,
+      "h": null,
+      "loading": "lazy",
+      "natural": "1179x860"
+    },
+    {
+      "src": "/assets/client-car-11.webp",
+      "alt": "Mercedes-Benz Viano в помещении перед поставкой",
+      "w": null,
+      "h": null,
+      "loading": "lazy",
+      "natural": "1179x814"
+    },
+    {
+      "src": "/assets/telegram-avatar.jpg",
+      "alt": "Логотип MB Kuzbass",
+      "w": null,
+      "h": null,
+      "loading": "auto",
+      "natural": "320x320"
+    }
+  ],
+  "desktopRequests": [
+    {
+      "url": "/assets/client-car-05.webp",
+      "status": 200,
+      "bytes": 356440,
+      "type": "image"
+    },
+    {
+      "url": "/assets/parallax-car-02.webp",
+      "status": 200,
+      "bytes": 346996,
+      "type": "image"
+    },
+    {
+      "url": "/assets/client-car-06.webp",
+      "status": 200,
+      "bytes": 300830,
+      "type": "image"
+    },
+    {
+      "url": "/assets/index-6YMNVtV7.js",
+      "status": 200,
+      "bytes": 230647,
+      "type": "script"
+    },
+    {
+      "url": "/assets/client-car-03.webp",
+      "status": 200,
+      "bytes": 227616,
+      "type": "image"
+    },
+    {
+      "url": "/assets/parallax-gclass-row.webp",
+      "status": 200,
+      "bytes": 217966,
+      "type": "image"
+    },
+    {
+      "url": "/assets/client-car-01.webp",
+      "status": 200,
+      "bytes": 208112,
+      "type": "image"
+    },
+    {
+      "url": "/assets/client-car-02.webp",
+      "status": 200,
+      "bytes": 206434,
+      "type": "image"
+    },
+    {
+      "url": "/assets/parallax-bmw-e39-side.webp",
+      "status": 200,
+      "bytes": 168480,
+      "type": "image"
+    },
+    {
+      "url": "/assets/client-car-11.webp",
+      "status": 200,
+      "bytes": 41596,
+      "type": "image"
+    },
+    {
+      "url": "/assets/client-car-08.webp",
+      "status": 200,
+      "bytes": 35580,
+      "type": "image"
+    },
+    {
+      "url": "/assets/mb-kuzbass-label-background.webp",
+      "status": 200,
+      "bytes": 30534,
+      "type": "image"
+    },
+    {
+      "url": "/assets/index-DBNwnNxq.css",
+      "status": 200,
+      "bytes": 27079,
+      "type": "stylesheet"
+    },
+    {
+      "url": "/assets/telegram-avatar.jpg",
+      "status": 200,
+      "bytes": 13049,
+      "type": "image"
+    },
+    {
+      "url": "/",
+      "status": 200,
+      "bytes": 6829,
+      "type": "document"
+    },
+    {
+      "url": "/analytics-config.js",
+      "status": 200,
+      "bytes": 401,
+      "type": "script"
+    },
+    {
+      "url": "/reviews-config.js",
+      "status": 200,
+      "bytes": 207,
+      "type": "script"
+    }
+  ],
+  "desktopPerfLocal": {
+    "domContentLoaded": 101,
+    "load": 101,
+    "paints": [
+      "first-paint=24ms",
+      "first-contentful-paint=476ms"
+    ],
+    "docHeight": 5539
+  },
+  "cookieBannerDesktop": {
+    "top": 512,
+    "height": 264,
+    "width": 640,
+    "viewportH": 800,
+    "coverage": "15%"
+  },
+  "cookieBannerMobile390x844": {
+    "top": 404,
+    "height": 424,
+    "viewportH": 844,
+    "coverage": "46%"
+  },
+  "mobileFirstScreenWithBanner": {
+    "visiblePhoneLinks": 0,
+    "visibleTelegramLinks": 1,
+    "navDisplay": "flex/visible",
+    "horizontalOverflow": false,
+    "scrollWidth": 390
+  },
+  "mobileFirstScreenAfterBanner": {
+    "visiblePhoneLinks": 0,
+    "visibleTelegramLinks": 1,
+    "headerHeight": 105,
+    "headerPosition": "sticky"
+  },
+  "catalogEnginesHashRoute": {
+    "title": "Двигатели и навесное — каталог MB Kuzbass",
+    "description": "Оригинальные двигатели Mercedes-Benz и BMW с японских автомобилей-доноров. Комплектность, маркировку и совместимость подтверждаем перед сделкой. MB Kuzbass, Барнаул.",
+    "canonical": "https://mb-kuzbass.ru/",
+    "headings": [
+      "H1: Двигатели и навесное",
+      "H2: Двигатель BMW E39 M54",
+      "H2: Двигатель BMW X3 N52",
+      "H2: Двигатель Mercedes-Benz C203 M111",
+      "H2: Двигатель Mercedes-Benz C203 M271",
+      "H2: Двигатель Mercedes-Benz E211 M272",
+      "H2: Двигатель BMW E60 N62",
+      "H2: Двигатель Mercedes-Benz W163 M112",
+      "H3: Контакты",
+      "H3: Разделы",
+      "H3: Документы",
+      "H2: Управление cookie"
+    ],
+    "words": 329
+  }
+}

@@ -77,7 +77,7 @@ window.MBKUZBASS_REVIEWS_CONFIG = {
 - Dev- и preview-серверы привязаны к `127.0.0.1`, поэтому исходники не публикуются в локальную сеть случайно.
 - Перед каждой публикацией запускайте `npm audit` и `npm run build`. Не добавляйте токены, пароли, банковские ключи или секреты в `src`, `public`, `.env` с префиксом `VITE_` либо собранные файлы.
 
-Production-файлы размещаются на Спринтхосте, а DNS и проксирование настроены через Cloudflare. Заголовки безопасности настраиваются в `.htaccess`, панели Спринтхоста и Cloudflare. GitHub используется только как репозиторий исходников и истории изменений.
+Production-файлы и DNS-зона домена размещаются на Спринтхосте (домен зарегистрирован в Webnames, Cloudflare не используется). Заголовки безопасности, редиректы на `https://mb-kuzbass.ru` и адреса со слэшем настраиваются в `public/.htaccess`, он же закрывает служебные папки (`app`, `audit`, `docs`, `.git`) и `.md`-файлы, если на хостинг случайно загрузили весь репозиторий. GitHub используется только как репозиторий исходников и истории изменений.
 
 ## Error-страницы
 
@@ -92,7 +92,8 @@ Production-файлы размещаются на Спринтхосте, а DNS
 
 ## Где менять контент
 
-- `src/data.js`: телефон, Telegram, WhatsApp, VK, 2ГИС, Drom, адрес и режим работы.
+- `src/data.js`: телефон, Telegram, WhatsApp, VK, 2ГИС, Drom, адрес и режим работы. Заявки идут в личный аккаунт `contact.telegram` (`@MB_Kuzbass`); открытая группа `contact.telegramGroup` показывается только как «Группа в Telegram». Кнопки мессенджеров подставляют первое сообщение через `createMessengerUrl` (без данных из формы).
+- `src/data.js`: `landingPages` — ссылки с главной на посадочные страницы.
 - `src/data.js`: фото галереи, alt-тексты, выбранные отзывы, услуги и преимущества.
 - `src/data.js`: `reviewsProvider` и резервные значения в `reviewsMeta`.
 - `public/reviews-config.js`: ключ 2ГИС или proxy-url для онлайн-рейтинга.
@@ -100,9 +101,10 @@ Production-файлы размещаются на Спринтхосте, а DNS
 - `src/data.js`: объект `commerce` с флагами онлайн-заказа, оплаты и личных кабинетов. Перед подключением новой функции меняются флаги, документы и соответствующий интерфейс.
 - `index.html`: SEO title, description, canonical, Open Graph, Twitter Card, manifest и базовый JSON-LD.
 - `public/robots.txt` и `public/sitemap.xml`: адрес сайта для поисковиков.
+- `public/<адрес>/index.html` и `public/seo-pages.css`: статичные посадочные страницы, которые отдаются без JavaScript (сейчас 7). Новую посадочную нужно добавить в `public/sitemap.xml`, в `landingPages` и в блок «Другие направления» остальных посадочных; `npm run build` проверяет, что каждый адрес из sitemap есть в сборке, что на него ссылаются главная и все посадочные и что кнопка Telegram ведет в `@MB_Kuzbass`. После правки `seo-pages.css` поменяйте `?v=` в ссылке на него, иначе браузеры до 7 дней показывают старый файл.
 - `public/404.html`, `public/500.html`, `public/503.html`, `public/offline.html`: страницы ошибок.
 - `public/assets`: фотографии из 2ГИС и новые изображения.
-- `public/assets/telegram-avatar.jpg`: аватарка из Telegram-канала `t.me/mbc_kuzbass`, используется в шапке и SEO `logo`.
+- `public/assets/telegram-avatar.jpg`: аватарка из Telegram-группы `t.me/mbc_kuzbass`, используется в шапке и SEO `logo`.
 - `public/favicon.svg`: исходник компактной иконки сайта. Команда `npm run build` автоматически создаёт из него PNG-размеры и `favicon.ico`.
 
 ## Слайдер автомобилей
@@ -114,10 +116,10 @@ Production-файлы размещаются на Спринтхосте, а DNS
 ## SEO-подготовка
 
 - В `index.html` добавлены title, description, canonical, Open Graph, Twitter Card, geo-meta, favicon, manifest и JSON-LD `AutoPartsStore`.
-- В `sitemap.xml` указана главная страница для индексации.
+- В `sitemap.xml` указаны главная и 7 посадочных страниц.
 - В `robots.txt` открыта индексация главной и закрыты технические error-страницы.
-- В JSON-LD есть адрес, телефон, координаты, рейтинг, режим работы, карта 2ГИС и ссылки на Telegram/VK/2ГИС.
-- После загрузки онлайн-рейтинга сайт обновляет `aggregateRating` в JSON-LD на странице.
+- В JSON-LD есть адрес, телефон, координаты, режим работы, карта 2ГИС и ссылки на Telegram/VK/2ГИС/Drom.
+- Рейтинг 2ГИС показывается только текстом со ссылкой на источник. `aggregateRating` в разметку не добавляется: это оценки другой площадки, правила поисковиков запрещают выдавать их за собственные. `npm run build` остановится, если он появится в `index.html`.
 
 ## Что делают функции в `src/App.jsx`
 
@@ -125,15 +127,15 @@ Production-файлы размещаются на Спринтхосте, а DNS
 - `readPrivacyPreferences`: читает сохраненный выбор необходимых и аналитических cookie для текущей версии согласия.
 - `savePrivacyPreferences`: сохраняет выбор аналитики на 180 дней.
 - `createRequestText`: собирает текст заявки из полей формы.
-- `copyRequestText`: копирует заявку в буфер перед открытием Telegram.
-- `updateRatingStructuredData`: обновляет JSON-LD рейтинг после онлайн-загрузки 2ГИС.
+- `copyWithSelection`, `copyRequestText`: копируют заявку в буфер в момент нажатия (синхронно, с запасным Clipboard API), до открытия Telegram.
 - `createReviewsIntroText`: собирает короткую строку для заголовка секции отзывов.
 - `getReviewSourceLinks`: собирает ссылки на площадки отзывов, сейчас это 2ГИС и Drom.
 - `createStatsWithReviews`: подставляет актуальный рейтинг в верхние числовые показатели.
 - `resolveAssetUrl`: делает URL изображения абсолютным для фоновых CSS-изображений.
 - `getCatalogSlugFromHash`: достает slug категории из адреса вида `#catalog/engines`.
 - `getCarouselOffset`: считает положение слайда относительно активного авто.
-- `Header`: выводит шапку и основную навигацию.
+- `Header`: выводит шапку, основную навигацию с «Каталогом» и телефон.
+- `MobileContactBar`: нижняя панель «Позвонить / Telegram / WhatsApp» на экранах до 820 px.
 - `SectionIntro`: выводит единый заголовок секции.
 - `ContactButton`: выводит кнопку Telegram, WhatsApp, VK или 2ГИС.
 - `CatalogCategoryPage`: выводит внутреннюю SPA-страницу выбранной категории каталога.
@@ -148,7 +150,7 @@ Production-файлы размещаются на Спринтхосте, а DNS
 
 Внутри `App` также есть обработчики:
 
-- `handleRequestSubmit`: формирует заявку, копирует текст и открывает Telegram.
+- `handleRequestSubmit`: формирует заявку, копирует текст и в том же нажатии открывает личный чат `@MB_Kuzbass` (без `await` перед `window.open`, иначе Safari на iPhone может заблокировать вкладку).
 - `handleCatalogOpen`: открывает выбранную категорию каталога и сбрасывает прокрутку наверх.
 - `handleEscape`: закрывает модальное окно документов по клавише Escape.
 - `handleHashChange`: синхронизирует hash URL с состоянием SPA-каталога.

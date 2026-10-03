@@ -196,6 +196,30 @@ textarea {
   }
 }
 
+.header-phone {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  color: $white;
+  background: $red;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+
+  svg {
+    flex: 0 0 auto;
+    fill: currentColor;
+  }
+
+  &:hover {
+    background: color.adjust($red, $lightness: -6%);
+  }
+}
+
 .hero {
   position: relative;
   z-index: 1;
@@ -401,6 +425,37 @@ h1 {
   z-index: 1;
   padding: 78px 48px;
   border-top: 1px solid rgba($line, 0.76);
+}
+
+.seo-fallback {
+  display: grid;
+  gap: 20px;
+  min-height: 70vh;
+  padding: clamp(36px, 8vw, 96px);
+  background: #fff;
+
+  h1 {
+    max-width: 980px;
+    font-size: clamp(40px, 7vw, 92px);
+    line-height: 0.98;
+  }
+
+  p {
+    max-width: 820px;
+    color: #3c4147;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+
+  nav {
+    display: grid;
+    gap: 10px;
+
+    a {
+      color: $red;
+      font-weight: 800;
+    }
+  }
 }
 
 .section--dark {
@@ -901,6 +956,21 @@ h1 {
     line-height: 1.16;
   }
 
+  h3 a {
+    text-decoration: underline;
+    text-decoration-color: rgba($gold-on-dark, 0.7);
+    text-underline-offset: 4px;
+
+    &::after {
+      content: ' →';
+      color: $gold-on-dark;
+    }
+
+    &:hover {
+      color: $gold-on-dark;
+    }
+  }
+
   p {
     margin-bottom: 0;
     color: rgba(255, 255, 255, 0.78);
@@ -962,6 +1032,47 @@ h1 {
     color: $muted;
     font-size: 13px;
     font-weight: 700;
+  }
+}
+
+.landing-links {
+  margin-top: 22px;
+  padding: 20px;
+  background: rgba($white, 0.9);
+  border: 1px solid rgba($line, 0.9);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 18px;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    padding: 8px 12px;
+    color: $ink;
+    background: $paper;
+    border: 1px solid $line;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+
+    &:hover {
+      color: $red;
+      border-color: $red;
+    }
   }
 }
 
@@ -1238,6 +1349,12 @@ textarea {
   color: $green;
   font-size: 14px;
   line-height: 1.5;
+
+  a {
+    color: $red;
+    font-weight: 800;
+    text-decoration: underline;
+  }
 }
 
 .contact-info {
@@ -2144,5 +2261,100 @@ textarea {
 
   .contact-info__buttons .button {
     width: auto;
+  }
+}
+
+// Нижняя панель связи для телефонов. На компьютере телефон и мессенджеры видны в шапке и первом экране.
+.mobile-contact-bar {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  .mobile-contact-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    background: rgba($ink, 0.96);
+    border-top: 1px solid rgba($white, 0.12);
+
+    a {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      color: $white;
+      border: 1px solid rgba($white, 0.28);
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+  }
+
+  .mobile-contact-bar .mobile-contact-bar__phone {
+    background: $red;
+    border-color: $red;
+  }
+
+  // Пока посетитель печатает в форме, панель не закрывает поля ввода.
+  .page-shell:has(input:focus, textarea:focus) ~ .mobile-contact-bar {
+    display: none;
+  }
+
+  // Последние строки подвала не должны прятаться под панелью.
+  .footer {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}
+
+// На планшете и телефоне шапка в две строки: бренд и телефон, ниже меню во всю ширину.
+@media (max-width: 820px) {
+  .site-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .site-header .nav {
+    grid-row: 2;
+    grid-column: 1 / -1;
+
+    a {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+  }
+
+  .header-phone {
+    grid-row: 1;
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 560px) {
+  // На узком экране в шапке остается кнопка-иконка: номер целиком есть в нижней панели и контактах.
+  .header-phone {
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+
+    span {
+      display: none;
+    }
+  }
+}
+
+// На экранах 360 px название в шапке помещается в одну строку рядом с кнопкой телефона.
+@media (max-width: 380px) {
+  .brand strong {
+    font-size: 15px;
   }
 }

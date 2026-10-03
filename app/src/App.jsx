@@ -6,8 +6,10 @@ import {
   catalog,
   commerce,
   contact,
+  createMessengerUrl,
   directions,
   garageSlides,
+  landingPages,
   legalDocs,
   messengers,
   owner,
@@ -51,35 +53,42 @@ function createRequestText(formData) {
   ].join('\n');
 }
 
-// Нужна для ускорения заявки. Пытается скопировать подготовленный текст в буфер обмена перед открытием Telegram.
-async function copyRequestText(text) {
-  if (!navigator.clipboard) return false;
+// Копирует текст через выделение скрытого поля. Работает синхронно, поэтому успевает до того, как форма откроет
+// Telegram в новой вкладке и страница потеряет фокус. Поле скрыто от Вебвизора, как и сама форма.
+function copyWithSelection(text) {
+  const previousFocus = document.activeElement;
+  const field = document.createElement('textarea');
+  field.value = text;
+  field.className = 'ym-hide-content ym-disable-keys';
+  field.setAttribute('readonly', '');
+  field.setAttribute('aria-hidden', 'true');
+  Object.assign(field.style, { position: 'absolute', left: '-9999px', top: `${window.scrollY}px`, fontSize: '16px' });
+  document.body.append(field);
+  field.select();
+  field.setSelectionRange(0, text.length);
 
+  let copied;
   try {
-    await navigator.clipboard.writeText(text);
-    return true;
+    copied = document.execCommand('copy');
   } catch {
-    return false;
+    copied = false;
   }
+
+  field.remove();
+  if (previousFocus instanceof HTMLElement) previousFocus.focus({ preventScroll: true });
+  return copied;
 }
 
-// Нужна для SEO. Обновляет JSON-LD AggregateRating после успешной загрузки актуального рейтинга из 2ГИС.
-function updateRatingStructuredData(meta) {
-  const script = document.querySelector('script[type="application/ld+json"]');
-  if (!script || !meta?.ratingCountValue) return;
+// Нужна для ускорения заявки. Копирует подготовленный текст в буфер обмена в момент нажатия; если старый способ
+// недоступен, запускает Clipboard API в том же нажатии. Возвращает Promise с результатом.
+function copyRequestText(text) {
+  if (copyWithSelection(text)) return Promise.resolve(true);
+  if (!navigator.clipboard) return Promise.resolve(false);
 
-  try {
-    const data = JSON.parse(script.textContent);
-    data.aggregateRating = {
-      ...data.aggregateRating,
-      ratingValue: meta.rating,
-      ratingCount: meta.ratingCountValue,
-      bestRating: 5,
-    };
-    script.textContent = JSON.stringify(data);
-  } catch {
-    // Если JSON-LD изменили вручную, страница продолжит работать без обновления SEO-блока.
-  }
+  return navigator.clipboard.writeText(text).then(
+    () => true,
+    () => false,
+  );
 }
 
 // Нужна для секции отзывов. Собирает короткую строку с источником, рейтингом и количеством оценок.
@@ -172,7 +181,7 @@ function getCarouselOffset(index, activeIndex, total) {
   return offset;
 }
 
-// Нужна для шапки сайта. Отрисовывает бренд, город и быстрые ссылки по основным разделам страницы.
+// Нужна для шапки сайта. Отрисовывает бренд, город, быстрые ссылки по основным разделам страницы и телефон.
 function Header() {
   return (
     <header className="site-header">
@@ -187,13 +196,53 @@ function Header() {
       </a>
 
       <nav className="nav" aria-label="Навигация">
+        <a href="#catalog">Каталог</a>
         <a href="#about">О компании</a>
         <a href="#directions">Направления</a>
         <a href="#vehicles">Авто</a>
         <a href="#reviews">Отзывы</a>
         <a href="#contacts">Контакты</a>
       </nav>
+
+      <a
+        className="header-phone"
+        href={contact.phoneHref}
+        aria-label={`Позвонить: ${contact.phone}`}
+        onClick={() => trackGoal('header_phone')}
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+          <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+        </svg>
+        <span>{contact.phone}</span>
+      </a>
     </header>
+  );
+}
+
+// Нужна для мобильной версии. Держит звонок и мессенджеры на экране, пока посетитель листает страницу.
+function MobileContactBar() {
+  return (
+    <nav className="mobile-contact-bar" aria-label="Быстрая связь">
+      <a className="mobile-contact-bar__phone" href={contact.phoneHref} onClick={() => trackGoal('mobile_bar_phone')}>
+        Позвонить
+      </a>
+      <a
+        href={createMessengerUrl(contact.telegram)}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => trackGoal('mobile_bar_telegram')}
+      >
+        Telegram
+      </a>
+      <a
+        href={createMessengerUrl(contact.whatsapp)}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => trackGoal('mobile_bar_whatsapp')}
+      >
+        WhatsApp
+      </a>
+    </nav>
   );
 }
 
@@ -319,7 +368,7 @@ function CatalogCategoryPage({ category }) {
         <div className="catalog-page__actions">
           <a
             className="button button--primary"
-            href={contact.telegram}
+            href={createMessengerUrl(contact.telegram, `Интересует раздел «${category.label}».`)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackGoal('catalog_telegram')}
@@ -346,7 +395,7 @@ function CatalogCategoryPage({ category }) {
               <p>{item.description}</p>
               <a
                 className="button button--ghost"
-                href={contact.telegram}
+                href={createMessengerUrl(contact.telegram, `Интересует: ${item.title}. Есть в наличии?`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackGoal('catalog_item_telegram')}
@@ -653,7 +702,7 @@ function Footer({ onOpenLegal, onOpenPrivacySettings }) {
           <div className="footer__actions">
             <a
               className="button button--primary"
-              href={contact.telegram}
+              href={createMessengerUrl(contact.telegram)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackGoal('footer_telegram')}
@@ -670,12 +719,20 @@ function Footer({ onOpenLegal, onOpenPrivacySettings }) {
           <h3>Контакты</h3>
           <a href={contact.phoneHref} onClick={() => trackGoal('footer_phone')}>{contact.phone}</a>
           <a
-            href={contact.telegram}
+            href={createMessengerUrl(contact.telegram)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackGoal('footer_contact_telegram')}
           >
-            Telegram
+            Telegram @MB_Kuzbass
+          </a>
+          <a
+            href={contact.telegramGroup}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackGoal('footer_telegram_group')}
+          >
+            Группа в Telegram
           </a>
           <p>{contact.address}</p>
           <p>{contact.workTime}</p>
@@ -742,7 +799,7 @@ function App() {
     }),
     [heroCoverBackgroundImage],
   );
-  const primaryMessengers = messengers.filter((item) => item.key !== 'twoGis');
+  const primaryMessengers = messengers.filter((item) => !['twoGis', 'telegramGroup'].includes(item.key));
   const currentStats = useMemo(
     () => createStatsWithReviews(stats, currentReviewsMeta),
     [currentReviewsMeta],
@@ -837,12 +894,9 @@ function App() {
       isInitialNavigation = false;
       const currentHash = window.location.hash;
 
-      // Старые ссылки на обзор каталога и обычное открытие сайта должны начинаться с первого экрана.
-      if (isFirstRun && (!currentHash || currentHash === '#catalog')) {
-        if (currentHash === '#catalog') {
-          window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
-        }
-
+      // Обычное открытие сайта начинается с первого экрана. Ссылка /#catalog (например, из шапки
+      // посадочных страниц) обрабатывается ниже как якорь и прокручивает страницу к каталогу.
+      if (isFirstRun && !currentHash) {
         setActiveLegalId(null);
         setCatalogSlug(null);
         schedulePageTopReset();
@@ -982,7 +1036,7 @@ function App() {
 
     let isActive = true;
 
-    // Нужна для онлайн-отзывов. Загружает рейтинг, обновляет состояние страницы и JSON-LD для SEO.
+    // Нужна для онлайн-отзывов. Загружает рейтинг и обновляет его на странице.
     async function syncReviews() {
       setReviewsSyncStatus('loading');
 
@@ -992,7 +1046,6 @@ function App() {
 
         setCurrentReviewsMeta(meta);
         setReviewsSyncStatus(meta.isLive ? 'success' : 'static');
-        updateRatingStructuredData(meta);
       } catch {
         if (isActive) setReviewsSyncStatus('static');
       }
@@ -1005,21 +1058,16 @@ function App() {
     };
   }, [onlineReviewsConfigured]);
 
-  // Нужна для формы заявки. Формирует текст, копирует его и открывает основной Telegram-канал связи.
-  async function handleRequestSubmit(event) {
+  // Нужна для формы заявки. Копирует текст и открывает личный чат Telegram в том же нажатии: если открыть окно
+  // после await, Safari на iPhone может заблокировать новую вкладку. Данные формы в ссылку не попадают.
+  function handleRequestSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const text = createRequestText(formData);
-    const copied = await copyRequestText(text);
+    const copying = copyRequestText(createRequestText(formData));
 
-    setFormStatus(
-      copied
-        ? 'Текст заявки скопирован. Telegram откроется в новой вкладке, вставьте сообщение в чат.'
-        : 'Telegram откроется в новой вкладке. Если текст не скопировался, отправьте VIN, контакт и задачу вручную.',
-    );
-
-    trackGoal('request_submit');
     window.open(contact.telegram, '_blank', 'noopener,noreferrer');
+    trackGoal('request_submit');
+    copying.then((copied) => setFormStatus(copied ? 'copied' : 'not-copied'));
   }
 
   // Нужна для карточек каталога на главной. Открывает SPA-категорию и сбрасывает старую позицию прокрутки.
@@ -1066,10 +1114,10 @@ function App() {
           <>
         <section className="hero" data-parallax-bg="none">
           <div className="hero__content">
-            <p className="eyebrow">Оригинальные запчасти / авто с аукционов / поставки для разборов</p>
-            <h1>{site.name}</h1>
+            <p className="eyebrow">Контрактные запчасти / авто с аукционов / поставки для разборов</p>
+            <h1>Контрактные запчасти Mercedes-Benz и BMW в Барнауле</h1>
             <p className="hero__lead">
-              Продаем качественные оригинальные запчасти с японских доноров для Mercedes-Benz и BMW.
+              Продаем контрактные оригинальные б/у запчасти с японских доноров для Mercedes-Benz и BMW.
               Занимаемся выбором, покупкой и доставкой в любую точку России автомобилей с японских
               аукционов, а также поставками для авторазборов — от одного машинокомплекта до целого
               контейнера.
@@ -1154,7 +1202,7 @@ function App() {
             {directions.map((item, index) => (
               <article className="direction-card" key={item.title}>
                 <span>{String(index + 1).padStart(2, '0')}</span>
-                <h3>{item.title}</h3>
+                <h3>{item.href ? <a href={item.href}>{item.title}</a> : item.title}</h3>
                 <p>{item.text}</p>
               </article>
             ))}
@@ -1179,6 +1227,17 @@ function App() {
               </a>
             ))}
           </div>
+
+          <nav className="landing-links" aria-labelledby="landing-links-title">
+            <h3 id="landing-links-title">Подробнее о запчастях и услугах</h3>
+            <ul>
+              {landingPages.map((page) => (
+                <li key={page.href}>
+                  <a href={page.href}>{page.label}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </section>
 
         <section className="section" data-parallax-bg="4">
@@ -1300,7 +1359,16 @@ function App() {
                     Позвонить
                   </a>
                 </div>
-                {formStatus && <p className="form-status">{formStatus}</p>}
+                {formStatus && (
+                  <p className="form-status">
+                    {formStatus === 'copied'
+                      ? 'Текст заявки скопирован. Вставьте его в чат Telegram и отправьте.'
+                      : 'Текст не скопировался. Напишите в чате Telegram VIN, контакт и задачу.'}{' '}
+                    <a href={contact.telegram} target="_blank" rel="noopener noreferrer">
+                      Чат не открылся? Открыть @MB_Kuzbass
+                    </a>
+                  </p>
+                )}
                 <p className="form-local-note">
                   Данные не отправляются на сервер сайта. Форма только копирует текст в вашем браузере;
                   сообщение отправляете вы сами в Telegram.
@@ -1317,12 +1385,12 @@ function App() {
               <div className="contact-info__item">
                 <span>Основная связь</span>
                 <a
-                  href={contact.telegram}
+                  href={createMessengerUrl(contact.telegram)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackGoal('contacts_telegram')}
                 >
-                  Telegram
+                  Telegram @MB_Kuzbass
                 </a>
               </div>
               <div className="contact-info__item">
@@ -1352,6 +1420,7 @@ function App() {
       </main>
 
       <Footer onOpenLegal={setActiveLegalId} onOpenPrivacySettings={() => setPrivacyPanelOpen(true)} />
+      <MobileContactBar />
       {privacyPanelOpen && (
         <CookieBanner
           preferences={privacyPreferences}
