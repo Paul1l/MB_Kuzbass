@@ -20,6 +20,11 @@ DirectoryIndex index.html
   RedirectMatch 404 "^/(?:app|audit|docs|\.git|\.github)(?:/|$)|\.md$"
 </IfModule>
 
+# Шрифты сайта лежат на своём домене; явный тип нужен старым настройкам Apache без записи для woff2.
+<IfModule mod_mime.c>
+  AddType font/woff2 .woff2
+</IfModule>
+
 ErrorDocument 404 /404.html
 ErrorDocument 500 /500.html
 ErrorDocument 503 /503.html

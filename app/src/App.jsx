@@ -1,52 +1,97 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  brandBackdropImage,
   brandAvatar,
-  benefits,
+  brandBackdropImage,
   catalog,
+  catalogCards,
   commerce,
   contact,
   createMessengerUrl,
   directions,
-  garageSlides,
+  donorModels,
+  dromListingsLabel,
+  featuredProducts,
+  heroImages,
   landingPages,
   legalDocs,
-  messengers,
   owner,
-  parallaxBackgrounds,
+  purchaseSteps,
   reviews,
   reviewsMeta,
   reviewsProvider,
   site,
-  stats,
+  trustPoints,
 } from './data.js';
 import { isOnlineReviewsConfigured, loadOnlineReviewsMeta } from './onlineReviews.js';
 import { disableAnalytics, enableAnalytics, trackGoal, trackPageView } from './analytics.js';
 import { readPrivacyPreferences, savePrivacyPreferences } from './privacyConsent.js';
 
-const requestPlaceholderText =
-  'Здравствуйте! Нужны запчасти, автомобиль с японского аукциона или поставка машинокомплекта.';
+// Прозрачная точка вместо фото первого экрана на телефоне: там фото скрыто, и браузер не скачивает лишнее.
+const EMPTY_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-// Нужна для единообразного оформления ссылок-кнопок. По типу канала связи возвращает CSS-классы обычной,
-// основной или второстепенной кнопки.
-function getButtonClass(variant) {
-  if (variant === 'primary') return 'button button--primary';
-  if (variant === 'ghost') return 'button button--ghost';
-  return 'button';
+// Контуры иконок 24×24. Рисуются линией текущего цвета текста.
+const iconPaths = {
+  phone: ['M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z'],
+  send: ['M21 4L3 11l7 2 2 7 9-16z', 'M10 13l4-3'],
+  star: ['M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z'],
+  layers: ['M12 3l9 5-9 5-9-5z', 'M3 13l9 5 9-5'],
+  pin: ['M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z', 'M14.5 10a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z'],
+  truck: [
+    'M3 6h11v10H3z',
+    'M14 9h4l3 3v4h-7',
+    'M8.8 17.5a1.8 1.8 0 1 1-3.6 0 1.8 1.8 0 0 1 3.6 0z',
+    'M19.3 17.5a1.8 1.8 0 1 1-3.6 0 1.8 1.8 0 0 1 3.6 0z',
+  ],
+  tag: ['M3 12V4h8l10 10-8 8z', 'M9 8.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z'],
+  search: ['M17.5 11a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z', 'M20 20l-4.2-4.2'],
+  camera: ['M4 7h3l2-2h6l2 2h3v12H4z', 'M15.5 13a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z'],
+  shield: ['M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z', 'M8.5 12l2.5 2.5 4.5-5'],
+  menu: ['M4 7h16M4 12h16M4 17h16'],
+  close: ['M6 6l12 12M18 6L6 18'],
+};
+
+// Нужна для иконок в интерфейсе. Иконка декоративная: смысл передает подпись рядом.
+function Icon({ name, size = 20 }) {
+  return (
+    <svg
+      className="icon"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {iconPaths[name].map((path) => (
+        <path d={path} key={path} />
+      ))}
+    </svg>
+  );
 }
 
-// Нужна для формы заявки. Собирает имя, контакт и задачу в готовый текст для отправки в Telegram.
-function createRequestText(formData) {
-  const name = formData.get('name') || 'не указано';
-  const userContact = formData.get('contact') || 'не указан';
-  const message = formData.get('message') || 'без описания';
+// Нужна для форм заявки. Собирает ответы формы в готовый текст для отправки в Telegram.
+function createRequestText(kind, formData) {
+  const field = (name, fallback) => String(formData.get(name) || '').trim() || fallback;
   const consentTimestamp = new Date().toISOString();
+  const details =
+    kind === 'car'
+      ? [
+          'Заявка с сайта MB Kuzbass: автомобиль из Японии',
+          `Автомобиль: ${field('car', 'не указан')}`,
+          `Куда доставить: ${field('city', 'не указано')}`,
+        ]
+      : [
+          'Заявка с сайта MB Kuzbass: запчасть',
+          `Автомобиль или VIN: ${field('vehicle', 'не указан')}`,
+          `Деталь: ${field('part', 'не указана')}`,
+        ];
 
   return [
-    'Заявка с сайта MB Kuzbass',
-    `Имя: ${name}`,
-    `Контакт: ${userContact}`,
-    `Задача: ${message}`,
+    ...details,
     `Согласие на обработку ПДн: дано ${consentTimestamp}`,
     `Редакция согласия: ${site.updatedAt}`,
     `Документ: ${new URL('#consent', site.url).href}`,
@@ -91,43 +136,6 @@ function copyRequestText(text) {
   );
 }
 
-// Нужна для секции отзывов. Собирает короткую строку с источником, рейтингом и количеством оценок.
-function createReviewsIntroText(meta) {
-  const sources = Array.isArray(meta.sources) && meta.sources.length
-    ? meta.sources.map((source) => source.name).join(' и ')
-    : meta.source;
-
-  return `${sources}: ${[meta.rating, meta.ratingCount, meta.reviewCount].filter(Boolean).join(', ')}.`;
-}
-
-// Нужна для блока отзывов. Возвращает список внешних площадок, куда пользователь может перейти для проверки рейтинга и отзывов.
-function getReviewSourceLinks(meta) {
-  if (Array.isArray(meta.sources) && meta.sources.length) return meta.sources;
-
-  return [
-    {
-      name: meta.source,
-      url: meta.sourceUrl,
-      label: meta.ratingCount,
-    },
-  ];
-}
-
-// Нужна для верхних метрик. Подставляет актуальный рейтинг и количество оценок в массив показателей.
-function createStatsWithReviews(baseStats, meta) {
-  return baseStats.map((item) => {
-    if (item.key === 'rating') return { ...item, value: meta.rating };
-    if (item.key === 'reviews') return { ...item, value: meta.ratingCountValue || item.value, label: meta.ratingCount };
-    return item;
-  });
-}
-
-// Нужна для фоновых изображений. Делает URL абсолютным, чтобы CSS background не искал assets относительно CSS-файла.
-function resolveAssetUrl(url) {
-  if (typeof window === 'undefined') return url;
-  return new URL(url, window.location.href).href;
-}
-
 // Нужна для SPA-каталога. Достает slug категории из hash вида #catalog/engines.
 function getCatalogSlugFromHash(hash) {
   const cleanHash = (hash || '').replace(/^#/, '');
@@ -170,52 +178,84 @@ function schedulePageTopReset() {
   });
 }
 
-// Нужна для ручной карусели авто. Считает кратчайшее смещение слайда относительно активной карточки.
-function getCarouselOffset(index, activeIndex, total) {
-  let offset = index - activeIndex;
-  const halfway = Math.floor(total / 2);
+// Keeps image areas useful when a cached page points at an asset that has
+// already been replaced during deployment.
+function createImageFallbackHandler(fallbackUrl) {
+  return (event) => {
+    const image = event.currentTarget;
+    if (image.dataset.fallbackApplied === 'true') return;
 
-  if (offset > halfway) offset -= total;
-  if (offset < -halfway) offset += total;
-
-  return offset;
+    image.dataset.fallbackApplied = 'true';
+    image.classList.add('is-fallback');
+    image.src = fallbackUrl;
+  };
 }
 
-// Нужна для шапки сайта. Отрисовывает бренд, город, быстрые ссылки по основным разделам страницы и телефон.
-function Header() {
+const handleImageError = createImageFallbackHandler(brandBackdropImage);
+
+// Нужна для шапки сайта: адрес и режим, бренд, меню, телефон и Telegram. На телефоне меню открывается кнопкой.
+function Header({ menuOpen, onToggleMenu, onCloseMenu }) {
   return (
-    <header className="site-header">
-      <a className="brand" href="#top">
-        <span className="brand__mark">
-          <img className="brand__avatar" src={brandAvatar} alt="Аватарка MB Kuzbass из Telegram" />
-        </span>
-        <span>
-          <strong>{site.name}</strong>
-          <small>{site.city}</small>
-        </span>
-      </a>
+    <>
+      <div className="topbar">
+        <div className="container topbar__inner">
+          <span>
+            {contact.address} · {contact.workTime}
+          </span>
+          <span>Запчасти и автомобили из Японии · отправка по всей России</span>
+        </div>
+      </div>
 
-      <nav className="nav" aria-label="Навигация">
-        <a href="#catalog">Каталог</a>
-        <a href="#about">О компании</a>
-        <a href="#directions">Направления</a>
-        <a href="#vehicles">Авто</a>
-        <a href="#reviews">Отзывы</a>
-        <a href="#contacts">Контакты</a>
-      </nav>
+      <header className="site-header">
+        <div className="container site-header__inner">
+          <a className="brand" href="#top" onClick={onCloseMenu}>
+            <img className="brand__logo" src={brandAvatar} alt="Логотип MB Kuzbass" width="48" height="48" />
+            <span className="brand__text">
+              <strong>{site.shortName}</strong>
+              <small>Запчасти и авто из Японии</small>
+            </span>
+          </a>
 
-      <a
-        className="header-phone"
-        href={contact.phoneHref}
-        aria-label={`Позвонить: ${contact.phone}`}
-        onClick={() => trackGoal('header_phone')}
-      >
-        <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
-          <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-        </svg>
-        <span>{contact.phone}</span>
-      </a>
-    </header>
+          <nav id="site-nav" className={`nav${menuOpen ? ' is-open' : ''}`} aria-label="Основное меню" onClick={onCloseMenu}>
+            <a href="#catalog">Каталог</a>
+            <a href="/avtomobili-iz-yaponii-barnaul/">Авто из Японии</a>
+            <a href="/dvigateli-akpp-mercedes-bmw-barnaul/">Двигатели и АКПП</a>
+            <a href="/postavki-dlya-avtorazborov-barnaul/">Для разборов</a>
+            <a href="#contacts">Контакты</a>
+          </nav>
+
+          <div className="site-header__actions">
+            <a className="header-phone" href={contact.phoneHref} onClick={() => trackGoal('header_phone')}>
+              <Icon name="phone" />
+              <span className="header-phone__text">
+                <strong>{contact.phone}</strong>
+                <small>пн–пт 9:00–18:00</small>
+              </span>
+            </a>
+            <a
+              className="button button--dark header-telegram"
+              href={createMessengerUrl(contact.telegram)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackGoal('header_telegram')}
+            >
+              <Icon name="send" size={18} />
+              Telegram
+            </a>
+            <button
+              className="menu-toggle"
+              type="button"
+              aria-expanded={menuOpen}
+              aria-controls="site-nav"
+              aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
+              onClick={onToggleMenu}
+            >
+              <Icon name={menuOpen ? 'close' : 'menu'} size={22} />
+            </button>
+          </div>
+        </div>
+      </header>
+    </>
   );
 }
 
@@ -246,53 +286,38 @@ function MobileContactBar() {
   );
 }
 
-// Нужна для одинаковой структуры секций. Делает заголовок с номером, подписью, H2 и необязательным описанием.
-function SectionIntro({ index, eyebrow, title, text }) {
+// Нужна под формой заявки: что произошло после нажатия и запасная ссылка, если вкладка не открылась.
+function FormStatus({ status }) {
+  if (!status) return null;
+
   return (
-    <div className="section-intro">
-      <span>{index}</span>
-      <div>
-        <p>{eyebrow}</p>
-        <h2>{title}</h2>
-        {text && <small>{text}</small>}
-      </div>
-    </div>
+    <p className="form-status">
+      {status === 'copied'
+        ? 'Текст заявки скопирован. Вставьте его в чат Telegram и отправьте.'
+        : 'Текст не скопировался. Напишите в чате Telegram модель, VIN и что нужно.'}{' '}
+      <a href={contact.telegram} target="_blank" rel="noopener noreferrer">
+        Чат не открылся? Открыть @MB_Kuzbass
+      </a>
+    </p>
   );
 }
 
-// Нужна для быстрых контактов. Создает ссылку на внешний канал связи в едином стиле кнопки.
-function ContactButton({ item }) {
+// Нужна для обеих форм первого экрана: отдельное согласие на обработку ПДн со ссылкой на документ.
+function ConsentCheckbox({ id, onOpenLegal }) {
   return (
-    <a
-      className={getButtonClass(item.variant)}
-      href={item.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={() => trackGoal(`contact_${item.key}`)}
-    >
-      {item.label}
-    </a>
+    <label className="privacy-check" htmlFor={id}>
+      <input id={id} type="checkbox" name="agree" required />
+      <span>
+        Даю отдельное согласие на обработку персональных данных на условиях документа{' '}
+        <LegalLink doc={legalDocs.find((doc) => doc.id === 'consent')} onOpen={onOpenLegal} />.
+      </span>
+    </label>
   );
 }
 
-// Keeps image areas useful when a cached page points at an asset that has
-// already been replaced during deployment.
-function createImageFallbackHandler(fallbackUrl) {
-  return (event) => {
-    const image = event.currentTarget;
-    if (image.dataset.fallbackApplied === 'true') return;
-
-    image.dataset.fallbackApplied = 'true';
-    image.classList.add('is-fallback');
-    image.src = fallbackUrl;
-  };
-}
-
-// Нужна карточкам с несколькими ракурсами. Показывает одно стабильное по размеру изображение
-// и позволяет вручную переключать фото, не запуская автоматическую карусель.
+// Нужна для карточек каталога. Показывает фото товара, а если файл недоступен — запасное изображение.
 function CatalogProductGallery({ product }) {
   const [activeImage, setActiveImage] = useState(0);
-  const handleImageError = createImageFallbackHandler(brandBackdropImage);
   const totalImages = product.images.length;
   const currentImage = product.images[activeImage];
 
@@ -356,149 +381,60 @@ function CatalogProductGallery({ product }) {
 // Нужна для SPA-страниц каталога. Показывает выбранную категорию, карточки позиций и CTA для запроса в Telegram.
 function CatalogCategoryPage({ category }) {
   return (
-    <section className="catalog-page" data-parallax-bg="3">
-      <a className="catalog-page__back" href="#catalog">
-        Вернуться к категориям
-      </a>
+    <section className="catalog-page">
+      <div className="container catalog-page__inner">
+        <a className="catalog-page__back" href="#catalog">
+          ← Вернуться к категориям
+        </a>
 
-      <div className="catalog-page__hero">
-        <span>Каталог запчастей</span>
-        <h1>{category.label}</h1>
-        <p>{category.description}</p>
-        <div className="catalog-page__actions">
-          <a
-            className="button button--primary"
-            href={createMessengerUrl(contact.telegram, `Интересует раздел «${category.label}».`)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackGoal('catalog_telegram')}
-          >
-            Уточнить наличие в Telegram
-          </a>
-          <a className="button button--ghost" href="#contacts">
-            Оставить заявку
-          </a>
-        </div>
-        <p className="catalog-page__notice">
-          Информационная витрина: наличие, состояние, комплектность и цена подтверждаются менеджером.
-          Заказ и оплата на сайте не оформляются.
-        </p>
-      </div>
-
-      <div className="catalog-products" aria-label={`Каталог: ${category.label}`}>
-        {category.items.map((item) => (
-          <article className="catalog-product-card" key={item.title}>
-            <CatalogProductGallery product={item} />
-            <div className="catalog-product-card__body">
-              <span>{item.meta}</span>
-              <h2>{item.title}</h2>
-              <p>{item.description}</p>
-              <a
-                className="button button--ghost"
-                href={createMessengerUrl(contact.telegram, `Интересует: ${item.title}. Есть в наличии?`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackGoal('catalog_item_telegram')}
-              >
-                Уточнить наличие
-              </a>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// Нужна как доказательный блок, а не как главный продающий CTA. Показывает реальные автомобили-доноры в ручной
-// карусели без автопрокрутки: пользователь сам выбирает слайд стрелками или кликом по видимому авто.
-function GarageCarousel() {
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-  const activeSlide = garageSlides[activeSlideIndex];
-
-  // Нужна для ручной навигации назад. Переключает активное авто по кругу.
-  function setPreviousSlide() {
-    setActiveSlideIndex((currentIndex) => (currentIndex - 1 + garageSlides.length) % garageSlides.length);
-  }
-
-  // Нужна для ручной навигации вперед. Переключает активное авто по кругу.
-  function setNextSlide() {
-    setActiveSlideIndex((currentIndex) => (currentIndex + 1) % garageSlides.length);
-  }
-
-  return (
-    <section className="section section--garage" id="vehicles" data-parallax-bg="4">
-      <SectionIntro
-        index="05"
-        eyebrow="Авто"
-        title="Автомобили доноры"
-      />
-
-      <div className="garage-carousel">
-        <div className="garage-stage" role="region" aria-label="Карусель автомобилей MB Kuzbass">
-          {garageSlides.map((slide, index) => {
-            const offset = getCarouselOffset(index, activeSlideIndex, garageSlides.length);
-            const absoluteOffset = Math.abs(offset);
-            const isVisible = absoluteOffset <= 2;
-            const scale = absoluteOffset === 0 ? 1 : absoluteOffset === 1 ? 0.74 : 0.58;
-            const opacity = isVisible ? (absoluteOffset === 0 ? 1 : 0.62) : 0;
-
-            return (
-              <button
-                className={`garage-slide${offset === 0 ? ' is-active' : ''}`}
-                style={{
-                  '--offset': offset,
-                  '--scale': scale,
-                  '--opacity': opacity,
-                  '--z-index': 10 - absoluteOffset,
-                }}
-                type="button"
-                onClick={() => setActiveSlideIndex(index)}
-                aria-label={`${slide.meta}. Показать ${slide.title}`}
-                aria-hidden={!isVisible}
-                tabIndex={isVisible ? 0 : -1}
-                key={slide.title}
-              >
-                <img src={slide.image} alt={slide.alt} loading={absoluteOffset === 0 ? 'eager' : 'lazy'} />
-                <span>{slide.meta}</span>
-              </button>
-            );
-          })}
+        <div className="catalog-page__hero">
+          <span>Каталог запчастей</span>
+          <h1>{category.label}</h1>
+          <p>{category.description}</p>
+          <div className="catalog-page__actions">
+            <a
+              className="button button--accent"
+              href={createMessengerUrl(contact.telegram, `Интересует раздел «${category.label}».`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackGoal('catalog_telegram')}
+            >
+              <Icon name="send" size={18} />
+              Уточнить наличие в Telegram
+            </a>
+            <a className="button button--outline" href={contact.phoneHref} onClick={() => trackGoal('catalog_phone')}>
+              Позвонить
+            </a>
+          </div>
+          <p className="catalog-page__notice">
+            Информационная витрина: наличие, состояние, комплектность и цена подтверждаются менеджером.
+            Заказ и оплата на сайте не оформляются.
+          </p>
         </div>
 
-        <div className="garage-panel">
-          <div>
-            <span>{activeSlide.meta}</span>
-            <h3>{activeSlide.title}</h3>
-            <p className="garage-description-slot" aria-hidden="true" />
-          </div>
-          <div className="garage-controls">
-            <button type="button" onClick={setPreviousSlide} aria-label="Предыдущее авто">
-              ‹
-            </button>
-            <button type="button" onClick={setNextSlide} aria-label="Следующее авто">
-              ›
-            </button>
-          </div>
+        <div className="catalog-products" aria-label={`Каталог: ${category.label}`}>
+          {category.items.map((item) => (
+            <article className="catalog-product-card" key={item.title}>
+              <CatalogProductGallery product={item} />
+              <div className="catalog-product-card__body">
+                <span>{item.meta}</span>
+                <h2>{item.title}</h2>
+                <p>{item.description}</p>
+                <a
+                  className="button button--dark"
+                  href={createMessengerUrl(contact.telegram, `Интересует: ${item.title}. Есть в наличии?`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackGoal('catalog_item_telegram')}
+                >
+                  Узнать цену и наличие
+                </a>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
-  );
-}
-
-// Нужна для отзывов. Показывает одну карточку с автором, рейтингом, текстом и ссылкой на источник.
-function ReviewCard({ review }) {
-  return (
-    <article className="review-card">
-      <div className="review-card__top">
-        <strong>{review.author}</strong>
-        <span>{review.rating}</span>
-      </div>
-      <p>{review.text}</p>
-      <a href={review.link} target="_blank" rel="noopener noreferrer">
-        {review.source}, {review.date}
-      </a>
-    </article>
   );
 }
 
@@ -671,147 +607,87 @@ function CookieBanner({ preferences, initialSettings = false, onSave, onClose, o
   );
 }
 
-// Нужна для нижней части сайта. Показывает служебную информацию и ссылки на юридические документы.
+// Нужна для нижней части сайта: бренд и реквизиты, ссылки на разделы и юридические документы.
 function Footer({ onOpenLegal, onOpenPrivacySettings }) {
-  const footerNavigation = [
-    { href: '#about', label: 'О компании' },
-    { href: '#directions', label: 'Направления' },
-    { href: '#catalog', label: 'Каталог' },
-    { href: '#vehicles', label: 'Авто' },
-    { href: '#reviews', label: 'Отзывы' },
-    { href: '#contacts', label: 'Контакты' },
-  ];
-
   return (
     <footer className="footer">
-      <div className="footer__main">
-        <div className="footer__brand">
-          <a className="footer-brand" href="#top">
-            <span className="footer-brand__mark">
-              <img src={brandAvatar} alt="Логотип MB Kuzbass" />
-            </span>
-            <span>
-              <strong>{site.name}</strong>
-              <small>{site.city}</small>
-            </span>
-          </a>
-          <p>
-            Оригинальные запчасти Mercedes-Benz и BMW с японских доноров, автомобили с аукционов и
-            поставки для авторазборов по России.
-          </p>
-          <div className="footer__actions">
-            <a
-              className="button button--primary"
-              href={createMessengerUrl(contact.telegram)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackGoal('footer_telegram')}
-            >
-              Telegram
+      <div className="container footer__inner">
+        <div className="footer__columns">
+          <div className="footer__brand">
+            <a className="brand brand--footer" href="#top">
+              <img className="brand__logo" src={brandAvatar} alt="Логотип MB Kuzbass" width="44" height="44" />
+              <span className="brand__text">
+                <strong>{site.name}</strong>
+              </span>
             </a>
-            <a className="button button--dark-outline" href="#request" onClick={() => trackGoal('footer_request')}>
-              Оставить заявку
-            </a>
+            <p>
+              Контрактные запчасти Mercedes-Benz и BMW с японских доноров, автомобили с аукционов Японии и
+              поставки для авторазборов. {site.city}.
+            </p>
+            <p className="footer__requisites">
+              {owner.name} · ИНН {owner.inn} · ОГРНИП {owner.ogrnip}
+            </p>
           </div>
+
+          <nav className="footer__nav" aria-label="Разделы сайта">
+            <h3>Разделы</h3>
+            {landingPages.map((page) => (
+              <a href={page.href} key={page.href}>
+                {page.label}
+              </a>
+            ))}
+          </nav>
+
+          <nav className="footer__nav" aria-label="Документы сайта">
+            <h3>Документы</h3>
+            {legalDocs.map((doc) => (
+              <LegalLink doc={doc} onOpen={onOpenLegal} key={doc.id} />
+            ))}
+            <button type="button" onClick={onOpenPrivacySettings}>
+              Настройки cookie
+            </button>
+          </nav>
         </div>
 
-        <div className="footer__column">
-          <h3>Контакты</h3>
-          <a href={contact.phoneHref} onClick={() => trackGoal('footer_phone')}>{contact.phone}</a>
-          <a
-            href={createMessengerUrl(contact.telegram)}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackGoal('footer_contact_telegram')}
-          >
-            Telegram @MB_Kuzbass
-          </a>
-          <a
-            href={contact.telegramGroup}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackGoal('footer_telegram_group')}
-          >
-            Группа в Telegram
-          </a>
-          <p>{contact.address}</p>
-          <p>{contact.workTime}</p>
-        </div>
-
-        <nav className="footer__column" aria-label="Навигация по сайту">
-          <h3>Разделы</h3>
-          {footerNavigation.map((item) => (
-            <a href={item.href} key={item.href}>
-              {item.label}
-            </a>
-          ))}
-        </nav>
-
-        <nav className="footer__column footer-links" aria-label="Документы сайта">
-          <h3>Документы</h3>
-          {legalDocs.map((doc) => (
-            <LegalLink doc={doc} onOpen={onOpenLegal} key={doc.id} />
-          ))}
-          <button type="button" onClick={onOpenPrivacySettings}>
-            Настройки cookie
-          </button>
-        </nav>
-      </div>
-
-      <div className="footer__bottom">
-        <span>© 2026 {site.name}</span>
-        <span>{owner.name}</span>
-        <p>
-          Информационная витрина. Заказы и платежи на сайте не принимаются. Обновлено: {site.updatedAt}.
+        <p className="footer__bottom">
+          © 2026 {site.name}. Информационная витрина: заказы и платежи на сайте не принимаются, наличие,
+          состояние и цена подтверждаются при обращении. Обновлено: {site.updatedAt}.
+        </p>
+        <p className="footer__note">
+          Сайт не является официальным дилером или представительством Mercedes-Benz и BMW. Товарные знаки
+          принадлежат их правообладателям и используются для описания совместимости товаров.
+          {commerce.acceptsPaymentsOnSite ? '' : ' Онлайн-оплата на сайте не подключена.'}
         </p>
       </div>
-      <p className="footer__trademark-note">
-        Сайт не является официальным дилером или представительством Mercedes-Benz и BMW. Товарные
-        знаки принадлежат их правообладателям и используются для описания совместимости товаров.
-        {commerce.acceptsPaymentsOnSite ? '' : ' Онлайн-оплата на сайте не подключена.'}
-      </p>
     </footer>
   );
 }
 
-// Нужна как корневой компонент. Собирает SEO-состояние, SPA-каталог, отзывы, параллакс, форму заявки,
+// Нужна как корневой компонент. Собирает SEO-состояние, SPA-каталог, отзывы, формы заявки,
 // footer-документы и cookie-плашку в одну страницу.
 function App() {
-  const [formStatus, setFormStatus] = useState('');
+  const [formStatus, setFormStatus] = useState({ parts: '', car: '' });
+  const [heroMode, setHeroMode] = useState('parts');
+  const [vehicleQuery, setVehicleQuery] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
   const [activeLegalId, setActiveLegalId] = useState(null);
   const [privacyPreferences, setPrivacyPreferences] = useState(() => readPrivacyPreferences());
   const [privacyPanelOpen, setPrivacyPanelOpen] = useState(() => !readPrivacyPreferences());
   const [currentReviewsMeta, setCurrentReviewsMeta] = useState(() => ({ ...reviewsMeta, isLive: false }));
   const onlineReviewsConfigured = useMemo(() => isOnlineReviewsConfigured(reviewsProvider), []);
   const [reviewsSyncStatus, setReviewsSyncStatus] = useState(onlineReviewsConfigured ? 'loading' : 'static');
-  const [activeParallaxIndex, setActiveParallaxIndex] = useState(null);
   const [catalogSlug, setCatalogSlug] = useState(() =>
     typeof window === 'undefined' ? null : getCatalogSlugFromHash(window.location.hash),
   );
-  const heroCoverBackgroundImage = useMemo(() => resolveAssetUrl(brandBackdropImage), []);
-  const resolvedParallaxBackgrounds = useMemo(
-    () => parallaxBackgrounds.map((image) => resolveAssetUrl(image)),
-    [],
-  );
-  const pageShellStyle = useMemo(
-    () => ({
-      '--hero-cover-image': `url("${heroCoverBackgroundImage}")`,
-    }),
-    [heroCoverBackgroundImage],
-  );
-  const primaryMessengers = messengers.filter((item) => !['twoGis', 'telegramGroup'].includes(item.key));
-  const currentStats = useMemo(
-    () => createStatsWithReviews(stats, currentReviewsMeta),
-    [currentReviewsMeta],
-  );
-  const reviewsIntroText = useMemo(() => createReviewsIntroText(currentReviewsMeta), [currentReviewsMeta]);
-  const reviewSourceLinks = useMemo(() => getReviewSourceLinks(currentReviewsMeta), [currentReviewsMeta]);
+  const partInputRef = useRef(null);
+  const ratingDetails = [currentReviewsMeta.ratingCount, currentReviewsMeta.reviewCount].filter(Boolean).join(', ');
   const reviewsStatusText =
     reviewsSyncStatus === 'loading'
       ? 'обновляем 2ГИС'
       : currentReviewsMeta.isLive
         ? currentReviewsMeta.updatedLabel
         : '';
+  const flampReview = reviews.find((review) => review.source === 'Фламп');
   const activeLegalDoc = useMemo(
     () => legalDocs.find((doc) => doc.id === activeLegalId),
     [activeLegalId],
@@ -868,11 +744,13 @@ function App() {
     };
   }, [activeCatalogCategory, activeLegalDoc, privacyPreferences?.analytics]);
 
-  // Закрывает модальное окно документов по Escape, чтобы юридические страницы не блокировали просмотр сайта.
+  // Закрывает документ и меню по Escape, чтобы они не мешали просмотру сайта.
   useEffect(() => {
-    // Нужна для клавиатурного закрытия модалки. При Escape сбрасывает выбранный документ.
+    // Нужна для клавиатурного закрытия. При Escape сбрасывает выбранный документ и закрывает меню.
     function handleEscape(event) {
-      if (event.key === 'Escape') closeLegalDocument();
+      if (event.key !== 'Escape') return;
+      closeLegalDocument();
+      setMenuOpen(false);
     }
 
     document.addEventListener('keydown', handleEscape);
@@ -966,70 +844,6 @@ function App() {
     schedulePageAnchorScroll(window.location.hash);
   }, [activeCatalogCategory]);
 
-  // Переключает фоновые параллакс-изображения по ближайшей секции и обновляет CSS-смещение при прокрутке.
-  useEffect(() => {
-    if (!resolvedParallaxBackgrounds.length) return undefined;
-
-    let isQueued = false;
-
-    // Нужна для параллакса. Выбирает активный фон по секции около середины экрана и двигает фон по scrollY.
-    function updateParallaxBackground() {
-      isQueued = false;
-      const scrollShift = Math.max(-220, Math.round((window.scrollY || 0) * -0.035));
-      document.documentElement.style.setProperty('--parallax-y', `${scrollShift}px`);
-
-      const sections = Array.from(document.querySelectorAll('[data-parallax-bg]'));
-      const focusLine = window.innerHeight * 0.46;
-      let activeSection = sections[0];
-      let closestDistance = Number.POSITIVE_INFINITY;
-
-      sections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        const isInFocus = rect.top <= focusLine && rect.bottom >= focusLine;
-        const distance = isInFocus ? 0 : Math.abs(rect.top - focusLine);
-
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          activeSection = section;
-        }
-      });
-
-      const parallaxValue = activeSection?.dataset.parallaxBg;
-      const nextIndex =
-        parallaxValue === 'none' ? null : Number(parallaxValue || 0) % resolvedParallaxBackgrounds.length;
-      setActiveParallaxIndex((currentIndex) => (currentIndex === nextIndex ? currentIndex : nextIndex));
-    }
-
-    // Нужна для производительности. Ставит обновление параллакса в requestAnimationFrame вместо частых пересчетов.
-    function queueUpdate() {
-      if (isQueued) return;
-      isQueued = true;
-      window.requestAnimationFrame(updateParallaxBackground);
-    }
-
-    const delayedUpdates = [80, 260, 700].map((delay) => window.setTimeout(queueUpdate, delay));
-    const pageShell = document.querySelector('.page-shell');
-    const resizeObserver =
-      pageShell && typeof ResizeObserver !== 'undefined'
-        ? new ResizeObserver(queueUpdate)
-        : null;
-
-    resizeObserver?.observe(pageShell);
-    queueUpdate();
-    window.addEventListener('scroll', queueUpdate, { passive: true });
-    window.addEventListener('resize', queueUpdate);
-    window.addEventListener('hashchange', queueUpdate);
-
-    return () => {
-      window.removeEventListener('scroll', queueUpdate);
-      window.removeEventListener('resize', queueUpdate);
-      window.removeEventListener('hashchange', queueUpdate);
-      delayedUpdates.forEach((timeoutId) => window.clearTimeout(timeoutId));
-      resizeObserver?.disconnect();
-      document.documentElement.style.removeProperty('--parallax-y');
-    };
-  }, [catalogSlug, resolvedParallaxBackgrounds.length]);
-
   // Пытается получить актуальные публичные показатели отзывов из 2ГИС, если задан API-ключ или proxy.
   useEffect(() => {
     if (!onlineReviewsConfigured) return undefined;
@@ -1058,16 +872,32 @@ function App() {
     };
   }, [onlineReviewsConfigured]);
 
-  // Нужна для формы заявки. Копирует текст и открывает личный чат Telegram в том же нажатии: если открыть окно
-  // после await, Safari на iPhone может заблокировать новую вкладку. Данные формы в ссылку не попадают.
-  function handleRequestSubmit(event) {
+  // Нужна для форм первого экрана. Копирует текст и открывает личный чат Telegram в том же нажатии: если открыть
+  // окно после await, Safari на iPhone может заблокировать новую вкладку. Данные формы в ссылку не попадают.
+  function handleLeadSubmit(event, kind) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const copying = copyRequestText(createRequestText(formData));
+    const copying = copyRequestText(createRequestText(kind, formData));
 
     window.open(contact.telegram, '_blank', 'noopener,noreferrer');
     trackGoal('request_submit');
-    copying.then((copied) => setFormStatus(copied ? 'copied' : 'not-copied'));
+    trackGoal(`request_submit_${kind}`);
+    copying.then((copied) => {
+      setFormStatus((current) => ({ ...current, [kind]: copied ? 'copied' : 'not-copied' }));
+    });
+  }
+
+  // Нужна для кнопок «Частые доноры». Подставляет модель в форму подбора запчасти и переводит к полю детали.
+  function handleDonorPick(model) {
+    setVehicleQuery(model.query);
+    setHeroMode('parts');
+    trackGoal('donor_model_pick');
+    window.requestAnimationFrame(() => {
+      const input = partInputRef.current;
+      if (!input) return;
+      input.scrollIntoView({ block: 'center' });
+      input.focus({ preventScroll: true });
+    });
   }
 
   // Нужна для карточек каталога на главной. Открывает SPA-категорию и сбрасывает старую позицию прокрутки.
@@ -1095,326 +925,434 @@ function App() {
 
   return (
     <>
-      <Header />
+      <Header
+        menuOpen={menuOpen}
+        onToggleMenu={() => setMenuOpen((open) => !open)}
+        onCloseMenu={() => setMenuOpen(false)}
+      />
 
-      <main id="top" className="page-shell" style={pageShellStyle}>
-        <div className="site-parallax" aria-hidden="true">
-          {resolvedParallaxBackgrounds.map((image, index) => (
-            <span
-              className={`site-parallax__layer site-parallax__layer--${index}${activeParallaxIndex === index ? ' is-active' : ''}`}
-              style={{ backgroundImage: `url("${image}")` }}
-              key={image}
-            />
-          ))}
-        </div>
-
+      <main id="top" className="page">
         {activeCatalogCategory ? (
           <CatalogCategoryPage category={activeCatalogCategory} />
         ) : (
           <>
-        <section className="hero" data-parallax-bg="none">
-          <div className="hero__content">
-            <p className="eyebrow">Контрактные запчасти / авто с аукционов / поставки для разборов</p>
-            <h1>Контрактные запчасти Mercedes-Benz и BMW в Барнауле</h1>
-            <p className="hero__lead">
-              Продаем контрактные оригинальные б/у запчасти с японских доноров для Mercedes-Benz и BMW.
-              Занимаемся выбором, покупкой и доставкой в любую точку России автомобилей с японских
-              аукционов, а также поставками для авторазборов — от одного машинокомплекта до целого
-              контейнера.
-            </p>
-
-            <div className="hero__actions">
-              {primaryMessengers.map((item) => (
-                <ContactButton item={item} key={item.key} />
-              ))}
-              <a className="button button--ghost" href="#request" onClick={() => trackGoal('hero_request')}>
-                Оставить заявку
-              </a>
-            </div>
-            <p className="hero__notice">
-              Сайт показывает направления работы и примеры ассортимента. Наличие и условия покупки
-              подтверждаются при обращении.
-            </p>
-          </div>
-
-          <div
-            className="hero__visual"
-            aria-label="MB Kuzbass — оригинальные запчасти с японских доноров"
-          >
-            <div className="hero-cover__content">
-              <span>{site.name}</span>
-              <h2>Mercedes-Benz / BMW / Аукционы Японии</h2>
-              <p>Оригинальные запчасти, автомобили с аукционов и поставки для авторазборов.</p>
-            </div>
-          </div>
-
-          <div className="stats">
-            {currentStats.map((item) => (
-              <div className="stats__item" key={item.key || item.value}>
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="section" id="about" data-parallax-bg="1">
-          <SectionIntro
-            index="01"
-            eyebrow="О компании"
-            title="Продаем оригинальные запчасти с японских доноров и привозим автомобили с аукционов."
-            text="MB Kuzbass работает с владельцами Mercedes-Benz и BMW, частными клиентами, сервисами и авторазборами по всей России."
-          />
-
-          <div className="about-grid">
-            <article className="about-card">
-              <h3>Что делаем</h3>
-              <p>
-                Продаем оригинальные запчасти с японских доноров, занимаемся автомобилями с японских
-                аукционов и поставками машинокомплектов для авторазборов.
-              </p>
-            </article>
-            <article className="about-card">
-              <h3>Как работаем</h3>
-              <p>
-                Уточняем задачу, модель, VIN или нужный объем поставки, показываем состояние товара,
-                согласовываем покупку, доставку и передачу в транспортную компанию.
-              </p>
-            </article>
-            <article className="about-card">
-              <h3>Кому подходит</h3>
-              <p>
-                Владельцам Mercedes-Benz и BMW, автосервисам, мастерам, покупателям автомобилей с
-                японских аукционов и авторазборам, которым нужны регулярные поставки.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section className="section section--dark" id="directions" data-parallax-bg="2">
-          <SectionIntro
-            index="02"
-            eyebrow="Направления"
-            title="Основные задачи, с которыми можно обратиться."
-          />
-
-          <div className="direction-grid">
-            {directions.map((item, index) => (
-              <article className="direction-card" key={item.title}>
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <h3>{item.href ? <a href={item.href}>{item.title}</a> : item.title}</h3>
-                <p>{item.text}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="section" id="catalog" data-parallax-bg="3">
-          <SectionIntro
-            index="03"
-            eyebrow="Каталог"
-            title="Частые категории запчастей."
-            text="Если нужной позиции нет на складе, ее можно проверить под заказ."
-          />
-
-          <div className="catalog">
-            {catalog.map((item) => (
-              <a href={item.href} onClick={(event) => handleCatalogOpen(event, item.slug)} key={item.label}>
-                <span className="catalog__copy">
-                  <strong>{item.label}</strong>
-                  <small>{item.caption}</small>
-                </span>
-              </a>
-            ))}
-          </div>
-
-          <nav className="landing-links" aria-labelledby="landing-links-title">
-            <h3 id="landing-links-title">Подробнее о запчастях и услугах</h3>
-            <ul>
-              {landingPages.map((page) => (
-                <li key={page.href}>
-                  <a href={page.href}>{page.label}</a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </section>
-
-        <section className="section" data-parallax-bg="4">
-          <SectionIntro
-            index="04"
-            eyebrow="Преимущества"
-            title="Что получает клиент перед покупкой."
-          />
-
-          <div className="benefits">
-            {benefits.map((item) => (
-              <article className="benefit-card" key={item.title}>
-                <h3>{item.title}</h3>
-                <p>{item.text}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <GarageCarousel />
-
-        <section className="section section--reviews" id="reviews" data-parallax-bg="2">
-          <SectionIntro
-            index="06"
-            eyebrow="Отзывы"
-            title="Рейтинг и впечатления клиентов."
-            text={reviewsIntroText}
-          />
-
-          <div className="review-summary">
-            <strong>{currentReviewsMeta.rating}</strong>
-            <span>
-              {currentReviewsMeta.ratingCount}
-              {reviewsStatusText && <small>{reviewsStatusText}</small>}
-            </span>
-            <div className="review-summary__links">
-              {reviewSourceLinks.map((source) => (
-                <a href={source.url} target="_blank" rel="noopener noreferrer" key={source.name}>
-                  {source.name}: {source.label}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          <div className="reviews">
-            {reviews.map((review, index) => (
-              <ReviewCard review={review} key={`${review.author}-${review.date}-${review.source}-${index}`} />
-            ))}
-          </div>
-        </section>
-
-        <section className="section section--contacts" id="contacts" data-parallax-bg="none">
-          <SectionIntro
-            index="07"
-            eyebrow="Контакты"
-            title="Пришлите VIN, фото детали, ссылку на авто или объем поставки."
-            text="Так проще быстро понять задачу, наличие, сроки и стоимость доставки."
-          />
-
-          <div className="contacts-layout">
-            <div className="contact-card" id="request">
-              <div className="contact-card__head">
-                <span>Заявка</span>
-                <h3>Быстрая заявка в Telegram</h3>
-                <p>Заполните основные данные, текст заявки скопируется и откроется основной канал связи.</p>
-              </div>
-              <form className="ym-hide-content" onSubmit={handleRequestSubmit}>
-                <div className="form-row">
-                  <label>
-                    Имя
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Как к вам обращаться"
-                      autoComplete="name"
-                      maxLength="80"
-                      className="ym-disable-keys"
-                    />
-                  </label>
-                  <label>
-                    Контакт
-                    <input
-                      type="text"
-                      name="contact"
-                      placeholder="Телефон, Telegram или VK"
-                      autoComplete="tel"
-                      maxLength="120"
-                      className="ym-disable-keys"
-                    />
-                  </label>
+            <section className="hero" aria-labelledby="hero-title">
+              <div className="container hero__inner">
+                <div className="route" aria-label="Маршрут: Япония, Барнаул, вся Россия">
+                  <span className="route__point route__point--start">Япония</span>
+                  <span className="route__line" aria-hidden="true" />
+                  <span className="route__point">Барнаул</span>
+                  <span className="route__line" aria-hidden="true" />
+                  <span className="route__point">вся Россия</span>
                 </div>
-                <label>
-                  Что нужно найти
-                  <textarea
-                    name="message"
-                    rows="5"
-                    placeholder={requestPlaceholderText}
-                    maxLength="1500"
-                    className="ym-disable-keys"
-                  />
-                </label>
-                <label className="privacy-check">
-                  <input type="checkbox" name="agree" required />
-                  <span>
-                    Даю отдельное согласие на обработку персональных данных на условиях документа{' '}
-                    <LegalLink doc={legalDocs.find((doc) => doc.id === 'consent')} onOpen={setActiveLegalId} />.
-                  </span>
-                </label>
-                <p className="form-local-note">
-                  Перед отправкой ознакомьтесь с документом{' '}
+
+                <div className="hero__head">
+                  <h1 id="hero-title">Mercedes-Benz и BMW из Японии — по запчастям и целиком</h1>
+                  <p className="hero__lead">
+                    Контрактные запчасти с японских доноров и автомобили с аукционов Японии под заказ. Склад
+                    в Барнауле, отправка по всей России.
+                  </p>
+                </div>
+
+                <div className="hero-switch" role="group" aria-label="Что вы ищете">
+                  <button type="button" aria-pressed={heroMode === 'parts'} onClick={() => setHeroMode('parts')}>
+                    Нужна запчасть
+                  </button>
+                  <button type="button" aria-pressed={heroMode === 'car'} onClick={() => setHeroMode('car')}>
+                    Авто из Японии
+                  </button>
+                </div>
+
+                <div className="doors" id="request">
+                  <article className={`door${heroMode === 'parts' ? ' is-active' : ''}`} aria-labelledby="door-parts-title">
+                    <div className="door__media">
+                      <picture>
+                        <source media="(max-width: 820px)" srcSet={EMPTY_IMAGE} />
+                        <img src={heroImages.parts} alt={heroImages.partsAlt} width="1280" height="960" />
+                      </picture>
+                      <span className="tag">Запчасти</span>
+                    </div>
+                    <form className="door__form ym-hide-content" onSubmit={(event) => handleLeadSubmit(event, 'parts')}>
+                      <h2 id="door-parts-title">Нужна запчасть</h2>
+                      <p>
+                        Двигатели, АКПП, оптика, кузов, подвеска с японских доноров. Проверим по VIN и пришлём
+                        фото до оплаты.
+                      </p>
+                      <div className="door__fields">
+                        <label htmlFor="lead-vehicle">
+                          VIN или марка, модель, год
+                          <input
+                            id="lead-vehicle"
+                            name="vehicle"
+                            type="text"
+                            placeholder="Например: W211 E300, 2007"
+                            maxLength="120"
+                            className="ym-disable-keys"
+                            value={vehicleQuery}
+                            onChange={(event) => setVehicleQuery(event.target.value)}
+                          />
+                        </label>
+                        <label htmlFor="lead-part">
+                          Какая деталь нужна
+                          <input
+                            id="lead-part"
+                            name="part"
+                            type="text"
+                            placeholder="Например: АКПП или левая фара"
+                            maxLength="300"
+                            className="ym-disable-keys"
+                            ref={partInputRef}
+                          />
+                        </label>
+                      </div>
+                      <ConsentCheckbox id="lead-parts-agree" onOpenLegal={setActiveLegalId} />
+                      <button className="button button--accent button--wide" type="submit">
+                        <Icon name="send" />
+                        Подобрать запчасть
+                      </button>
+                      <FormStatus status={formStatus.parts} />
+                    </form>
+                  </article>
+
+                  <article className={`door${heroMode === 'car' ? ' is-active' : ''}`} aria-labelledby="door-car-title">
+                    <div className="door__media">
+                      <picture>
+                        <source media="(max-width: 820px)" srcSet={EMPTY_IMAGE} />
+                        <img src={heroImages.cars} alt={heroImages.carsAlt} width="960" height="1280" />
+                      </picture>
+                      <span className="tag tag--dark">Авто из Японии</span>
+                    </div>
+                    <form className="door__form ym-hide-content" onSubmit={(event) => handleLeadSubmit(event, 'car')}>
+                      <h2 id="door-car-title">Хочу авто из Японии</h2>
+                      <p>Подберём и купим автомобиль на японском аукционе, доставим в любую точку России.</p>
+                      <div className="door__fields">
+                        <label htmlFor="lead-car">
+                          Марка, модель, годы выпуска
+                          <input
+                            id="lead-car"
+                            name="car"
+                            type="text"
+                            placeholder="Например: Mercedes-Benz E-Class, 2016–2019"
+                            maxLength="160"
+                            className="ym-disable-keys"
+                          />
+                        </label>
+                        <label htmlFor="lead-city">
+                          Куда доставить
+                          <input
+                            id="lead-city"
+                            name="city"
+                            type="text"
+                            placeholder="Например: Новосибирск"
+                            maxLength="80"
+                            className="ym-disable-keys"
+                          />
+                        </label>
+                      </div>
+                      <ConsentCheckbox id="lead-car-agree" onOpenLegal={setActiveLegalId} />
+                      <button className="button button--dark button--wide" type="submit">
+                        <Icon name="send" />
+                        Подобрать автомобиль
+                      </button>
+                      <FormStatus status={formStatus.car} />
+                    </form>
+                  </article>
+                </div>
+
+                <p className="hero__note">
+                  Данные не отправляются на сервер сайта: форма копирует текст заявки, а отправляете его вы сами
+                  в Telegram. Перед отправкой ознакомьтесь с документом{' '}
                   <LegalLink doc={legalDocs.find((doc) => doc.id === 'privacy')} onOpen={setActiveLegalId} />.
                   Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется.
                 </p>
-                <div className="form-actions">
-                  <button className="button button--primary" type="submit">
-                    Открыть Telegram
-                  </button>
-                  <a className="button button--ghost" href={contact.phoneHref} onClick={() => trackGoal('request_phone')}>
-                    Позвонить
-                  </a>
-                </div>
-                {formStatus && (
-                  <p className="form-status">
-                    {formStatus === 'copied'
-                      ? 'Текст заявки скопирован. Вставьте его в чат Telegram и отправьте.'
-                      : 'Текст не скопировался. Напишите в чате Telegram VIN, контакт и задачу.'}{' '}
-                    <a href={contact.telegram} target="_blank" rel="noopener noreferrer">
-                      Чат не открылся? Открыть @MB_Kuzbass
-                    </a>
-                  </p>
-                )}
-                <p className="form-local-note">
-                  Данные не отправляются на сервер сайта. Форма только копирует текст в вашем браузере;
-                  сообщение отправляете вы сами в Telegram.
-                </p>
-              </form>
-            </div>
 
-            <aside className="contact-info">
-              <div className="contact-info__head">
-                <span>Связь</span>
-                <h3>Контакты MB Kuzbass</h3>
-                <p>Основной канал для заявок — Telegram. Для маршрута и отзывов можно открыть карточку 2ГИС.</p>
+                <ul className="facts" aria-label="Коротко о компании">
+                  <li>
+                    <Icon name="star" size={26} />
+                    <span>
+                      <strong>{currentReviewsMeta.rating} в 2ГИС</strong>
+                      <small>{ratingDetails}</small>
+                    </span>
+                  </li>
+                  <li>
+                    <Icon name="layers" size={26} />
+                    <span>
+                      <strong>{dromListingsLabel}</strong>
+                      <small>профиль MBKuzbass на Drom</small>
+                    </span>
+                  </li>
+                  <li>
+                    <Icon name="pin" size={26} />
+                    <span>
+                      <strong>Склад в Барнауле</strong>
+                      <small>самовывоз по адресу</small>
+                    </span>
+                  </li>
+                  <li>
+                    <Icon name="truck" size={26} />
+                    <span>
+                      <strong>Отправка по России</strong>
+                      <small>транспортными компаниями</small>
+                    </span>
+                  </li>
+                </ul>
               </div>
-              <div className="contact-info__item">
-                <span>Основная связь</span>
-                <a
-                  href={createMessengerUrl(contact.telegram)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackGoal('contacts_telegram')}
-                >
-                  Telegram @MB_Kuzbass
+            </section>
+
+            <section className="donors" aria-label="Частые доноры">
+              <div className="container donors__inner">
+                <strong>Частые доноры:</strong>
+                {donorModels.map((model) => (
+                  <button className="chip" type="button" onClick={() => handleDonorPick(model)} key={model.query}>
+                    {model.brand} <span className="mono">{model.code}</span>
+                  </button>
+                ))}
+                <a className="chip chip--plain" href="#request" onClick={() => setHeroMode('parts')}>
+                  Другая модель →
                 </a>
               </div>
-              <div className="contact-info__item">
-                <span>Телефон</span>
-                <a href={contact.phoneHref} onClick={() => trackGoal('contacts_phone')}>{contact.phone}</a>
+            </section>
+
+            <section className="section section--paper" id="catalog" aria-labelledby="catalog-title">
+              <div className="container">
+                <div className="section-head">
+                  <h2 id="catalog-title">Каталог запчастей</h2>
+                  <p>Наличие меняется каждый день. Пришлите VIN — скажем, что есть сейчас и сколько стоит.</p>
+                </div>
+                <div className="category-grid">
+                  {catalog.map((item) => (
+                    <a
+                      className="category-card"
+                      href={item.href}
+                      onClick={(event) => handleCatalogOpen(event, item.slug)}
+                      key={item.slug}
+                    >
+                      <img
+                        src={catalogCards[item.slug]?.cover || item.items[0]?.images[0]}
+                        alt={`${item.label} — фото товара MB Kuzbass`}
+                        width="800"
+                        height="600"
+                        loading="lazy"
+                        decoding="async"
+                        onError={handleImageError}
+                      />
+                      <span className="category-card__body">
+                        <strong>{item.label}</strong>
+                        {catalogCards[item.slug] && <span className="mono">{catalogCards[item.slug].codes}</span>}
+                        <span className="category-card__more">Смотреть раздел →</span>
+                      </span>
+                    </a>
+                  ))}
+                </div>
               </div>
-              <div className="contact-info__item">
-                <span>Адрес</span>
-                <p>
-                  {contact.address}. Схема проезда и вход — в карточке 2ГИС.
-                </p>
+            </section>
+
+            <section className="section section--white" aria-labelledby="featured-title">
+              <div className="container">
+                <div className="section-head">
+                  <h2 id="featured-title">Примеры с нашего склада</h2>
+                  <p>На фото — реальные детали с биркой MB KUZBASS. Наличие и цену подтверждаем перед продажей.</p>
+                </div>
+                <div className="product-grid">
+                  {featuredProducts.map((product) => (
+                    <article className="product-card" key={product.title}>
+                      <a
+                        className="product-card__media"
+                        href={`#catalog/${product.categorySlug}`}
+                        onClick={(event) => handleCatalogOpen(event, product.categorySlug)}
+                      >
+                        <img
+                          src={product.images[0]}
+                          alt={product.alt}
+                          width="800"
+                          height="600"
+                          loading="lazy"
+                          decoding="async"
+                          onError={handleImageError}
+                        />
+                        <span className="tag">Фото товара</span>
+                      </a>
+                      <div className="product-card__body">
+                        <span className="product-card__meta">{product.meta}</span>
+                        <h3>{product.title}</h3>
+                        <p className="product-card__price">Цена по запросу</p>
+                        <a
+                          className="button button--dark"
+                          href={createMessengerUrl(contact.telegram, `Интересует: ${product.title}. Есть в наличии?`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => trackGoal('featured_telegram')}
+                        >
+                          Узнать цену и наличие
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
               </div>
-              <div className="contact-info__item">
-                <span>Режим</span>
-                <p>{contact.workTime}</p>
+            </section>
+
+            <section className="section section--paper" aria-labelledby="steps-title">
+              <div className="container">
+                <h2 id="steps-title" className="section-title">
+                  Как купить деталь
+                </h2>
+                <ol className="steps">
+                  {purchaseSteps.map((step, index) => (
+                    <li className="step" key={step.title}>
+                      <span className="step__number">{index + 1}</span>
+                      <h3>{step.title}</h3>
+                      <p>{step.text}</p>
+                    </li>
+                  ))}
+                </ol>
               </div>
-              <div className="contact-info__buttons">
-                {messengers.map((item) => (
-                  <ContactButton item={item} key={item.key} />
-                ))}
+            </section>
+
+            <section className="section section--dark" id="directions" aria-labelledby="directions-title">
+              <div className="container">
+                <h2 id="directions-title" className="section-title">
+                  Авто из Японии и поставки для разборов
+                </h2>
+                <div className="direction-grid">
+                  {directions.map((item) => (
+                    <article className="direction-card" key={item.title}>
+                      <img src={item.image} alt={item.alt} width="1280" height="960" loading="lazy" decoding="async" />
+                      <div className="direction-card__body">
+                        <h3>{item.title}</h3>
+                        <p>{item.text}</p>
+                        <a href={item.href}>{item.linkText} →</a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
               </div>
-            </aside>
-          </div>
-        </section>
+            </section>
+
+            <section className="section section--paper" id="reviews" aria-labelledby="trust-title">
+              <div className="container">
+                <h2 id="trust-title" className="section-title">
+                  Почему нам доверяют
+                </h2>
+                <div className="trust-grid">
+                  {trustPoints.map((point) => (
+                    <div className="trust-card" key={point.title}>
+                      <Icon name={point.icon} size={30} />
+                      <h3>{point.title}</h3>
+                      <p>{point.text}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="review-grid">
+                  <div className="review-card review-card--rating">
+                    <div className="review-card__score">
+                      <strong>{currentReviewsMeta.rating}</strong>
+                      <Icon name="star" size={34} />
+                    </div>
+                    <p>
+                      Рейтинг в 2ГИС · {ratingDetails}
+                      {reviewsStatusText && <small> · {reviewsStatusText}</small>}
+                    </p>
+                    <a href={contact.twoGis} target="_blank" rel="noopener noreferrer" onClick={() => trackGoal('reviews_2gis')}>
+                      Читать отзывы в 2ГИС →
+                    </a>
+                  </div>
+                  {flampReview && (
+                    <div className="review-card">
+                      <span className="review-card__source">
+                        {flampReview.source} · {flampReview.rating} · {flampReview.date}
+                      </span>
+                      <p>{flampReview.text}</p>
+                      <a href={flampReview.link} target="_blank" rel="noopener noreferrer">
+                        Открыть отзыв на Флампе →
+                      </a>
+                    </div>
+                  )}
+                  <div className="review-card">
+                    <span className="review-card__source">Drom · профиль продавца MBKuzbass</span>
+                    <p>{dromListingsLabel}, история продавца и отзывы покупателей.</p>
+                    <a href={contact.drom} target="_blank" rel="noopener noreferrer" onClick={() => trackGoal('reviews_drom')}>
+                      Открыть профиль на Drom →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="section section--dark" id="contacts" aria-labelledby="contacts-title">
+              <div className="container contacts">
+                <div className="contacts__main">
+                  <h2 id="contacts-title" className="section-title">
+                    Приезжайте или напишите
+                  </h2>
+                  <dl className="contacts__facts">
+                    <div>
+                      <dt>Адрес склада</dt>
+                      <dd>{contact.address}</dd>
+                    </div>
+                    <div>
+                      <dt>Режим работы</dt>
+                      <dd>{contact.workTime}</dd>
+                    </div>
+                  </dl>
+                  <a className="contacts__phone" href={contact.phoneHref} onClick={() => trackGoal('contacts_phone')}>
+                    {contact.phone}
+                  </a>
+                  <div className="contacts__buttons">
+                    <a
+                      className="button button--accent"
+                      href={createMessengerUrl(contact.telegram)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackGoal('contacts_telegram')}
+                    >
+                      <Icon name="send" size={18} />
+                      Telegram @MB_Kuzbass
+                    </a>
+                    <a
+                      className="button button--outline-light"
+                      href={createMessengerUrl(contact.whatsapp)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackGoal('contacts_whatsapp')}
+                    >
+                      WhatsApp
+                    </a>
+                    <a
+                      className="button button--outline-light"
+                      href={contact.twoGis}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackGoal('contacts_route')}
+                    >
+                      Маршрут в 2ГИС
+                    </a>
+                  </div>
+                </div>
+
+                <div className="contacts__more">
+                  <h3>Где мы ещё есть</h3>
+                  <a href={contact.telegramGroup} target="_blank" rel="noopener noreferrer" onClick={() => trackGoal('contacts_telegram_group')}>
+                    <span>Группа в Telegram</span>
+                    <span>t.me/mbc_kuzbass</span>
+                  </a>
+                  <a href={contact.vk} target="_blank" rel="noopener noreferrer" onClick={() => trackGoal('contacts_vk')}>
+                    <span>ВКонтакте</span>
+                    <span>vk.ru/mb_kuzbass</span>
+                  </a>
+                  <a href={contact.drom} target="_blank" rel="noopener noreferrer" onClick={() => trackGoal('contacts_drom')}>
+                    <span>Drom</span>
+                    <span>{dromListingsLabel}</span>
+                  </a>
+                  <a href={contact.twoGis} target="_blank" rel="noopener noreferrer" onClick={() => trackGoal('contacts_2gis')}>
+                    <span>2ГИС</span>
+                    <span>
+                      {currentReviewsMeta.rating} · {currentReviewsMeta.ratingCount}
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </section>
           </>
         )}
       </main>

@@ -1,4 +1,5 @@
 import { getAssetUrl } from './assetUrl.js';
+import { catalog } from './catalog.js';
 
 // Нужна для всех локальных изображений. Возвращает путь с учетом base URL, чтобы сайт работал и локально, и на хостинге.
 const asset = (fileName) => {
@@ -15,11 +16,11 @@ export const site = {
   legalName: 'ИП Пушкарев Кирилл Александрович',
   city: 'Барнаул',
   url: 'https://mb-kuzbass.ru/',
-  title: 'Контрактные запчасти Mercedes-Benz и BMW в Барнауле — MB Kuzbass',
+  title: 'Запчасти Mercedes-Benz, BMW и авто из Японии в Барнауле — MB Kuzbass',
   description:
-    'Контрактные оригинальные б/у запчасти Mercedes-Benz и BMW с японских автомобилей-доноров в Барнауле. Подбор по VIN, фото состояния и доставка по России.',
+    'Контрактные запчасти Mercedes-Benz и BMW с японских доноров и автомобили с аукционов Японии под заказ. Подбор по VIN, фото до оплаты, отправка по России.',
   keywords:
-    'контрактные запчасти Барнаул, контрактные запчасти Mercedes-Benz, запчасти Мерседес Барнаул, контрактные запчасти BMW, запчасти БМВ Барнаул, оригинальные б/у запчасти, японские доноры, авторазбор Mercedes BMW',
+    'запчасти Mercedes-Benz Барнаул, запчасти BMW Барнаул, контрактные запчасти, авто из Японии Барнаул, автомобили с аукционов Японии, японские доноры, авторазбор Mercedes BMW',
   updatedAt: '03.10.2026',
 };
 
@@ -49,13 +50,14 @@ export const owner = {
 // Основные визуальные ассеты сайта. Для замены фото достаточно положить файл в assets и поменять имя здесь.
 export const brandAvatar = asset('telegram-avatar.jpg');
 export const brandBackdropImage = asset('mb-kuzbass-label-background.webp');
-export const parallaxBackgrounds = [
-  asset('client-car-01.webp'),
-  asset('parallax-gclass-row.webp'),
-  asset('parallax-bmw-e39-side.webp'),
-  asset('client-car-06.webp'),
-  asset('parallax-car-02.webp'),
-];
+
+// Фото первого экрана: площадка с деталями и автомобиль на улице в Японии.
+export const heroImages = {
+  parts: asset('client-car-02.jpg'),
+  partsAlt: 'Площадка MB Kuzbass: Mercedes-Benz C-Class и стеллажи с деталями',
+  cars: asset('client-car-07.jpg'),
+  carsAlt: 'Автомобили Mercedes-Benz на улице в Японии',
+};
 
 // Карточки двигателей для примеров ассортимента. Новые моторы добавляются отдельными объектами в этот массив.
 export const engineCards = [
@@ -181,13 +183,6 @@ export const messengers = [
   },
 ];
 
-// Верхние числовые показатели. Рейтинг и количество оценок могут обновляться онлайн из 2ГИС.
-export const stats = [
-  { key: 'parts', value: 'OEM', label: 'оригинальные запчасти с японских доноров' },
-  { key: 'rating', value: '4.8', label: 'рейтинг компании в карточке 2ГИС' },
-  { key: 'reviews', value: '28', label: 'оценок в 2ГИС на момент обновления сайта' },
-];
-
 // Статичные посадочные страницы из public/<адрес>/index.html. Обычные ссылки на них с главной помогают
 // посетителям и поисковым роботам найти разделы; verify-build.mjs сверяет список с sitemap.xml.
 export const landingPages = [
@@ -200,49 +195,106 @@ export const landingPages = [
   { href: '/postavki-dlya-avtorazborov-barnaul/', label: 'Поставки для авторазборов' },
 ];
 
-// Основные направления работы компании. Отрисовываются во втором блоке лендинга.
+// Направления кроме запчастей: блок с фото и ссылками на посадочные страницы.
 export const directions = [
   {
-    title: 'Контрактные запчасти с японских доноров',
-    text: 'Продаем оригинальные б/у детали для Mercedes-Benz и BMW: кузов, оптику, агрегаты, салон, подвеску и редкие позиции.',
-    href: '/kontraktnye-zapchasti-barnaul/',
-  },
-  {
-    title: 'Автомобили с японских аукционов',
-    text: 'Занимаемся выбором, покупкой и доставкой автомобилей с японских аукционов в любую точку России.',
+    title: 'Автомобили с аукционов Японии',
+    text: 'Подбираем, покупаем и доставляем автомобиль с японского аукциона в любую точку России.',
     href: '/avtomobili-iz-yaponii-barnaul/',
+    linkText: 'Подробнее об авто из Японии',
+    image: asset('client-car-03.jpg'),
+    alt: 'Несколько автомобилей Mercedes-Benz G-Class на площадке',
   },
   {
     title: 'Поставки для авторазборов',
-    text: 'Сотрудничаем с авторазборами и предлагаем поставки от одного машинокомплекта до целого контейнера.',
+    text: 'Машинокомплекты для разборов: от одного автомобиля до целого контейнера.',
     href: '/postavki-dlya-avtorazborov-barnaul/',
-  },
-  {
-    title: 'Проверка и отправка',
-    text: 'Показываем состояние товара, согласовываем состав поставки и передаем груз транспортной компании.',
+    linkText: 'Подробнее о поставках для разборов',
+    image: asset('client-car-12.jpg'),
+    alt: 'Автомобиль-донор Mercedes-Benz в процессе разбора',
   },
 ];
 
-// Каталог хранится отдельно от контента лендинга: товары и изображения загружаются из catalog-products.json.
-export { catalog } from './catalog.js';
+// Частые доноры по объявлениям MB Kuzbass на Drom (02.10.2026). Кнопка подставляет модель в форму подбора.
+export const donorModels = [
+  { brand: 'Mercedes', code: 'W203', query: 'Mercedes-Benz W203' },
+  { brand: 'Mercedes', code: 'W204', query: 'Mercedes-Benz W204' },
+  { brand: 'Mercedes', code: 'W207', query: 'Mercedes-Benz W207' },
+  { brand: 'Mercedes', code: 'W211', query: 'Mercedes-Benz W211' },
+  { brand: 'BMW', code: 'E39', query: 'BMW E39' },
+  { brand: 'BMW X3', code: 'E83', query: 'BMW X3 E83' },
+];
 
-// Преимущества перед покупкой. Это отдельный блок, чтобы важные аргументы не прятались в слайдере.
-export const benefits = [
+// Число объявлений в профиле MBKuzbass на Drom (8 123 на 02.10.2026). Обновлять вручную, округляя вниз.
+export const dromListingsLabel = '8 000+ объявлений';
+
+// Каталог хранится отдельно от контента лендинга: товары и изображения загружаются из catalog-products.json.
+export { catalog };
+
+// Обложки и примеры для карточек категорий на главной. Фото — реальные товары со склада.
+export const catalogCards = {
+  engines: { cover: asset('catalog/engines/bmw-x3-n52.webp'), codes: 'M54 · N52 · N62 · M111 · M271 · M272 · M112' },
+  transmission: { cover: asset('catalog/transmission/mercedes-e-class-2009-akpp.webp'), codes: 'ZF 6HP26 · Mercedes-Benz E-Class · BMW 525i' },
+  chassis: { cover: asset('catalog/chassis/mercedes-w211-wheel-set.webp'), codes: 'Диски W211, W204, E39 · тормоза W221, W211 · рычаги' },
+  body: { cover: asset('catalog/body/mercedes-w204-body-01.webp'), codes: 'Кузов W204 · пороги W203' },
+  optics: { cover: asset('catalog/optics/bmw-550i-2006-headlights.webp'), codes: 'Фары W212, BMW 550i · ксенон C-Class · фонари W207, W211' },
+  interior: { cover: asset('catalog/interior/bmw-550i-seat-set.webp'), codes: 'Сиденья BMW 550i и другие элементы салона' },
+};
+
+// Примеры товаров на главной: реальные позиции каталога. Наличие и цену подтверждает менеджер.
+export const featuredProducts = [
+  ['engines', 'Двигатель BMW E39 M54'],
+  ['transmission', 'АКПП ZF 6HP26 BMW 550i'],
+  ['optics', 'Комплект передних фар Mercedes-Benz W212'],
+  ['engines', 'Двигатель Mercedes-Benz E211 M272'],
+]
+  .map(([slug, title]) => {
+    const product = catalog.find((item) => item.slug === slug)?.items.find((item) => item.title === title);
+    return product && { ...product, categorySlug: slug };
+  })
+  .filter(Boolean);
+
+// Порядок покупки детали. Только то, что действительно делаем: VIN, фото и видео, отправка или самовывоз.
+export const purchaseSteps = [
   {
-    title: 'Проверка по VIN',
-    text: 'Сверяем совместимость перед оплатой, чтобы деталь подошла без лишних переделок.',
+    title: 'Пришлите VIN или фото',
+    text: 'VIN, модель и год или фото старой детали — в Telegram, WhatsApp или по телефону.',
   },
   {
+    title: 'Проверим совместимость',
+    text: 'Сверяем по VIN и маркировкам, чтобы деталь подошла без лишних переделок.',
+  },
+  {
+    title: 'Покажем товар',
+    text: 'Фото и видео конкретной детали: состояние, маркировки, крепления, заметные дефекты.',
+  },
+  {
+    title: 'Отправим или выдадим',
+    text: 'Транспортной компанией по России или самовывоз со склада в Барнауле.',
+  },
+];
+
+// Блок «Почему нам доверяют»: проверяемые факты, без обещаний сроков и гарантий, которых нет в договоре.
+export const trustPoints = [
+  {
+    icon: 'tag',
+    title: 'Свои фото каждой детали',
+    text: 'Фотографируем товар у себя, с жёлтой биркой MB KUZBASS, — а не берём картинки из интернета.',
+  },
+  {
+    icon: 'search',
+    title: 'Проверка по VIN до оплаты',
+    text: 'Сверяем совместимость, чтобы деталь подошла без лишних переделок.',
+  },
+  {
+    icon: 'camera',
     title: 'Фото и видео до сделки',
-    text: 'Показываем состояние узла, маркировки, крепления и заметные внешние дефекты.',
+    text: 'Показываем состояние узла, маркировки, крепления и заметные дефекты.',
   },
   {
-    title: 'Прямой контакт',
-    text: 'Основные вопросы решаются в Telegram: можно отправить VIN, фото детали или список позиций.',
-  },
-  {
-    title: 'Доставка по России',
-    text: 'Передаем товар транспортным компаниям и помогаем выбрать удобный способ отправки.',
+    icon: 'shield',
+    title: 'Работаем официально',
+    text: `${owner.name} · ИНН ${owner.inn} · ОГРНИП ${owner.ogrnip}`,
   },
 ];
 
@@ -307,58 +359,6 @@ export const gallery = [
     title: 'Авто-донор в разборе',
     image: asset('client-car-12.jpg'),
     alt: 'Автомобиль-донор Mercedes-Benz в процессе разбора',
-  },
-];
-
-// Ручной слайдер автомобилей-доноров. Не ставим автопрокрутку, чтобы блок не отвлекал от заявки.
-export const garageSlides = [
-  {
-    title: 'Mercedes-Benz C-Class',
-    meta: 'Склад и доноры',
-    image: asset('client-car-02.jpg'),
-    alt: 'Серебристый Mercedes-Benz C-Class на площадке MB Kuzbass',
-    description: 'Автомобиль-донор для подбора оригинальных деталей Mercedes-Benz.',
-    tags: ['Japan donor', 'OEM parts', 'MB'],
-  },
-  {
-    title: 'Mercedes-Benz на площадке',
-    meta: 'Партия авто',
-    image: asset('client-car-03.jpg'),
-    alt: 'Несколько автомобилей Mercedes-Benz на площадке MB Kuzbass',
-    description: 'Примеры автомобилей и машинокомплектов для поставок и разбора.',
-    tags: ['Stock', 'Donors', 'Russia'],
-  },
-  {
-    title: 'Седан под поставку',
-    meta: 'Под заказ',
-    image: asset('client-car-05.jpg'),
-    alt: 'Серебристый седан Mercedes-Benz под поставку',
-    description: 'Авто можно согласовать по фото, состоянию и комплектации перед отправкой.',
-    tags: ['Auction', 'Delivery', 'Check'],
-  },
-  {
-    title: 'Купе Mercedes-Benz',
-    meta: 'Кузов и салон',
-    image: asset('client-car-06.jpg'),
-    alt: 'Купе Mercedes-Benz на площадке MB Kuzbass',
-    description: 'Подходит для подбора кузовных деталей, салона, дисков и подвески.',
-    tags: ['Coupe', 'Body', 'Parts'],
-  },
-  {
-    title: 'Авто в боксе',
-    meta: 'Перед отправкой',
-    image: asset('client-car-08.jpg'),
-    alt: 'Белый Mercedes-Benz в чистом боксе перед отправкой',
-    description: 'Фото из бокса помогают показать фактическое состояние автомобиля клиенту.',
-    tags: ['Box', 'Photo', 'Ready'],
-  },
-  {
-    title: 'Коммерческий Mercedes-Benz',
-    meta: 'Авто из Японии',
-    image: asset('client-car-11.jpg'),
-    alt: 'Mercedes-Benz Viano в помещении перед поставкой',
-    description: 'Пример автомобиля, который можно подобрать, купить и доставить из Японии.',
-    tags: ['Japan', 'Auto', 'Order'],
   },
 ];
 
