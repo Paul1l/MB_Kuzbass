@@ -125,6 +125,22 @@ if (!indexHtml.includes(`<link rel="canonical" href="${productionOrigin}/"`)) {
   throw new Error('index.html does not contain the expected production canonical URL.');
 }
 
+// Каждый адрес из sitemap.xml должен быть в сборке: посадочные страницы лежат в public/<адрес>/index.html
+// и иначе тихо пропадут при следующей выкладке.
+for (const [, location] of sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+  const { pathname } = new URL(location);
+  const pageFile = pathname === '/' ? 'index.html' : `${pathname.replace(/^\/+|\/+$/g, '')}/index.html`;
+  await access(path.join(distDirectory, pageFile)).catch(() => {
+    throw new Error(`sitemap.xml ссылается на страницу, которой нет в сборке: ${pathname}`);
+  });
+}
+
+// Редирект на https://mb-kuzbass.ru должен приходить из исходников, а не из ручной правки корня репозитория.
+const htaccess = await readFile(path.join(distDirectory, '.htaccess'), 'utf8');
+if (!htaccess.includes('RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI} [R=301,L,NE]')) {
+  throw new Error('.htaccess в сборке не содержит редирект на https://mb-kuzbass.ru.');
+}
+
 async function collectFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const nestedFiles = await Promise.all(

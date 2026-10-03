@@ -100,6 +100,7 @@ Production-файлы размещаются на Спринтхосте, а DNS
 - `src/data.js`: объект `commerce` с флагами онлайн-заказа, оплаты и личных кабинетов. Перед подключением новой функции меняются флаги, документы и соответствующий интерфейс.
 - `index.html`: SEO title, description, canonical, Open Graph, Twitter Card, manifest и базовый JSON-LD.
 - `public/robots.txt` и `public/sitemap.xml`: адрес сайта для поисковиков.
+- `public/<адрес>/index.html` и `public/seo-pages.css`: статичные посадочные страницы, которые отдаются без JavaScript (сейчас 7). Новую посадочную нужно добавить в `public/sitemap.xml`; `npm run build` проверяет, что каждый адрес из sitemap есть в сборке.
 - `public/404.html`, `public/500.html`, `public/503.html`, `public/offline.html`: страницы ошибок.
 - `public/assets`: фотографии из 2ГИС и новые изображения.
 - `public/assets/telegram-avatar.jpg`: аватарка из Telegram-канала `t.me/mbc_kuzbass`, используется в шапке и SEO `logo`.
