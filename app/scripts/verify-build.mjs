@@ -165,6 +165,21 @@ for (const landingPath of landingPaths) {
   }
 }
 
+// Фото блока «Уже заказали в Японии» лежат в public/assets/japan. Ссылка на отсутствующий файл дала бы
+// пустую карточку на главной и на посадочной об авто из Японии.
+const japanLandingHtml = await readFile(path.join(distDirectory, 'avtomobili-iz-yaponii-barnaul', 'index.html'), 'utf8');
+const japanPhotos = new Set(
+  [
+    ...dataSource.matchAll(/asset\('(japan\/[\w-]+\.webp)'\)/g),
+    ...japanLandingHtml.matchAll(/\/assets\/(japan\/[\w-]+\.webp)/g),
+  ].map((match) => match[1]),
+);
+for (const photo of japanPhotos) {
+  await access(path.join(distDirectory, 'assets', photo)).catch(() => {
+    throw new Error(`Нет фото для блока «Уже заказали в Японии»: assets/${photo}`);
+  });
+}
+
 // Редирект на https://mb-kuzbass.ru должен приходить из исходников, а не из ручной правки корня репозитория.
 const htaccess = await readFile(path.join(distDirectory, '.htaccess'), 'utf8');
 if (!htaccess.includes('RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI} [R=301,L,NE]')) {
