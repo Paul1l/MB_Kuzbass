@@ -2,6 +2,8 @@ app/node_modules/
 app/dist/
 app/.npm-cache/
 app/*.log
+app/test-results/
+app/playwright-report/
 screenshots/
 
 # Приватные рабочие копии документов Роскомнадзора не должны попадать в публичный репозиторий.

@@ -31,6 +31,15 @@ export default [
     },
   },
   {
+    // Тесты выполняются в Node, а колбэки page.evaluate — в браузере, поэтому нужны оба набора глобальных имён.
+    files: ['tests/**/*.js', 'playwright.config.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      globals: { ...globals.node, ...globals.browser },
+      parserOptions: { sourceType: 'module' },
+    },
+  },
+  {
     files: ['public/analytics-config.js', 'public/reviews-config.js'],
     languageOptions: {
       ecmaVersion: 'latest',
