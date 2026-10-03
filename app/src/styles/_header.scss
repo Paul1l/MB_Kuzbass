@@ -1,0 +1,138 @@
+@use 'tokens' as *;
+
+// Верхняя строка и шапка
+.topbar {
+  color: $soft-dark;
+  background: $ink;
+  font-size: 14px;
+}
+
+.topbar__inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 24px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: $white;
+  border-bottom: 1px solid $line;
+}
+
+.site-header__inner {
+  position: relative;
+  display: flex;
+  min-height: $header-height;
+  align-items: center;
+  gap: 24px;
+}
+
+.brand {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  color: $ink;
+  text-decoration: none;
+}
+
+.brand__logo {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  background: $white;
+  border: 2px solid $ink;
+  border-radius: 10px;
+}
+
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+
+  strong {
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  small {
+    color: $muted;
+    font-size: 13px;
+  }
+}
+
+.nav {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 4px 22px;
+  font-size: 15px;
+  font-weight: 600;
+
+  a {
+    padding: 10px 0;
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+
+    &:hover {
+      border-bottom-color: $accent;
+    }
+  }
+}
+
+.site-header__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.header-phone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: $ink;
+  text-decoration: none;
+
+  .icon {
+    display: none;
+  }
+}
+
+.header-phone__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+
+  strong {
+    font-size: 19px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  small {
+    color: $muted;
+    font-size: 13px;
+  }
+}
+
+.menu-toggle {
+  display: none;
+  width: 46px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: $ink;
+  background: $white;
+  border: 1.5px solid $input-line;
+  border-radius: 10px;
+  cursor: pointer;
+}

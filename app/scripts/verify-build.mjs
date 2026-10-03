@@ -5,7 +5,12 @@ const distDirectory = path.resolve('dist');
 const productionOrigin = 'https://mb-kuzbass.ru';
 const legacyOrigin = 'https://paul1l.github.io/MB_Kuzbass';
 const catalogManifest = JSON.parse(await readFile(path.resolve('catalog-products.json'), 'utf8'));
-const appSource = await readFile(path.resolve('src/App.jsx'), 'utf8');
+// Компоненты разложены по src/components, src/sections и src/lib, поэтому контрольные тексты ищутся во всех исходниках.
+const sourceDirectory = path.resolve('src');
+const sourceFiles = (await readdir(sourceDirectory, { recursive: true })).filter((fileName) => /\.jsx?$/.test(fileName));
+const appSource = (
+  await Promise.all(sourceFiles.map((fileName) => readFile(path.join(sourceDirectory, fileName), 'utf8')))
+).join('\n');
 const dataSource = await readFile(path.resolve('src/data.js'), 'utf8');
 const privacyConsentSource = await readFile(path.resolve('src/privacyConsent.js'), 'utf8');
 const requiredFiles = [
@@ -36,7 +41,7 @@ const requiredFiles = [
 
 // Защищает юридически значимые элементы интерфейса от случайного отката при следующих правках.
 for (const [sourceName, source, forbiddenText] of [
-  ['App.jsx', appSource, 'Согласен на обработку персональных данных по'],
+  ['src', appSource, 'Согласен на обработку персональных данных по'],
   ['data.js', dataSource, 'Yura Shishkin'],
 ]) {
   if (source.includes(forbiddenText)) {
@@ -45,9 +50,9 @@ for (const [sourceName, source, forbiddenText] of [
 }
 
 for (const [sourceName, source, requiredText] of [
-  ['App.jsx', appSource, 'Даю отдельное согласие на обработку персональных данных'],
-  ['App.jsx', appSource, 'Редакция согласия:'],
-  ['App.jsx', appSource, 'Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется'],
+  ['src', appSource, 'Даю отдельное согласие на обработку персональных данных'],
+  ['src', appSource, 'Редакция согласия:'],
+  ['src', appSource, 'Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется'],
   ['data.js', dataSource, 'Клиент на Флампе'],
   ['data.js', dataSource, "updatedAt: '03.10.2026'"],
   ['privacyConsent.js', privacyConsentSource, "PRIVACY_CONSENT_VERSION = '2026-08-03'"],
@@ -163,6 +168,21 @@ for (const landingPath of landingPaths) {
   if (!landingHtml.includes(`href="${leadTelegramUrl}`)) {
     throw new Error(`${landingPath}: кнопка Telegram не ведет в аккаунт для заявок ${leadTelegramUrl}.`);
   }
+}
+
+// Фото блока «Уже заказали в Японии» лежат в public/assets/japan. Ссылка на отсутствующий файл дала бы
+// пустую карточку на главной и на посадочной об авто из Японии.
+const japanLandingHtml = await readFile(path.join(distDirectory, 'avtomobili-iz-yaponii-barnaul', 'index.html'), 'utf8');
+const japanPhotos = new Set(
+  [
+    ...dataSource.matchAll(/asset\('(japan\/[\w-]+\.webp)'\)/g),
+    ...japanLandingHtml.matchAll(/\/assets\/(japan\/[\w-]+\.webp)/g),
+  ].map((match) => match[1]),
+);
+for (const photo of japanPhotos) {
+  await access(path.join(distDirectory, 'assets', photo)).catch(() => {
+    throw new Error(`Нет фото для блока «Уже заказали в Японии»: assets/${photo}`);
+  });
 }
 
 // Редирект на https://mb-kuzbass.ru должен приходить из исходников, а не из ручной правки корня репозитория.

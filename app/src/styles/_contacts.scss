@@ -1,0 +1,98 @@
+@use 'tokens' as *;
+
+// Контакты
+.contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px 48px;
+}
+
+.contacts__main {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 520px;
+  flex-direction: column;
+  gap: 22px;
+
+  .section-title {
+    margin-bottom: 0;
+  }
+}
+
+.contacts__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px 32px;
+  margin: 0;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  dt {
+    color: $muted-dark;
+    font-size: 14px;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+  }
+}
+
+.contacts__phone {
+  color: $accent;
+  font-size: clamp(30px, 3.4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.contacts__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.contacts__more {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 380px;
+  flex-direction: column;
+  padding: 26px;
+  background: $ink-2;
+  border: 1px solid $line-dark;
+  border-radius: 16px;
+
+  h3 {
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  a {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    color: $white;
+    border-bottom: 1px solid $line-dark;
+    text-decoration: none;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    span:last-child {
+      color: $muted-dark;
+      text-align: right;
+    }
+
+    &:hover span:first-child {
+      text-decoration: underline;
+    }
+  }
+}

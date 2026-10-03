@@ -1,0 +1,93 @@
+@use 'tokens' as *;
+
+// Подвал
+.footer {
+  color: $soft-dark;
+  background: $ink-3;
+  font-size: 15px;
+}
+
+.footer__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-top: 56px;
+  padding-bottom: 32px;
+}
+
+.footer__columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px 48px;
+}
+
+.footer__brand {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 320px;
+  flex-direction: column;
+  gap: 12px;
+
+  p {
+    max-width: 380px;
+    margin: 0;
+  }
+}
+
+.brand--footer {
+  color: $white;
+
+  .brand__logo {
+    width: 44px;
+    height: 44px;
+    border-color: $white;
+  }
+}
+
+.footer__requisites {
+  color: #8a8f96;
+  font-size: 13px;
+}
+
+.footer__nav {
+  display: flex;
+  flex: 1 1 240px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+
+  h3 {
+    margin-bottom: 4px;
+    color: $white;
+    font-size: 16px;
+  }
+
+  a,
+  button {
+    padding: 0;
+    color: $soft-dark;
+    background: none;
+    border: 0;
+    font-size: 15px;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      color: $white;
+      text-decoration: underline;
+    }
+  }
+}
+
+.footer__bottom,
+.footer__note {
+  margin: 0;
+  color: #8a8f96;
+  font-size: 13px;
+}
+
+.footer__bottom {
+  padding-top: 20px;
+  border-top: 1px solid #23272c;
+}
