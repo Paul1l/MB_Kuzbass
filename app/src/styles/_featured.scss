@@ -1,0 +1,68 @@
+@use 'tokens' as *;
+
+// Примеры товаров
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: $white;
+  border: 1px solid $line;
+  border-radius: 16px;
+}
+
+.product-card__media {
+  position: relative;
+  display: block;
+
+  img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    background: #e9e7e1;
+  }
+
+  .tag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 12px;
+  }
+}
+
+.product-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .button {
+    margin-top: auto;
+    min-height: 46px;
+    font-size: 15px;
+  }
+}
+
+.product-card__meta {
+  color: $muted;
+  font-size: 13px;
+}
+
+.product-card__price {
+  margin: 0 0 6px;
+  color: $muted;
+  font-size: 16px;
+  font-weight: 700;
+}

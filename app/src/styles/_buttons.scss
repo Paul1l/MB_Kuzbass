@@ -1,0 +1,71 @@
+@use 'sass:color';
+@use 'tokens' as *;
+
+// Кнопки
+.button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  color: $ink;
+  background: $white;
+  border: 1.5px solid $line;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $ink;
+  }
+}
+
+.button--accent,
+.button--primary {
+  color: $ink;
+  background: $accent;
+  border-color: $accent;
+  font-weight: 800;
+
+  &:hover {
+    background: color.adjust($accent, $lightness: -8%);
+    border-color: color.adjust($accent, $lightness: -8%);
+  }
+}
+
+.button--dark {
+  color: $white;
+  background: $ink;
+  border-color: $ink;
+
+  &:hover {
+    background: #2a2e33;
+    border-color: #2a2e33;
+  }
+}
+
+.button--outline {
+  background: transparent;
+  border-color: $ink;
+}
+
+.button--outline-light {
+  color: $white;
+  background: transparent;
+  border-color: rgba($white, 0.7);
+
+  &:hover {
+    border-color: $white;
+  }
+}
+
+.button--wide {
+  width: 100%;
+  min-height: 54px;
+  font-size: 17px;
+}

@@ -1,0 +1,99 @@
+@use 'tokens' as *;
+
+// Доверие и отзывы
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.trust-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+  background: $white;
+  border: 1px solid $line;
+  border-radius: 16px;
+
+  h3 {
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: $muted;
+    font-size: 15px;
+  }
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.review-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px;
+  background: $white;
+  border: 1px solid $line;
+  border-radius: 16px;
+
+  p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.5;
+  }
+
+  a {
+    margin-top: auto;
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.review-card__source {
+  color: $muted;
+  font-size: 14px;
+}
+
+.review-card--rating {
+  color: $white;
+  background: $ink;
+  border-color: $ink;
+
+  p {
+    color: $soft-dark;
+    font-size: 16px;
+  }
+
+  a {
+    color: $accent;
+  }
+}
+
+.review-card__score {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  strong {
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .icon {
+    color: $accent;
+    fill: $accent;
+  }
+}

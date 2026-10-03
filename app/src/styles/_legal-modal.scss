@@ -1,0 +1,102 @@
+@use 'tokens' as *;
+
+// Документы в модальном окне
+.legal-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.legal-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.58);
+  border: 0;
+  cursor: pointer;
+}
+
+.legal-modal__panel {
+  position: relative;
+  width: min(840px, 100%);
+  max-height: min(760px, calc(100vh - 48px));
+  overflow: auto;
+  background: $white;
+  border: 1px solid $line;
+  border-radius: 14px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+.legal-modal__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+  background: $white;
+  border-bottom: 1px solid $line;
+
+  p {
+    margin: 0 0 8px;
+    color: $muted;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 26px;
+    line-height: 1.15;
+  }
+}
+
+.legal-modal__close {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 10px 16px;
+  color: $ink;
+  background: $paper;
+  border: 1.5px solid $line;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $ink;
+  }
+}
+
+.legal-modal__lead {
+  margin: 0;
+  padding: 22px 24px 0;
+  color: #3c4147;
+  line-height: 1.6;
+}
+
+.legal-modal__body {
+  display: grid;
+  gap: 16px;
+  padding: 20px 24px 28px;
+
+  section {
+    padding: 18px;
+    background: $paper;
+    border: 1px solid $line;
+    border-radius: 10px;
+  }
+
+  h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+
+  p {
+    margin: 0;
+    color: #3c4147;
+    line-height: 1.6;
+  }
+}

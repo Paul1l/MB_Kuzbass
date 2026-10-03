@@ -1,0 +1,46 @@
+@use 'tokens' as *;
+
+// Секции
+.section {
+  padding-top: 88px;
+  padding-bottom: 88px;
+}
+
+.section--paper {
+  background: $paper;
+}
+
+.section--white {
+  background: $white;
+}
+
+.section--dark {
+  color: $white;
+  background: $ink;
+}
+
+.section-head {
+  display: flex;
+  max-width: 760px;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
+
+  p {
+    margin: 0;
+    color: $muted;
+    font-size: 18px;
+  }
+}
+
+.section-head h2,
+.section-title {
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+.section-title {
+  margin-bottom: 32px;
+}

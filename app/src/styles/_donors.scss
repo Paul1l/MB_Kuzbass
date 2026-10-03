@@ -1,0 +1,50 @@
+@use 'tokens' as *;
+
+// Частые доноры
+.donors {
+  background: $white;
+  border-bottom: 1px solid $line;
+}
+
+.donors__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+
+  > strong {
+    margin-right: 8px;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  color: $ink;
+  background: $paper;
+  border: 1.5px solid $line;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+
+  .mono {
+    font-size: 14px;
+  }
+
+  &:hover {
+    border-color: $ink;
+  }
+}
+
+.chip--plain {
+  background: transparent;
+  border-color: transparent;
+  font-weight: 700;
+}
