@@ -1,164 +1,221 @@
 @use 'tokens' as *;
 
-// Первый экран
+// Первый экран — мозаика: заголовок, форма заявки на всю высоту справа, фото с площадки, авто из Японии
+// и две плитки с цифрами (2ГИС и Drom).
 .hero {
-  color: $white;
-  background: $ink;
+  padding: 18px 0 56px;
 }
 
-.hero__inner {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  padding-top: 56px;
-  padding-bottom: 64px;
-}
-
-.route {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  color: $soft-dark;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.route__point {
-  padding: 5px 10px;
-  border: 1.5px solid #5a5f66;
-  border-radius: 6px;
-}
-
-.route__point--start {
-  color: $ink;
-  background: $accent;
-  border-color: $accent;
-}
-
-.route__line {
-  width: 48px;
-  height: 2px;
-  background: #5a5f66;
+.hero__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto 300px 196px;
+  grid-template-areas:
+    'head head head head head head head head form form form form'
+    'main main main main japan japan japan japan form form form form'
+    'main main main main rating rating drom drom form form form form';
+  gap: $gap;
 }
 
 .hero__head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px 48px;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+  grid-area: head;
+  padding: 28px 8px 26px 4px;
 
   h1 {
-    flex: 1 1 640px;
-    max-width: 900px;
-    font-size: clamp(36px, 4.8vw, 68px);
-    font-weight: 800;
-    line-height: 1.03;
+    max-width: 860px;
+    font-family: $font-display;
+    font-size: clamp(34px, 3.6vw, 54px);
+    font-weight: 600;
+    line-height: 1.08;
     letter-spacing: -0.025em;
   }
 }
 
 .hero__lead {
-  flex: 1 1 320px;
-  max-width: 440px;
+  max-width: 600px;
   margin: 0;
-  color: $soft-dark;
+  color: $muted;
   font-size: 18px;
   line-height: 1.55;
 }
 
-.hero-switch {
-  display: none;
-}
-
-.doors {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-}
-
-.door {
+// Маршрут «Япония → Барнаул → вся Россия».
+.route {
   display: flex;
-  min-width: 0;
-  flex-direction: column;
-  overflow: hidden;
-  color: $ink;
-  background: $white;
-  border-radius: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.door__media {
-  position: relative;
-  height: 230px;
-  background: $ink-2;
+.route__point {
+  padding: 7px 14px;
+  background: $white;
+  border: 1.5px solid $line;
+  border-radius: 999px;
+  line-height: 1.2;
+}
 
-  img {
+.route__point--start {
+  color: $white;
+  background: $ink;
+  border-color: $ink;
+}
+
+.route__line {
+  width: 36px;
+  height: 1.5px;
+  background: $muted;
+}
+
+.hero__main {
+  grid-area: main;
+
+  > img {
+    object-position: center 42%;
+  }
+}
+
+.hero__japan {
+  grid-area: japan;
+  display: block;
+  overflow: hidden;
+  border-radius: $radius;
+
+  > img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
+}
 
-  .tag {
-    position: absolute;
-    top: 14px;
-    left: 14px;
+.hero__stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 22px 24px;
+}
+
+.hero__stat--rating {
+  grid-area: rating;
+
+  .icon {
+    color: $tag;
   }
 }
 
-.door:nth-child(2) .door__media img {
-  object-position: center 62%;
+.hero__stat--drom {
+  grid-area: drom;
 }
 
-.door__form {
+.hero__stat-value {
   display: flex;
-  flex: 1 1 auto;
+  align-items: center;
+  gap: 8px;
+  font-family: $font-display;
+  font-size: clamp(28px, 2.3vw, 34px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.hero__stat-label {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.tile--dark .hero__stat-label {
+  color: $soft-dark;
+}
+
+// Плитка с формой заявки. Форма «Нужна запчасть» или «Авто из Японии» — по переключателю сверху.
+.hero__form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  grid-area: form;
+  padding: 22px;
+}
+
+.hero-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  background: $paper;
+  border-radius: 999px;
+
+  button {
+    min-height: 46px;
+    padding: 0 12px;
+    color: $muted;
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &[aria-pressed='true'] {
+      color: $white;
+      background: $ink;
+    }
+  }
+}
+
+.door {
+  display: none;
   flex-direction: column;
   gap: 14px;
-  padding: 22px 24px 24px;
+
+  &.is-active {
+    display: flex;
+  }
 
   h2 {
-    font-size: 26px;
-    font-weight: 800;
+    font-family: $font-display;
+    font-size: 23px;
+    font-weight: 600;
     line-height: 1.15;
+    letter-spacing: -0.015em;
   }
 
   > p {
-    margin: 0;
+    margin: -6px 0 0;
     color: $muted;
-    font-size: 16px;
+    font-size: 15px;
   }
-}
 
-.door__fields {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-
-  label {
+  label:not(.privacy-check) {
     display: flex;
-    flex: 1 1 220px;
     flex-direction: column;
     gap: 6px;
-    color: #3b4047;
+    color: #3a3d50;
     font-size: 13px;
     font-weight: 600;
   }
 
-  input {
+  input[type='text'] {
     width: 100%;
-    min-height: 50px;
-    padding: 0 14px;
+    min-height: 52px;
+    padding: 0 18px;
     color: $ink;
     background: $input-bg;
     border: 1.5px solid $input-line;
-    border-radius: 10px;
+    border-radius: 16px;
     font-size: 16px;
-    outline: none;
 
     &::placeholder {
-      color: #8a8f96;
+      color: #85889a;
     }
 
     &:focus {
@@ -167,8 +224,11 @@
   }
 }
 
-.door__form .button--wide {
-  margin-top: auto;
+.donors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: -4px;
 }
 
 .privacy-check {
@@ -195,7 +255,7 @@
 
 .form-status {
   margin: 0;
-  color: #2f6c4f;
+  color: #23704a;
   font-size: 14px;
   line-height: 1.5;
 
@@ -205,48 +265,182 @@
   }
 }
 
-.hero__note {
-  max-width: 920px;
-  margin: 0;
-  color: $muted-dark;
-  font-size: 13px;
-  line-height: 1.5;
+// Другие способы связи под формой: на компьютере заполняют свободное место плитки, на телефоне их заменяет
+// нижняя панель.
+.hero__alt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+  padding: 16px;
+  background: $paper;
+  border-radius: $radius-inner;
 
-  a {
-    color: $soft-dark;
+  > span {
+    font-size: 14px;
+    font-weight: 700;
   }
 }
 
-.facts {
+.hero__alt-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px 40px;
+  gap: 6px;
+
+  .pill {
+    min-height: 42px;
+    padding: 0 14px;
+    border-color: $white;
+  }
+}
+
+.hero__note {
   margin: 0;
-  padding: 0;
-  list-style: none;
+  padding-top: 14px;
+  color: $muted;
+  border-top: 1px solid $line;
+  font-size: 12px;
+  line-height: 1.5;
 
-  li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  a {
+    color: $ink;
+  }
+}
+
+@media (max-width: 1100px) {
+  .hero__alt {
+    display: none;
   }
 
-  .icon {
-    color: $accent;
+  .hero__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto;
+    grid-template-areas:
+      'head head'
+      'form form'
+      'main japan'
+      'rating drom';
   }
 
-  span {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.3;
+  .hero__head {
+    padding: 18px 4px 10px;
   }
 
-  strong {
-    font-size: 16px;
+  .hero__main,
+  .hero__japan {
+    height: 320px;
   }
 
-  small {
-    color: $muted-dark;
+  .hero__stat {
+    min-height: 150px;
+  }
+}
+
+// Планшет: форма слева, фото справа — первый экран не превращается в длинную ленту.
+@media (min-width: 821px) and (max-width: 1100px) {
+  .hero__grid {
+    grid-template-areas:
+      'head head'
+      'form main'
+      'form japan'
+      'rating drom';
+  }
+
+  .hero__main,
+  .hero__japan {
+    height: auto;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    padding: 8px 0 36px;
+  }
+
+  .hero__grid {
+    gap: 10px;
+  }
+
+  .hero__head {
+    gap: 16px;
+    padding-top: 10px;
+
+    h1 {
+      font-size: 27px;
+      line-height: 1.12;
+    }
+  }
+
+  .hero__lead {
+    font-size: 15px;
+  }
+
+  .route {
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .route__point {
+    padding: 5px 10px;
+  }
+
+  .route__line {
+    width: auto;
+    flex: 1 1 10px;
+  }
+
+  .hero__form {
+    padding: 16px;
+  }
+
+  .hero__main,
+  .hero__japan {
+    height: 210px;
+  }
+
+  .hero__japan .tile__caption {
+    padding: 48px 14px 14px;
+
+    strong {
+      font-size: 14px;
+    }
+
+    small {
+      font-size: 12px;
+    }
+  }
+
+  .hero__main .tile__chip {
+    top: 10px;
+    left: 10px;
+    font-size: 12px;
+  }
+
+  // На маленькой плитке остаётся только круг со стрелкой, подпись — для экранных дикторов.
+  .hero__main .notch__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .hero__main .notch__link {
+    padding-left: 0;
+  }
+
+  .hero__stat {
+    min-height: 120px;
+    padding: 16px;
+  }
+
+  .hero__stat-value {
+    font-size: 26px;
+  }
+
+  .hero__stat-label {
     font-size: 13px;
   }
 }

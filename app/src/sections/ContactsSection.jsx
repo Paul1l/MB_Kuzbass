@@ -1,13 +1,13 @@
 import { trackGoal } from '../analytics.js';
 import { Icon } from '../components/Icon.jsx';
-import { contact, createMessengerUrl, dromListingsLabel } from '../data.js';
+import { contact, createMessengerUrl, dromListingsLabel, heroImages } from '../data.js';
 
-// Нужна для блока контактов: адрес, режим, телефон, мессенджеры и площадки, где есть MB Kuzbass.
+// Нужна для блока контактов в виде мозаики: телефон и мессенджеры, фото площадки и площадки, где есть MB Kuzbass.
 export function ContactsSection({ reviewsMeta }) {
   return (
-    <section className="section section--dark" id="contacts" aria-labelledby="contacts-title">
+    <section className="section" id="contacts" aria-labelledby="contacts-title">
       <div className="container contacts">
-        <div className="contacts__main">
+        <div className="tile tile--dark contacts__main">
           <h2 id="contacts-title" className="section-title">
             Приезжайте или напишите
           </h2>
@@ -56,7 +56,12 @@ export function ContactsSection({ reviewsMeta }) {
           </div>
         </div>
 
-        <div className="contacts__more">
+        <figure className="tile tile--photo contacts__photo">
+          <img src={heroImages.yard} alt={heroImages.yardAlt} width="1280" height="960" loading="lazy" decoding="async" />
+          <figcaption className="tile__chip">{contact.address}</figcaption>
+        </figure>
+
+        <div className="tile contacts__more">
           <h3>Где мы ещё есть</h3>
           <a href={contact.telegramGroup} target="_blank" rel="noopener noreferrer" onClick={() => trackGoal('contacts_telegram_group')}>
             <span>Группа в Telegram</span>

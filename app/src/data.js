@@ -51,12 +51,13 @@ export const owner = {
 export const brandAvatar = asset('telegram-avatar.jpg');
 export const brandBackdropImage = asset('mb-kuzbass-label-background.webp');
 
-// Фото первого экрана: площадка с деталями и автомобиль на улице в Японии.
+// Фото первого экрана: машина с табличкой MB Kuzbass на площадке и двор склада для блока контактов.
 export const heroImages = {
-  parts: asset('client-car-02.jpg'),
-  partsAlt: 'Площадка MB Kuzbass: Mercedes-Benz C-Class и стеллажи с деталями',
-  cars: asset('client-car-07.jpg'),
-  carsAlt: 'Автомобили Mercedes-Benz на улице в Японии',
+  main: asset('client-car-01.jpg'),
+  mainSmall: asset('client-car-01-480.webp'),
+  mainAlt: 'Серебристый Mercedes-Benz C-класс с табличкой MB Kuzbass на площадке',
+  yard: asset('client-car-02.jpg'),
+  yardAlt: 'Площадка MB Kuzbass: Mercedes-Benz C-класс и стеллажи с деталями',
 };
 
 // Карточки двигателей для примеров ассортимента. Новые моторы добавляются отдельными объектами в этот массив.
@@ -274,7 +275,8 @@ export const donorModels = [
 ];
 
 // Число объявлений в профиле MBKuzbass на Drom (8 123 на 02.10.2026). Обновлять вручную, округляя вниз.
-export const dromListingsLabel = '8 000+ объявлений';
+export const dromListingsCount = '8\u00a0000+';
+export const dromListingsLabel = `${dromListingsCount} объявлений`;
 
 // Каталог хранится отдельно от контента лендинга: товары и изображения загружаются из catalog-products.json.
 export { catalog };

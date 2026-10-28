@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Шрифты заголовка и основного текста нужны на первом экране. Без предзагрузки браузер находит их только
-// после CSS, заголовок перерисовывается другим шрифтом и сдвигает формы (CLS).
-const preloadedFonts = /^assets\/onest-(cyrillic|latin)-(400|800)-normal-[\w-]+\.woff2$/;
+// Шрифты заголовка (Unbounded 600) и основного текста (Onest 400) нужны на первом экране. Без предзагрузки
+// браузер находит их только после CSS, заголовок перерисовывается другим шрифтом и сдвигает формы (CLS).
+const preloadedFonts = /^assets\/(onest-(cyrillic|latin)-400|unbounded-(cyrillic|latin)-600)-normal-[\w-]+\.woff2$/;
 
 function preloadCriticalFonts() {
   return {

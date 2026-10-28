@@ -1,17 +1,18 @@
-// Стили сайта собраны из частей в src/styles: цвета и размеры — в _tokens.scss, дальше блоки в порядке страницы.
-// Порядок подключения важен: адаптивные правила (_responsive.scss) идут последними и переопределяют базовые.
+// Стили сайта собраны из частей в src/styles: цвета, шрифты и размеры — в _tokens.scss, общие плитки и
+// «таблетки» — в _tiles.scss, дальше блоки в порядке страницы. У каждого блока свои правила для узких экранов.
+// Порядок подключения важен: _responsive.scss идёт последним и переопределяет общие правила.
 @use 'styles/fonts';
 @use 'styles/base';
 @use 'styles/buttons';
+@use 'styles/tiles';
 @use 'styles/header';
 @use 'styles/hero';
-@use 'styles/donors';
 @use 'styles/sections';
 @use 'styles/catalog';
 @use 'styles/featured';
-@use 'styles/japan-cars';
 @use 'styles/steps';
 @use 'styles/directions';
+@use 'styles/japan-cars';
 @use 'styles/trust';
 @use 'styles/contacts';
 @use 'styles/footer';

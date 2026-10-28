@@ -6,8 +6,9 @@ for (const path of LANDING_PATHS) {
     expect(response.status()).toBe(200);
     await expect(page.locator('h1')).toBeVisible();
 
-    // Стили seo-pages.css применились: шапка графитовая.
-    await expect(page.locator('.seo-header')).toHaveCSS('background-color', 'rgb(18, 20, 23)');
+    // Стили seo-pages.css применились: заголовок шрифтом Unbounded, меню в белой капсуле.
+    await expect(page.locator('h1')).toHaveCSS('font-family', /Unbounded/);
+    await expect(page.locator('.seo-header nav')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 
     const hrefs = await page.locator('a[href]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute('href')),

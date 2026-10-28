@@ -14,7 +14,6 @@ import { readPrivacyPreferences, savePrivacyPreferences } from './privacyConsent
 import { CatalogSection } from './sections/CatalogSection.jsx';
 import { ContactsSection } from './sections/ContactsSection.jsx';
 import { DirectionsSection } from './sections/DirectionsSection.jsx';
-import { DonorsSection } from './sections/DonorsSection.jsx';
 import { FeaturedSection } from './sections/FeaturedSection.jsx';
 import { HeroSection } from './sections/HeroSection.jsx';
 import { JapanCarsSection } from './sections/JapanCarsSection.jsx';
@@ -302,10 +301,10 @@ function App() {
               formStatus={formStatus}
               onLeadSubmit={handleLeadSubmit}
               onOpenLegal={setActiveLegalId}
+              onDonorPick={handleDonorPick}
               reviewsMeta={currentReviewsMeta}
               ratingDetails={ratingDetails}
             />
-            <DonorsSection onDonorPick={handleDonorPick} onOtherModel={() => setHeroMode('parts')} />
             <CatalogSection onCatalogOpen={handleCatalogOpen} />
             <FeaturedSection onCatalogOpen={handleCatalogOpen} />
             <StepsSection />

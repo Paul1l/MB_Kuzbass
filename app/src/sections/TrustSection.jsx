@@ -4,39 +4,54 @@ import { contact, dromListingsLabel, reviews, trustPoints } from '../data.js';
 
 const flampReview = reviews.find((review) => review.source === 'Фламп');
 
-// Нужна для блока «Почему нам доверяют»: причины доверять, рейтинг 2ГИС, отзыв с Флампа и профиль на Drom.
+// Нужна для блока «Почему нам доверяют» в виде мозаики: крупный рейтинг 2ГИС, причины доверять, отзыв с Флампа
+// и профиль на Drom.
 export function TrustSection({ reviewsMeta, ratingDetails, reviewsStatusText }) {
   return (
-    <section className="section section--paper" id="reviews" aria-labelledby="trust-title">
+    <section className="section" id="reviews" aria-labelledby="trust-title">
       <div className="container">
-        <h2 id="trust-title" className="section-title">
-          Почему нам доверяют
-        </h2>
-        <div className="trust-grid">
-          {trustPoints.map((point) => (
-            <div className="trust-card" key={point.title}>
-              <Icon name={point.icon} size={30} />
-              <h3>{point.title}</h3>
-              <p>{point.text}</p>
-            </div>
-          ))}
+        <div className="section-head">
+          <h2 id="trust-title" className="section-title">
+            Почему нам доверяют
+          </h2>
+          <p>Только то, что можно проверить: рейтинг, отзывы, профиль продавца и реквизиты.</p>
         </div>
-        <div className="review-grid">
-          <div className="review-card review-card--rating">
-            <div className="review-card__score">
+        <div className="trust-grid">
+          <div className="tile tile--accent trust-rating">
+            <div className="trust-rating__score">
               <strong>{reviewsMeta.rating}</strong>
-              <Icon name="star" size={34} />
+              <Icon name="star" size={40} />
             </div>
             <p>
               Рейтинг в 2ГИС · {ratingDetails}
               {reviewsStatusText && <small> · {reviewsStatusText}</small>}
             </p>
-            <a href={contact.twoGis} target="_blank" rel="noopener noreferrer" onClick={() => trackGoal('reviews_2gis')}>
-              Читать отзывы в 2ГИС →
+            <a
+              className="button button--light button--arrow"
+              href={contact.twoGis}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackGoal('reviews_2gis')}
+            >
+              Читать отзывы в 2ГИС
+              <span className="round-arrow round-arrow--small" aria-hidden="true">
+                <Icon name="arrow" size={16} />
+              </span>
             </a>
           </div>
+
+          {trustPoints.map((point) => (
+            <div className="tile trust-card" key={point.title}>
+              <span className="trust-card__icon">
+                <Icon name={point.icon} size={26} />
+              </span>
+              <h3>{point.title}</h3>
+              <p>{point.text}</p>
+            </div>
+          ))}
+
           {flampReview && (
-            <div className="review-card">
+            <div className="tile review-card">
               <span className="review-card__source">
                 {flampReview.source} · {flampReview.rating} · {flampReview.date}
               </span>
@@ -46,7 +61,8 @@ export function TrustSection({ reviewsMeta, ratingDetails, reviewsStatusText }) 
               </a>
             </div>
           )}
-          <div className="review-card">
+
+          <div className="tile tile--dark review-card">
             <span className="review-card__source">Drom · профиль продавца MBKuzbass</span>
             <p>{dromListingsLabel}, история продавца и отзывы покупателей.</p>
             <a href={contact.drom} target="_blank" rel="noopener noreferrer" onClick={() => trackGoal('reviews_drom')}>
