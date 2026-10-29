@@ -15,7 +15,9 @@ concurrency:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    # Версия Ubuntu закреплена: ubuntu-latest перешёл на 26.04, а Playwright 1.56.1 ставит Chromium
+    # только на поддерживаемые им версии. Менять вместе с обновлением @playwright/test.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
