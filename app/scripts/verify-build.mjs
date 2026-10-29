@@ -54,7 +54,7 @@ for (const [sourceName, source, requiredText] of [
   ['src', appSource, 'Редакция согласия:'],
   ['src', appSource, 'Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется'],
   ['data.js', dataSource, 'Клиент на Флампе'],
-  ['data.js', dataSource, "updatedAt: '03.10.2026'"],
+  ['data.js', dataSource, "updatedAt: '29.10.2026'"],
   ['privacyConsent.js', privacyConsentSource, "PRIVACY_CONSENT_VERSION = '2026-08-03'"],
 ]) {
   if (!source.includes(requiredText)) {
