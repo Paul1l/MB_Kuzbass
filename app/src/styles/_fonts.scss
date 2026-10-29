@@ -43,3 +43,22 @@ $latin-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+0
   src: url('../fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2');
   unicode-range: $latin-range;
 }
+
+// Unbounded — широкий шрифт заголовков. Один вес (600), чтобы не утяжелять страницу.
+@font-face {
+  font-family: 'Unbounded';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/unbounded-cyrillic-600-normal.woff2') format('woff2');
+  unicode-range: $cyrillic-range;
+}
+
+@font-face {
+  font-family: 'Unbounded';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/unbounded-latin-600-normal.woff2') format('woff2');
+  unicode-range: $latin-range;
+}

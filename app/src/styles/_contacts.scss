@@ -1,35 +1,27 @@
 @use 'tokens' as *;
 
-// Контакты
+// Контакты: тёмная плитка с телефоном и мессенджерами, фото площадки и список площадок, где есть MB Kuzbass.
 .contacts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 32px 48px;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: 280px auto;
+  gap: $gap;
 }
 
 .contacts__main {
   display: flex;
-  min-width: 0;
-  flex: 1 1 520px;
   flex-direction: column;
   gap: 22px;
-
-  .section-title {
-    margin-bottom: 0;
-  }
+  grid-column: 1 / 8;
+  grid-row: 1 / 3;
+  padding: 36px;
 }
 
 .contacts__facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px 32px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 28px;
   margin: 0;
-
-  div {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
 
   dt {
     color: $muted-dark;
@@ -37,40 +29,49 @@
   }
 
   dd {
-    margin: 0;
+    margin: 4px 0 0;
     font-size: 17px;
     font-weight: 600;
   }
 }
 
 .contacts__phone {
-  color: $accent;
-  font-size: clamp(30px, 3.4vw, 44px);
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  color: $white;
+  font-family: $font-display;
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
   text-decoration: none;
+
+  &:hover {
+    color: $tag;
+  }
 }
 
 .contacts__buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-top: auto;
+}
+
+.contacts__photo {
+  grid-column: 8 / 13;
+  grid-row: 1;
 }
 
 .contacts__more {
   display: flex;
-  min-width: 0;
-  flex: 1 1 380px;
   flex-direction: column;
-  padding: 26px;
-  background: $ink-2;
-  border: 1px solid $line-dark;
-  border-radius: 16px;
+  grid-column: 8 / 13;
+  grid-row: 2;
+  padding: 24px 26px;
 
   h3 {
-    margin-bottom: 8px;
-    font-size: 20px;
-    font-weight: 800;
+    margin-bottom: 6px;
+    font-family: $font-display;
+    font-size: 18px;
+    font-weight: 600;
   }
 
   a {
@@ -78,8 +79,9 @@
     justify-content: space-between;
     gap: 12px;
     padding: 12px 0;
-    color: $white;
-    border-bottom: 1px solid $line-dark;
+    color: $ink;
+    border-bottom: 1px solid $line;
+    font-weight: 600;
     text-decoration: none;
 
     &:last-child {
@@ -87,12 +89,61 @@
     }
 
     span:last-child {
-      color: $muted-dark;
+      color: $muted;
+      font-weight: 500;
       text-align: right;
     }
 
     &:hover span:first-child {
       text-decoration: underline;
     }
+  }
+}
+
+@media (max-width: 1100px) {
+  .contacts {
+    grid-template-rows: auto;
+  }
+
+  .contacts__main {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .contacts__photo,
+  .contacts__more {
+    grid-column: span 6;
+    grid-row: auto;
+  }
+
+  .contacts__photo {
+    min-height: 260px;
+  }
+}
+
+@media (max-width: 680px) {
+  .contacts {
+    gap: 10px;
+  }
+
+  .contacts__main {
+    padding: 24px 20px;
+  }
+
+  .contacts__facts {
+    grid-template-columns: 1fr;
+  }
+
+  .contacts__photo,
+  .contacts__more {
+    grid-column: 1 / -1;
+  }
+
+  .contacts__photo {
+    min-height: 220px;
+  }
+
+  .contacts__buttons .button {
+    flex: 1 1 100%;
   }
 }

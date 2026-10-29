@@ -1,16 +1,30 @@
-// Палитра: графит, светлый «бумажный» фон и жёлтый акцент, как бирки MB KUZBASS на фото деталей.
-$ink: #121417;
-$ink-2: #1d2024;
-$ink-3: #0c0e10;
-$line-dark: #2c3036;
-$paper: #f4f2ec;
+// Палитра «bento»: светлый фон страницы, белые и тёмные плитки, красный и тёмно-синий из логотипа MB Kuzbass,
+// жёлтый — как бирки MB KUZBASS на фото деталей (только для мелких акцентов на тёмном).
+// Красный кнопок чуть темнее, чем в логотипе (#e14c47): так белый текст на нём читается (контраст 5:1).
+$ink: #15172a;
+$ink-2: #1f2238;
+$ink-3: #0e0f1b;
+$line-dark: #33375a;
+$navy: #353a57;
+$paper: #ecebe7;
 $white: #ffffff;
-$line: #e2ded4;
-$muted: #5a5f66;
-$muted-dark: #a9aeb6;
-$soft-dark: #c9cdd3;
-$accent: #ffc72c;
-$input-bg: #faf9f6;
-$input-line: #d9d5cb;
+$line: #dcd9d1;
+$muted: #5c5f70;
+$muted-dark: #a9adc2;
+$soft-dark: #cfd2e0;
+$accent: #c93d38;
+$accent-hover: #ad302c;
+$tag: #ffc72c;
+$input-bg: #f6f5f2;
+$input-line: #d4d1c8;
+
+// Скругления плиток и расстояние между ними — одни на весь сайт.
+$radius: 28px;
+$radius-inner: 20px;
+$gap: 14px;
+
 $header-height: 76px;
 $header-height-mobile: 64px;
+
+$font-display: 'Unbounded', 'Onest', system-ui, sans-serif;
+$font-body: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;

@@ -4,12 +4,19 @@ test.beforeEach(async ({ page }) => {
   await page.goto('./');
 });
 
-test('первый экран: заголовок, обе формы и меню', async ({ page }) => {
+test('первый экран: заголовок, форма с переключателем, меню и запасные контакты', async ({ page }) => {
   await expect(page.locator('h1')).toContainText('по запчастям и целиком');
+  await expect(page.locator('.hero-switch')).toBeVisible();
   await expect(page.locator('.door').nth(0)).toBeVisible();
-  await expect(page.locator('.door').nth(1)).toBeVisible();
-  await expect(page.locator('.hero-switch')).toBeHidden();
+  await expect(page.locator('.door').nth(1)).toBeHidden();
   await expect(page.locator('.nav a[href="#catalog"]')).toBeVisible();
+
+  await page.locator('.hero-switch button', { hasText: 'Авто из Японии' }).click();
+  await expect(page.locator('.door').nth(1)).toBeVisible();
+  await expect(page.locator('.door').nth(0)).toBeHidden();
+
+  const altTelegram = await page.locator('.hero__alt a', { hasText: 'Telegram' }).getAttribute('href');
+  expect(altTelegram.startsWith(`${LEAD_TELEGRAM}?text=`)).toBe(true);
 });
 
 test('«Частые доноры» подставляют модель и переводят к полю детали', async ({ page }) => {
@@ -39,7 +46,8 @@ test('форма запчасти: без согласия не отправля
   await expect(partsDoor.locator('.form-status')).toContainText('скопирован');
 });
 
-test('форма «Хочу авто из Японии»: текст заявки и открытие чата', async ({ page }) => {
+test('форма «Авто из Японии»: текст заявки и открытие чата', async ({ page }) => {
+  await page.locator('.hero-switch button', { hasText: 'Авто из Японии' }).click();
   const carDoor = page.locator('.door').nth(1);
   await page.fill('#lead-car', 'Mercedes-Benz E-Class 2018');
   await page.fill('#lead-city', 'Новосибирск');

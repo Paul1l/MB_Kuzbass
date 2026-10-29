@@ -1,27 +1,12 @@
 @use 'tokens' as *;
 
-// Верхняя строка и шапка
-.topbar {
-  color: $soft-dark;
-  background: $ink;
-  font-size: 14px;
-}
-
-.topbar__inner {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 4px 24px;
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
+// Шапка: бренд слева, меню-«таблетки» в капсуле по центру, телефон и Telegram справа.
 .site-header {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: $white;
-  border-bottom: 1px solid $line;
+  background: rgba($paper, 0.9);
+  backdrop-filter: blur(14px);
 }
 
 .site-header__inner {
@@ -29,12 +14,13 @@
   display: flex;
   min-height: $header-height;
   align-items: center;
-  gap: 24px;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .brand {
   display: flex;
-  flex: 0 0 auto;
+  min-width: 0;
   align-items: center;
   gap: 12px;
   color: $ink;
@@ -44,20 +30,24 @@
 .brand__logo {
   width: 48px;
   height: 48px;
+  flex: 0 0 auto;
   object-fit: cover;
   background: $white;
-  border: 2px solid $ink;
-  border-radius: 10px;
+  border-radius: 14px;
 }
 
 .brand__text {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   line-height: 1.2;
 
   strong {
-    font-size: 18px;
-    font-weight: 800;
+    font-family: $font-display;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
   }
 
   small {
@@ -68,30 +58,35 @@
 
 .nav {
   display: flex;
-  flex: 1 1 auto;
   align-items: center;
-  gap: 4px 22px;
-  font-size: 15px;
-  font-weight: 600;
+  gap: 2px;
+  padding: 5px;
+  background: $white;
+  border: 1px solid $line;
+  border-radius: 999px;
 
   a {
-    padding: 10px 0;
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    padding: 0 16px;
+    color: $ink;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
-    border-bottom: 2px solid transparent;
 
     &:hover {
-      border-bottom-color: $accent;
+      background: $paper;
     }
   }
 }
 
 .site-header__actions {
   display: flex;
-  flex: 0 0 auto;
   align-items: center;
-  gap: 16px;
-  margin-left: auto;
+  gap: 14px;
 }
 
 .header-phone {
@@ -112,7 +107,7 @@
   line-height: 1.2;
 
   strong {
-    font-size: 19px;
+    font-size: 17px;
     font-weight: 800;
     white-space: nowrap;
   }
@@ -127,12 +122,115 @@
   display: none;
   width: 46px;
   height: 46px;
-  align-items: center;
-  justify-content: center;
+  place-items: center;
   padding: 0;
   color: $ink;
   background: $white;
-  border: 1.5px solid $input-line;
-  border-radius: 10px;
+  border: 1px solid $line;
+  border-radius: 50%;
   cursor: pointer;
+}
+
+@media (max-width: 1360px) {
+  .header-telegram {
+    display: none;
+  }
+}
+
+// Меню убирается под кнопку раньше, чем перестаёт помещаться в строку.
+@media (max-width: 1180px) {
+  .menu-toggle {
+    display: grid;
+  }
+
+  .nav {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 24px;
+    left: 24px;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 8px;
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba($ink, 0.18);
+
+    a {
+      min-height: 50px;
+      padding: 0 18px;
+      font-size: 17px;
+    }
+  }
+
+  .nav.is-open {
+    display: flex;
+  }
+}
+
+@media (max-width: 560px) {
+  .site-header__inner {
+    min-height: $header-height-mobile;
+    gap: 10px;
+  }
+
+  .nav {
+    right: 16px;
+    left: 16px;
+  }
+
+  .brand {
+    gap: 10px;
+  }
+
+  .brand__logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .brand__text {
+    strong {
+      font-size: 15px;
+    }
+
+    small {
+      font-size: 12px;
+    }
+  }
+
+  .site-header__actions {
+    gap: 8px;
+  }
+
+  // На телефоне вместо номера — красная круглая кнопка: номер целиком есть в нижней панели и в контактах.
+  .header-phone {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    color: $white;
+    background: $accent;
+    border-radius: 50%;
+
+    .icon {
+      display: block;
+    }
+  }
+
+  // Номер скрыт визуально, но остаётся подписью ссылки для экранных дикторов.
+  .header-phone__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand__text small {
+    display: none;
+  }
 }

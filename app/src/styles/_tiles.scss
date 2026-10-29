@@ -1,0 +1,207 @@
+@use 'tokens' as *;
+
+// Плитки мозаики: белая, тёмная, красная и фото на всю плитку.
+.tile {
+  position: relative;
+  min-width: 0;
+  padding: 28px;
+  color: $ink;
+  background: $white;
+  border-radius: $radius;
+}
+
+.tile--dark {
+  color: $white;
+  background: $ink;
+}
+
+.tile--accent {
+  color: $white;
+  background: $accent;
+}
+
+// Фото-плитка не обрезает содержимое: скругление у самого фото, чтобы вырез в углу (.notch) не срезался.
+.tile--photo {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: $radius;
+  }
+}
+
+a.tile {
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a.tile {
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+    }
+  }
+}
+
+// Подпись-«таблетка» поверх фото.
+.tile__chip {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  max-width: calc(100% - 32px);
+  padding: 7px 14px;
+  color: $ink;
+  background: rgba($white, 0.94);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+// Подпись внизу фото на затемнении.
+.tile__caption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  gap: 4px;
+  padding: 64px 22px 20px;
+  color: $white;
+  background: linear-gradient(0deg, rgba($ink-3, 0.86) 0%, rgba($ink-3, 0.5) 55%, rgba($ink-3, 0) 100%);
+  border-radius: 0 0 $radius $radius;
+
+  strong {
+    font-family: $font-display;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  small {
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
+
+// Вырез в правом нижнем углу фото-плитки: цвет как у фона раздела, внутренние углы скруглены.
+// Псевдоэлементы рисуют вогнутые скругления над вырезом и слева от него.
+@mixin notch-colors($bg) {
+  background: $bg;
+
+  &::before,
+  &::after {
+    background: radial-gradient(circle at 0 0, transparent $radius - 0.5px, $bg $radius);
+  }
+}
+
+.notch {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 12px 0 0 12px;
+  border-top-left-radius: $radius;
+  @include notch-colors($paper);
+
+  &::before,
+  &::after {
+    position: absolute;
+    width: $radius;
+    height: $radius;
+    content: '';
+    pointer-events: none;
+  }
+
+  &::before {
+    right: 0;
+    bottom: 100%;
+  }
+
+  &::after {
+    right: 100%;
+    bottom: 0;
+  }
+}
+
+.notch--dark {
+  @include notch-colors($ink-3);
+
+  .notch__link {
+    color: $white;
+  }
+}
+
+.notch__link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-left: 10px;
+  color: $ink;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+// Метка на фото товара и машины.
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  color: $ink;
+  background: $tag;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.tag--dark {
+  color: $white;
+  background: rgba($ink-3, 0.82);
+}
+
+// Ряд ссылок-«таблеток» и кнопки быстрого выбора.
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.pill,
+.chip {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 18px;
+  color: $ink;
+  background: $white;
+  border: 1.5px solid $line;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $ink;
+  }
+}
+
+.chip {
+  padding: 0 14px;
+  font-size: 13px;
+
+  .mono {
+    font-size: 12px;
+  }
+}

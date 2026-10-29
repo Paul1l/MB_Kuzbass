@@ -1,4 +1,49 @@
-// Нижняя панель связи для телефонов. На компьютере телефон и Telegram видны в шапке.
+@use 'tokens' as *;
+
+// Нижняя панель связи для телефонов — плавающая капсула. На компьютере телефон и Telegram видны в шапке.
 .mobile-contact-bar {
   display: none;
+}
+
+@media (max-width: 820px) {
+  .mobile-contact-bar {
+    position: fixed;
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    left: 10px;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+    background: rgba($ink, 0.96);
+    border-radius: 999px;
+    box-shadow: 0 14px 40px rgba($ink-3, 0.3);
+
+    a {
+      display: flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      color: $white;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+  }
+
+  .mobile-contact-bar .mobile-contact-bar__phone {
+    background: $accent;
+  }
+
+  // Пока посетитель печатает в форме, панель не закрывает поля ввода.
+  .page:has(input:focus, textarea:focus) ~ .mobile-contact-bar {
+    display: none;
+  }
+
+  // Последние строки подвала не должны прятаться под панелью.
+  .footer {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
 }
