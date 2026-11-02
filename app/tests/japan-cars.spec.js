@@ -1,58 +1,49 @@
-import { LEAD_TELEGRAM, expect, hasHorizontalScroll, test, waitForInitialScrollReset } from './fixtures.js';
+import { LEAD_TELEGRAM, expect, hasHorizontalScroll, test } from './fixtures.js';
 
-// «Уже заказали в Японии» — карусель в духе примера с мороженым: машина в центре, фон блока в её цвет.
-test('«Уже заказали в Японии»: стрелки, точки и машины справа меняют машину в центре и цвет блока, «Хочу похожий» ведёт в @MB_Kuzbass с моделью', async ({
+test('«Уже заказали в Японии»: витрина переключает машины и цвет, фото листаются по кругу, «Хочу похожий» ведёт в @MB_Kuzbass с моделью', async ({
   page,
 }) => {
   await page.goto('./');
   const section = page.locator('#japan-cars');
   await section.scrollIntoViewIfNeeded();
-  const items = section.locator('.ice__item');
-  await expect(items).toHaveCount(4);
-  await expect(section.locator('.ice__item[data-slot="0"]')).toHaveCount(1);
+  const picks = section.locator('.car-pick');
+  await expect(picks).toHaveCount(4);
+  await expect(picks.first()).toHaveAttribute('aria-pressed', 'true');
 
-  const caption = section.locator('.ice__car strong');
-  const cta = section.locator('.ice__actions a').first();
-  const colorOf = () => section.evaluate((element) => element.style.getPropertyValue('--stage-bg'));
+  const card = section.locator('.car-card');
+  await expect(card).toHaveCount(1);
+  const photo = card.locator('.car-card__media img');
+  const counter = card.locator('.car-card__nav span');
+  const firstPhoto = await photo.getAttribute('src');
+  await expect(counter).toHaveText('1 / 3');
 
-  // Первое нажатие останавливает автопрокрутку, дальше машина меняется только по нажатию.
-  await section.getByRole('button', { name: 'Следующая машина' }).click();
-  const afterNext = await caption.textContent();
-  const colorAfterNext = await colorOf();
-  await section.getByRole('button', { name: 'Предыдущая машина' }).click();
-  await expect(caption).toHaveText('Mercedes-Benz C-класс Кабриолет');
-  expect(afterNext).toBe('Mercedes-Benz C-класс Купе');
-  expect(await colorOf()).not.toBe(colorAfterNext);
+  await card.getByRole('button', { name: /Следующее фото/ }).click();
+  await expect(counter).toHaveText('2 / 3');
+  expect(await photo.getAttribute('src')).not.toBe(firstPhoto);
 
-  const href = await cta.getAttribute('href');
+  await card.getByRole('button', { name: /Предыдущее фото/ }).click();
+  await card.getByRole('button', { name: /Предыдущее фото/ }).click();
+  await expect(counter).toHaveText('3 / 3');
+
+  const href = await card.locator('a.button').getAttribute('href');
   expect(href.startsWith(`${LEAD_TELEGRAM}?text=`)).toBe(true);
   expect(decodeURIComponent(href)).toContain('Хочу похожий автомобиль из Японии: Mercedes-Benz C-класс Кабриолет (A205)');
 
-  // Точка выбирает машину; машина справа тоже кликается.
-  await section.locator('.ice__dots button').nth(2).click();
-  await expect(caption).toHaveText('Mercedes-Benz C-класс седан');
-  await expect(section.locator('.ice__dots button').nth(2)).toHaveAttribute('aria-pressed', 'true');
-  expect(decodeURIComponent(await cta.getAttribute('href'))).toContain('седан (W205)');
-  await section.locator('.ice__item[data-slot="1"]').click();
-  await expect(caption).toHaveText('Mercedes-Benz C180 седан');
+  // Другая машина: карточка, ссылка и цвет витрины меняются, фото начинается с первого.
+  const stage = section.locator('.car-stage');
+  const firstColor = await stage.evaluate((element) => element.style.getPropertyValue('--stage-bg'));
+  await picks.nth(2).click();
+  await expect(picks.nth(2)).toHaveAttribute('aria-pressed', 'true');
+  await expect(picks.first()).toHaveAttribute('aria-pressed', 'false');
+  await expect(card.locator('h3')).toHaveText('Mercedes-Benz C-класс седан');
+  await expect(counter).toHaveText('1 / 4');
+  expect(decodeURIComponent(await card.locator('a.button').getAttribute('href'))).toContain('седан (W205)');
+  await expect(stage).toHaveAttribute('data-tone', 'dark');
+  expect(await stage.evaluate((element) => element.style.getPropertyValue('--stage-bg'))).not.toBe(firstColor);
 
-  // У машины в центре есть описание фото, у остальных — нет (они только кнопки выбора).
-  await expect(section.locator('.ice__item[data-slot="0"] img')).toHaveAttribute('alt', /Mercedes-Benz C180/);
-
+  // Фото машины и все миниатюры загрузились.
   await expect
-    // Все четыре фото карусели (миниатюры в волне на телефоне скрыты и не грузятся — так и задумано).
-    .poll(() => section.locator('.ice__stage img').evaluateAll((images) => images.every((image) => image.complete && image.naturalWidth > 0)))
+    .poll(() => section.locator('img').evaluateAll((images) => images.every((image) => image.complete && image.naturalWidth > 0)))
     .toBe(true);
   expect(await hasHorizontalScroll(page)).toBe(false);
-});
-
-test('«Уже заказали в Японии» листается само, пока блок на экране', async ({ page }) => {
-  await page.goto('./');
-  const section = page.locator('#japan-cars');
-  const caption = section.locator('.ice__car strong');
-  await expect(caption).toHaveText('Mercedes-Benz C-класс Кабриолет');
-  // Карусель листается только видимой, поэтому прокручиваем к ней после возврата главной к первому экрану.
-  await waitForInitialScrollReset(page);
-  await section.evaluate((element) => element.scrollIntoView({ block: 'center' }));
-  await expect(caption).not.toHaveText('Mercedes-Benz C-класс Кабриолет', { timeout: 8000 });
 });

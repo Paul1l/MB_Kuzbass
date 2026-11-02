@@ -5,7 +5,7 @@ import { directions } from '../data.js';
 // Нужна для блока «Авто из Японии и поставки для разборов»: две фото-плитки со ссылками на посадочные страницы.
 export function DirectionsSection() {
   return (
-    <section className="section section--dark" id="directions" aria-labelledby="directions-title">
+    <section className="section section--dark section--band-start" id="directions" aria-labelledby="directions-title">
       <div className="container">
         <ParticleRoute />
         <div className="section-head">

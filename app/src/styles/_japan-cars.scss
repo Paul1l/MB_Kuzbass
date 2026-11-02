@@ -1,278 +1,109 @@
 @use 'tokens' as *;
 
-// «Уже заказали в Японии» в духе примера владельца с мороженым: весь блок окрашен в цвет машины в центре
-// (--stage-bg из data.js), машины стоят каруселью, внизу кремовая волна с миниатюрами, стрелками и точками.
-.ice {
-  position: relative;
-  margin: 0 12px;
-  padding-top: 56px;
-  overflow: hidden;
+// «Уже заказали в Японии» — витрина на тёмной панели: слева крупно выбранная машина, справа кнопки выбора.
+// Фон витрины — в цвет выбранной машины (--stage-bg из data.js) и плавно перекрашивается при смене машины.
+.car-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 10px;
+  padding: 10px;
+  color: $ink;
+  background: var(--stage-bg, #{$ink-2});
+  border-radius: $radius;
+  transition:
+    background-color 0.7s ease,
+    color 0.7s ease;
+}
+
+.car-stage[data-tone='dark'] {
   color: $white;
-  background: var(--stage-bg, #{$navy});
-  // Низ без скругления: волна цвета страницы и так «стекает» в страницу, а скругление давало тонкую кромку.
-  border-radius: 40px 40px 0 0;
-  transition: background-color 0.8s ease;
 }
 
-.ice__grid {
+.car-card {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  align-items: center;
-  gap: 24px;
-  min-height: 480px;
-}
-
-.ice__text {
-  position: relative;
-  z-index: 5;
-  display: grid;
-  justify-items: start;
-  gap: 16px;
-}
-
-.ice__eyebrow {
-  margin: 0;
-  padding: 7px 14px;
-  background: rgba($white, 0.16);
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.ice__title {
-  margin: 0;
-  font-family: $font-display;
-  font-size: clamp(40px, 5.2vw, 76px);
-  font-weight: 600;
-  line-height: 0.98;
-  letter-spacing: -0.035em;
-}
-
-.ice__lead {
-  max-width: 440px;
-  margin: 0;
-  color: rgba($white, 0.9);
-  font-size: 17px;
-}
-
-// Подпись машины в центре: меняется вместе с ней.
-.ice__car {
-  display: grid;
-  gap: 2px;
-  margin: 6px 0 0;
-
-  strong {
-    font-family: $font-display;
-    font-size: 22px;
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
-  span {
-    font-size: 15px;
-    font-weight: 600;
-    opacity: 0.85;
-  }
-}
-
-.ice__actions {
-  display: flex;
-  flex-wrap: wrap;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  min-width: 0;
   gap: 10px;
 }
 
-// Сцена карусели. Позиции заданы в cqw — долях ширины сцены, чтобы карусель масштабировалась целиком.
-.ice__stage {
+.car-card__media {
   position: relative;
-  height: 470px;
-  container-type: inline-size;
-}
-
-.ice__item {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 64cqw;
-  aspect-ratio: 3 / 2;
-  padding: 0;
+  min-height: 420px;
   overflow: hidden;
-  cursor: pointer;
-  background: rgba($ink, 0.2);
-  border: 0;
-  border-radius: 28px;
-  box-shadow: 0 34px 60px -28px rgba($ink-3, 0.6);
-  transform-origin: 0 0;
+  background: rgba($ink, 0.12);
+  border-radius: $radius-inner;
 
   img {
-    display: block;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center 62%;
   }
 
-  &:focus-visible {
-    outline: 3px solid $white;
-    outline-offset: 3px;
-  }
-
-  // 0 — в центре крупно, 1 и 2 — справа меньше (третья обрезана краем блока), 3 — спрятана за краем.
-  &[data-slot='0'] {
-    z-index: 3;
-    cursor: default;
-    transform: translate(2cqw, 40px);
-  }
-
-  &[data-slot='1'] {
-    z-index: 2;
-    transform: translate(70cqw, 130px) scale(0.42);
-  }
-
-  &[data-slot='2'] {
-    z-index: 1;
-    transform: translate(99cqw, 170px) scale(0.28);
-  }
-
-  &[data-slot='3'] {
-    z-index: 0;
-    opacity: 0;
-    transform: translate(124cqw, 190px) scale(0.2);
+  .tag {
+    position: absolute;
+    top: 12px;
+    left: 12px;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .ice__item {
-    transition:
-      transform 0.85s cubic-bezier(0.2, 0.7, 0.2, 1),
-      opacity 0.85s ease;
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .ice__item[data-slot='1']:hover {
-      transform: translate(69cqw, 124px) scale(0.44);
-    }
-  }
-
-  // Уходящая машина падает вниз влево, как стаканчик в примере; возвращающаяся (кнопка «назад») — обратно.
-  .ice__item[data-motion='leave'] {
-    z-index: 4;
-    transition: none;
-    animation: ice-leave 0.85s cubic-bezier(0.5, 0, 0.75, 0) both;
-  }
-
-  .ice__item[data-motion='return'] {
-    z-index: 4;
-    transition: none;
-    animation: ice-return 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  }
-
-  .ice__car {
-    animation: ice-caption-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-}
-
-@keyframes ice-leave {
-  from {
-    opacity: 1;
-    transform: translate(2cqw, 40px);
-  }
-
-  to {
-    opacity: 0;
-    transform: translate(-34cqw, 520px) rotate(-16deg) scale(0.7);
-  }
-}
-
-@keyframes ice-return {
-  from {
-    opacity: 0;
-    transform: translate(-34cqw, 520px) rotate(-16deg) scale(0.7);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate(2cqw, 40px);
-  }
-}
-
-@keyframes ice-caption-in {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-}
-
-// Кремовая волна внизу блока — того же цвета, что фон страницы, поэтому блок «стекает» в страницу.
-.ice__wave {
+.car-card__body {
   position: relative;
-  z-index: 6;
-  height: 128px;
-  margin-top: -36px;
-}
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 14px 12px;
 
-.ice__wave-shape {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  h3 {
+    margin: 0;
+    font-family: $font-display;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
 
-  path {
-    fill: $paper;
+  .button {
+    align-self: flex-start;
+    margin-top: auto;
   }
 }
 
-.ice__bar {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: end;
-  height: 100%;
-  padding-bottom: 18px;
-  color: $ink;
+// Большой код кузова — как крупное название товара на витрине.
+.car-card__bigcode {
+  font-family: $font-display;
+  font-size: clamp(56px, 6.4vw, 92px);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  opacity: 0.9;
 }
 
-.ice__thumbs {
+.car-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.car-card__code {
+  padding: 7px 14px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0.8;
+}
+
+.car-card__nav {
   display: flex;
   align-items: center;
-  gap: 12px;
-
-  > span:last-child {
-    display: grid;
-    line-height: 1.2;
-  }
-
-  strong {
-    font-size: 15px;
-  }
-
-  small {
-    color: $muted;
-    font-size: 13px;
-  }
-}
-
-.ice__avatars {
-  display: flex;
-
-  img {
-    width: 38px;
-    height: 38px;
-    margin-left: -10px;
-    object-fit: cover;
-    border: 2px solid $paper;
-    border-radius: 50%;
-
-    &:first-child {
-      margin-left: 0;
-    }
-  }
-}
-
-.ice__arrows {
-  display: flex;
-  gap: 8px;
+  gap: 6px;
 
   button {
     display: grid;
@@ -280,161 +111,232 @@
     height: 44px;
     place-items: center;
     padding: 0;
-    color: $ink;
-    cursor: pointer;
-    background: $white;
-    border: 1.5px solid $line;
+    color: inherit;
+    background: transparent;
+    border: 1px solid currentColor;
     border-radius: 50%;
+    cursor: pointer;
 
     &:hover {
       color: $white;
       background: $ink;
       border-color: $ink;
     }
+  }
 
-    &:focus-visible {
-      outline: 2px solid $ink;
-      outline-offset: 2px;
-    }
+  span {
+    min-width: 46px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
   }
 }
 
-// Точка видна маленькой, а нажимается область 24×24 — меньше пальцем не попасть (WCAG 2.5.8).
-.ice__dots {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0;
+// На тёмно-красной витрине красная кнопка слилась бы с фоном: она становится белой.
+.car-stage[data-tone='dark'] {
+  .button--accent {
+    color: $ink;
+    background: $white;
+    border-color: $white;
+  }
 
-  button {
-    position: relative;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    cursor: pointer;
-    background: transparent;
-    border: 0;
-    border-radius: 999px;
-    transition: width 0.3s ease;
+  .car-card__nav button:hover {
+    color: $ink;
+    background: $white;
+    border-color: $white;
+  }
+}
 
-    &::before {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 10px;
-      height: 10px;
-      content: '';
-      background: rgba($ink, 0.25);
-      border-radius: 999px;
-      transform: translate(-50%, -50%);
-      transition:
-        width 0.3s ease,
-        background-color 0.3s ease;
-    }
+// Кнопки выбора машины: миниатюра, модель и кузов. Выбранная — белая плитка.
+.car-picker {
+  display: grid;
+  grid-auto-rows: 1fr;
+  gap: 8px;
+}
 
-    &[aria-pressed='true'] {
-      width: 40px;
+.car-pick {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: rgba($white, 0.22);
+  border: 1px solid rgba($ink, 0.12);
+  border-radius: $radius-inner;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
 
-      &::before {
-        width: 28px;
-        background: var(--stage-bg, #{$ink});
-      }
-    }
+  img {
+    width: 96px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 14px;
+  }
 
-    &:focus-visible {
-      outline: 2px solid $ink;
-      outline-offset: 2px;
-    }
+  span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  strong {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  small {
+    font-size: 13px;
+    opacity: 0.75;
+  }
+
+  &:hover {
+    background: rgba($white, 0.45);
+  }
+
+  &[aria-pressed='true'] {
+    color: $ink;
+    background: $white;
+    border-color: $white;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $tag;
+    outline-offset: 2px;
+  }
+}
+
+.car-stage[data-tone='dark'] .car-pick {
+  background: rgba($white, 0.1);
+  border-color: rgba($white, 0.18);
+
+  &:hover {
+    background: rgba($white, 0.2);
+  }
+
+  &[aria-pressed='true'] {
+    background: $white;
+  }
+}
+
+// Смена машины: фото въезжает справа с лёгким поворотом, код кузова поднимается снизу.
+@media (prefers-reduced-motion: no-preference) {
+  .car-card__media img {
+    animation: stage-photo-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .car-card__bigcode {
+    animation: stage-code-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .car-pick:hover {
+    transform: translateX(-3px);
+  }
+}
+
+@keyframes stage-photo-in {
+  from {
+    opacity: 0;
+    transform: translateX(10%) scale(0.92) rotate(-1.5deg);
+  }
+}
+
+@keyframes stage-code-in {
+  from {
+    opacity: 0;
+    transform: translateY(40%);
   }
 }
 
 @media (max-width: 1100px) {
-  .ice__grid {
+  .car-stage {
     grid-template-columns: 1fr;
-    gap: 8px;
-    min-height: 0;
   }
 
-  .ice__stage {
-    height: 52cqw;
-    min-height: 260px;
+  .car-picker {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: auto;
+  }
+
+  .car-pick {
+    grid-template-columns: 1fr;
+    gap: 6px;
+
+    img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+    }
+
+    strong {
+      font-size: 13px;
+    }
   }
 }
 
 @media (max-width: 820px) {
-  .ice {
-    margin: 0 8px;
-    padding-top: 36px;
-    border-radius: 28px 28px 0 0;
+  .car-card {
+    grid-template-columns: 1fr;
   }
 
-  .ice__lead {
-    font-size: 15px;
-  }
+  .car-card__media {
+    min-height: 0;
+    aspect-ratio: 3 / 2;
 
-  .ice__stage {
-    height: calc(52cqw + 30px);
-  }
-
-  .ice__item {
-    width: 76cqw;
-    border-radius: 22px;
-
-    &[data-slot='0'] {
-      transform: translate(0, 16px);
-    }
-
-    &[data-slot='1'] {
-      transform: translate(80cqw, 40px) scale(0.5);
-    }
-
-    &[data-slot='2'] {
-      opacity: 0;
-      transform: translate(110cqw, 60px) scale(0.3);
+    img {
+      object-position: center;
     }
   }
 
-  @keyframes ice-leave {
-    from {
-      opacity: 1;
-      transform: translate(0, 16px);
+  .car-card__bigcode {
+    font-size: 56px;
+  }
+
+  .car-card__body h3 {
+    font-size: 20px;
+  }
+}
+
+// На телефоне в кнопках выбора только фото и кузов: название модели — в карточке над ними.
+@media (max-width: 560px) {
+  .car-stage {
+    padding: 8px;
+  }
+
+  .car-picker {
+    gap: 6px;
+  }
+
+  .car-pick {
+    padding: 5px;
+
+    strong {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
 
-    to {
-      opacity: 0;
-      transform: translate(-40cqw, 70cqw) rotate(-16deg) scale(0.7);
+    small {
+      font-size: 12px;
+      text-align: center;
     }
   }
 
-  @keyframes ice-return {
-    from {
-      opacity: 0;
-      transform: translate(-40cqw, 70cqw) rotate(-16deg) scale(0.7);
-    }
-
-    to {
-      opacity: 1;
-      transform: translate(0, 16px);
-    }
+  .car-card__body {
+    padding: 12px 8px 8px;
   }
 
-  .ice__wave {
-    height: 84px;
-    margin-top: -8px;
-  }
-
-  // На узком экране волна растягивается по высоте сильнее — делаем её положе.
-  .ice__wave-shape {
-    height: 70%;
-    top: auto;
-  }
-
-  .ice__bar {
-    grid-template-columns: auto 1fr;
-    gap: 12px;
-    padding-bottom: 8px;
-  }
-
-  .ice__thumbs {
-    display: none;
+  .car-card__bigcode {
+    font-size: 44px;
   }
 }

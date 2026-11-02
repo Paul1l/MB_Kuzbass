@@ -219,14 +219,14 @@ export const directions = [
 // Автомобили, которые MB Kuzbass заказал в Японии (фото прислал владелец 03.10.2026). Фото сделаны в Японии,
 // номера и таблички японских продавцов закрыты табличкой MB Kuzbass. Модель и кузов определены по фото;
 // год, пробег, цена, город и срок доставки не указаны — их нет в исходных данных, добавлять только со слов владельца.
-// stage.bg — цвет всего блока, когда машина в центре витрины (как фон в цвет товара в примере владельца).
-// Цвета подобраны так, чтобы белый текст читался (контраст не меньше 4,5:1).
+// stage — цвет витрины, когда машина выбрана (как фон в цвет товара): светлый для белых машин, серебристый,
+// тёмно-красный для красной; tone: 'dark' — фон тёмный, текст и кнопка светлые.
 export const japanCars = [
   {
     title: 'Mercedes-Benz C-класс Кабриолет',
     code: 'A205',
     query: 'Mercedes-Benz C-класс Кабриолет (A205)',
-    stage: { bg: '#3d7aa5' },
+    stage: { bg: '#dde4ec', tone: 'light' },
     photos: [
       { src: asset('japan/mercedes-c-cabrio-a205-front.webp'), alt: 'Белый Mercedes-Benz C-класс Кабриолет спереди' },
       { src: asset('japan/mercedes-c-cabrio-a205-rear.webp'), alt: 'Белый Mercedes-Benz C-класс Кабриолет сзади' },
@@ -237,7 +237,7 @@ export const japanCars = [
     title: 'Mercedes-Benz C-класс Купе',
     code: 'C204',
     query: 'Mercedes-Benz C-класс Купе (C204)',
-    stage: { bg: '#5d6a78' },
+    stage: { bg: '#b4bbc3', tone: 'light' },
     photos: [
       { src: asset('japan/mercedes-c-coupe-c204-front.webp'), alt: 'Серебристый Mercedes-Benz C-класс Купе спереди' },
       { src: asset('japan/mercedes-c-coupe-c204-side.webp'), alt: 'Серебристый Mercedes-Benz C-класс Купе сбоку слева' },
@@ -248,7 +248,7 @@ export const japanCars = [
     title: 'Mercedes-Benz C-класс седан',
     code: 'W205',
     query: 'Mercedes-Benz C-класс седан (W205)',
-    stage: { bg: '#a63a32' },
+    stage: { bg: '#8c1d29', tone: 'dark' },
     photos: [
       { src: asset('japan/mercedes-c-w205-front.webp'), alt: 'Красный Mercedes-Benz C-класс седан спереди' },
       { src: asset('japan/mercedes-c-w205-rear.webp'), alt: 'Красный Mercedes-Benz C-класс седан сзади' },
@@ -260,7 +260,7 @@ export const japanCars = [
     title: 'Mercedes-Benz C180 седан',
     code: 'W204',
     query: 'Mercedes-Benz C180 седан (W204)',
-    stage: { bg: '#3b7f5f' },
+    stage: { bg: '#e8e3d8', tone: 'light' },
     photos: [
       { src: asset('japan/mercedes-c180-w204-front.webp'), alt: 'Белый Mercedes-Benz C180 спереди' },
       { src: asset('japan/mercedes-c180-w204-rear.webp'), alt: 'Белый Mercedes-Benz C180 сзади' },
@@ -331,15 +331,6 @@ export const purchaseSteps = [
 ];
 
 // Блок «Почему нам доверяют»: проверяемые факты, без обещаний сроков и гарантий, которых нет в договоре.
-// Сцена «склад» перед контактами (WarehouseScene): фото разбора на весь экран и короткие тексты. Факты те же,
-// что в «Почему нам доверяют» и в контактах: свои фото деталей, проверка по VIN, отправка по России.
-export const warehouseScene = {
-  image: asset('client-car-12.jpg'),
-  alt: 'Автомобиль-донор Mercedes-Benz в процессе разбора',
-  intro: 'Разбираем Mercedes-Benz и BMW с японских доноров. Каждую деталь фотографируем у себя — с жёлтой биркой MB KUZBASS.',
-  text: 'Детали снимаем с японских автомобилей-доноров, проверяем по VIN до оплаты и отправляем транспортными компаниями по России.',
-};
-
 export const trustPoints = [
   {
     icon: 'tag',

@@ -68,7 +68,7 @@ test('фото на карточках и на страницах каталог
   expect(new Set(categoryPageNames).size).toBe(categoryPageNames.length);
 });
 
-test('частицы рисуют маршрут, а сцена «склад» собирается при прокрутке', async ({ page }) => {
+test('частицы рисуют маршрут, а большие слова едут при прокрутке', async ({ page }) => {
   await page.goto('./');
   await waitForInitialScrollReset(page);
   const canvas = page.locator('.particle-route canvas');
@@ -84,21 +84,9 @@ test('частицы рисуют маршрут, а сцена «склад» �
     )
     .toBeGreaterThan(500);
 
-  // В начале сцены фото на весь экран, к концу прокрутки — карточкой, слева видны цифры и кнопки.
-  const scene = page.locator('.scene');
-  const { top, height } = await scene.evaluate((element) => ({
-    top: element.getBoundingClientRect().top + window.scrollY,
-    height: element.offsetHeight,
-  }));
-  const viewport = await page.evaluate(() => window.innerHeight);
-  await page.evaluate((y) => window.scrollTo(0, y), top);
-  await expect.poll(() => scene.evaluate((element) => Number(element.style.getPropertyValue('--p')))).toBeLessThan(0.05);
-  await expect(scene).not.toHaveClass(/is-assembled/);
-  await page.evaluate((y) => window.scrollTo(0, y), top + height - viewport);
-  await expect.poll(() => scene.evaluate((element) => Number(element.style.getPropertyValue('--p')))).toBeGreaterThan(0.95);
-  await expect(scene).toHaveClass(/is-assembled/);
-  await expect(scene.locator('.scene__info')).toHaveCSS('opacity', '1');
-  await expect(scene.getByRole('link', { name: 'Подобрать запчасть' })).toBeInViewport();
+  const mega = page.locator('.mega-type');
+  await mega.scrollIntoViewIfNeeded();
+  await expect.poll(() => mega.evaluate((element) => element.style.getPropertyValue('--mega-p'))).not.toBe('');
 });
 
 test.describe('при «Уменьшить движение»', () => {
@@ -116,7 +104,5 @@ test.describe('при «Уменьшить движение»', () => {
     await expect(page.locator('.hero__form .beam')).toBeHidden();
     await expect(page.locator('.particle-route')).toBeHidden();
     expect(await page.locator('.hero__main img').evaluate((image) => getComputedStyle(image).scale)).toBe('none');
-    await expect(page.locator('.scene')).toHaveClass(/scene--static/);
-    await expect(page.locator('.scene__info')).toHaveCSS('opacity', '1');
   });
 });

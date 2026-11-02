@@ -13,6 +13,19 @@
   border-radius: 40px;
 }
 
+// «Авто из Японии и поставки» и «Уже заказали в Японии» идут одной тёмной панелью.
+.section--band-start {
+  padding-bottom: 28px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.section--band-end {
+  padding-top: 28px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 .section-head {
   display: flex;
   flex-wrap: wrap;
@@ -50,6 +63,14 @@
   .section--dark {
     margin: 0 8px;
     border-radius: 28px;
+  }
+
+  .section--band-start {
+    padding-bottom: 20px;
+  }
+
+  .section--band-end {
+    padding-top: 20px;
   }
 
   .section-head {

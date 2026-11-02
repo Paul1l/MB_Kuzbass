@@ -1,0 +1,57 @@
+import { useState } from 'react';
+import { trackGoal } from '../analytics.js';
+import { contact, createMessengerUrl } from '../data.js';
+import { Icon } from './Icon.jsx';
+
+// Нужна для витрины «Уже заказали в Японии»: крупное фото выбранной машины, стрелки под ним (не закрывают
+// машину и табличку), большой код кузова и кнопка «Хочу похожий». При выборе другой машины карточка
+// создаётся заново, и фото с кодом кузова въезжают (анимация в _japan-cars.scss).
+export function JapanCarCard({ car }) {
+  const [activePhoto, setActivePhoto] = useState(0);
+  const totalPhotos = car.photos.length;
+  const photo = car.photos[activePhoto];
+  const showPhoto = (delta) => setActivePhoto((current) => (current + delta + totalPhotos) % totalPhotos);
+
+  return (
+    <article className="car-card">
+      <div className="car-card__media">
+        <img src={photo.src} alt={photo.alt} width="840" height="560" loading="lazy" decoding="async" />
+        <span className="tag tag--dark">Фото из Японии</span>
+      </div>
+      <div className="car-card__body">
+        <span className="car-card__bigcode" aria-hidden="true">
+          {car.code}
+        </span>
+        <h3>{car.title}</h3>
+        <div className="car-card__meta">
+          <span className="car-card__code">Кузов {car.code}</span>
+          {totalPhotos > 1 && (
+            <div className="car-card__nav">
+              <button type="button" onClick={() => showPhoto(-1)} aria-label={`Предыдущее фото: ${car.title}`}>
+                <Icon name="chevron-left" />
+              </button>
+              <span aria-live="polite">
+                {activePhoto + 1} / {totalPhotos}
+              </span>
+              <button type="button" onClick={() => showPhoto(1)} aria-label={`Следующее фото: ${car.title}`}>
+                <Icon name="chevron-right" />
+              </button>
+            </div>
+          )}
+        </div>
+        <a
+          className="button button--accent button--arrow"
+          href={createMessengerUrl(contact.telegram, `Хочу похожий автомобиль из Японии: ${car.query}. Бюджет и годы выпуска:`)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackGoal('japan_car_telegram')}
+        >
+          Хочу похожий
+          <span className="round-arrow round-arrow--small" aria-hidden="true">
+            <Icon name="arrow" size={16} />
+          </span>
+        </a>
+      </div>
+    </article>
+  );
+}
