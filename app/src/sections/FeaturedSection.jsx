@@ -1,10 +1,11 @@
 import { trackGoal } from '../analytics.js';
+import { productPath } from '../catalogPaths.js';
 import { contact, createMessengerUrl, featuredProducts } from '../data.js';
 import { handleImageError } from '../lib/images.js';
 
 // Нужна для блока «Примеры с нашего склада»: реальные позиции и запрос цены в Telegram. Первая карточка крупная,
 // остальные — плитки вокруг неё.
-export function FeaturedSection({ onCatalogOpen }) {
+export function FeaturedSection() {
   return (
     <section className="section" id="stock" aria-labelledby="featured-title">
       <div className="container">
@@ -19,8 +20,8 @@ export function FeaturedSection({ onCatalogOpen }) {
             <article className={`product-card product-card--${index + 1}`} key={product.title}>
               <a
                 className="product-card__media"
-                href={`#catalog/${product.categorySlug}`}
-                onClick={(event) => onCatalogOpen(event, product.categorySlug)}
+                href={productPath(product.categorySlug, product.title)}
+                aria-label={`${product.title}: подробнее`}
               >
                 <img
                   src={product.images[0]}
@@ -35,7 +36,9 @@ export function FeaturedSection({ onCatalogOpen }) {
               </a>
               <div className="product-card__body">
                 <span className="product-card__meta">{product.meta}</span>
-                <h3>{product.title}</h3>
+                <h3>
+                  <a href={productPath(product.categorySlug, product.title)}>{product.title}</a>
+                </h3>
                 <p className="product-card__price">Цена по запросу</p>
                 <a
                   className="button button--accent"

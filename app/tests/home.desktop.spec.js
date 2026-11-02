@@ -78,7 +78,7 @@ test('главная ссылается на все посадочные, отк
 });
 
 test('title и разметка без чужого рейтинга', async ({ page }) => {
-  await expect(page).toHaveTitle('Запчасти Mercedes-Benz, BMW и авто из Японии в Барнауле — MB Kuzbass');
+  await expect(page).toHaveTitle('Контрактные запчасти Mercedes-Benz и BMW, авто из Японии под заказ — Барнаул | MB Kuzbass');
   const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents();
   expect(jsonLd.join('')).not.toContain('aggregateRating');
 });

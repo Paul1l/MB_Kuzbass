@@ -10,6 +10,7 @@ function getImageOptions(fileName) {
   if (fileName === 'telegram-avatar.jpg') return { width: 320, quality: 84 };
   if (fileName.startsWith('engine-')) return { width: 960, quality: 78 };
   if (fileName === 'mb-kuzbass-label-background.png') return { width: 1920, quality: 82 };
+  if (fileName === 'client-car-01.jpg') return { width: 1600, quality: 76, extraWidths: [480] };
   return { width: 1600, quality: 76 };
 }
 
@@ -27,6 +28,15 @@ async function optimizeImage(fileName) {
     .resize({ width: options.width, withoutEnlargement: true })
     .webp({ quality: options.quality, effort: 5, smartSubsample: true })
     .toFile(outputPath);
+
+  // Уменьшенные копии для srcset (например, фото первого экрана на телефоне): тоже генерируются, в git не хранятся.
+  for (const width of options.extraWidths ?? []) {
+    await sharp(inputPath)
+      .rotate()
+      .resize({ width, withoutEnlargement: true })
+      .webp({ quality: options.quality, effort: 5, smartSubsample: true })
+      .toFile(path.join(assetsDirectory, `${path.basename(fileName, extension)}-${width}.webp`));
+  }
 
   const [inputInfo, outputInfo] = await Promise.all([stat(inputPath), stat(outputPath)]);
   return { fileName, inputBytes: inputInfo.size, outputBytes: outputInfo.size };

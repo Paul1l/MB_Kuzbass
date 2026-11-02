@@ -16,9 +16,9 @@ export const site = {
   legalName: 'ИП Пушкарев Кирилл Александрович',
   city: 'Барнаул',
   url: 'https://mb-kuzbass.ru/',
-  title: 'Запчасти Mercedes-Benz, BMW и авто из Японии в Барнауле — MB Kuzbass',
+  title: 'Контрактные запчасти Mercedes-Benz и BMW, авто из Японии под заказ — Барнаул | MB Kuzbass',
   description:
-    'Контрактные запчасти Mercedes-Benz и BMW с японских доноров и автомобили с аукционов Японии под заказ. Подбор по VIN, фото до оплаты, отправка по России.',
+    'Контрактные запчасти на Мерседес и БМВ с японских доноров и автомобили из Японии под заказ. Склад в Барнауле, подбор по VIN, фото до оплаты, отправка по России.',
   keywords:
     'запчасти Mercedes-Benz Барнаул, запчасти BMW Барнаул, контрактные запчасти, авто из Японии Барнаул, автомобили с аукционов Японии, японские доноры, авторазбор Mercedes BMW',
   updatedAt: '29.10.2026',
@@ -192,14 +192,14 @@ export const landingPages = [
   { href: '/zapchasti-bmw-barnaul/', label: 'Запчасти BMW' },
   { href: '/dvigateli-akpp-mercedes-bmw-barnaul/', label: 'Двигатели и АКПП' },
   { href: '/kuzovnye-detali-optika-mercedes-bmw-barnaul/', label: 'Кузовные детали и оптика' },
-  { href: '/avtomobili-iz-yaponii-barnaul/', label: 'Автомобили с аукционов Японии' },
+  { href: '/avtomobili-iz-yaponii-barnaul/', label: 'Автомобили из Японии под заказ' },
   { href: '/postavki-dlya-avtorazborov-barnaul/', label: 'Поставки для авторазборов' },
 ];
 
 // Направления кроме запчастей: блок с фото и ссылками на посадочные страницы.
 export const directions = [
   {
-    title: 'Автомобили с аукционов Японии',
+    title: 'Автомобили из Японии под заказ',
     text: 'Подбираем, покупаем и доставляем автомобиль с японского аукциона в любую точку России.',
     href: '/avtomobili-iz-yaponii-barnaul/',
     linkText: 'Подробнее об авто из Японии',
