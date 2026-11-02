@@ -784,3 +784,34 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+/* Появление карточек при прокрутке — только CSS (на этих страницах нет JavaScript) и только там, где браузер
+   умеет анимации по прокрутке. В остальных браузерах и при «Уменьшить движение» карточки просто видны.
+   Заливка только назад: после появления у карточки снова её обычные стили. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .seo-card,
+    .seo-steps li,
+    .seo-faq__item,
+    .seo-car {
+      animation: seo-reveal linear backwards;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+  }
+
+  .seo-card {
+    transition: transform .3s ease;
+  }
+
+  .seo-card:hover {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes seo-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(.97);
+  }
+}

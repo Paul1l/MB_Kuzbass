@@ -7,6 +7,7 @@
 @use 'styles/tiles';
 @use 'styles/header';
 @use 'styles/hero';
+@use 'styles/marquee';
 @use 'styles/sections';
 @use 'styles/catalog';
 @use 'styles/featured';
@@ -19,4 +20,5 @@
 @use 'styles/mobile-bar';
 @use 'styles/legal-modal';
 @use 'styles/cookie-banner';
+@use 'styles/motion';
 @use 'styles/responsive';

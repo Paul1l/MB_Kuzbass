@@ -1,5 +1,6 @@
 import { trackGoal } from '../analytics.js';
 import { ConsentCheckbox } from '../components/ConsentCheckbox.jsx';
+import { CountUp } from '../components/CountUp.jsx';
 import { FormStatus } from '../components/FormStatus.jsx';
 import { Icon } from '../components/Icon.jsx';
 import { LegalLink } from '../components/LegalLink.jsx';
@@ -41,6 +42,8 @@ export function HeroSection({
         </div>
 
         <div className="tile hero__form" id="request">
+          {/* Огонёк, бегущий по рамке формы (как «border beam»): привлекает взгляд к заявке. */}
+          <span className="beam" aria-hidden="true" />
           <div className="hero-switch" role="group" aria-label="Что вы ищете">
             <button type="button" aria-pressed={heroMode === 'parts'} onClick={() => onHeroModeChange('parts')}>
               Нужна запчасть
@@ -208,7 +211,7 @@ export function HeroSection({
           onClick={() => trackGoal('reviews_2gis')}
         >
           <span className="hero__stat-value">
-            {reviewsMeta.rating}
+            <CountUp value={reviewsMeta.rating} />
             <Icon name="star" size={26} />
           </span>
           <span className="hero__stat-label">в 2ГИС · {ratingDetails}</span>
@@ -221,7 +224,9 @@ export function HeroSection({
           rel="noopener noreferrer"
           onClick={() => trackGoal('reviews_drom')}
         >
-          <span className="hero__stat-value">{dromListingsCount}</span>
+          <span className="hero__stat-value">
+            <CountUp value={dromListingsCount} />
+          </span>
           <span className="hero__stat-label">объявлений на Drom</span>
         </a>
 

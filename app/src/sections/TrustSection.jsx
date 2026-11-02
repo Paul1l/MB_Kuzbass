@@ -1,4 +1,5 @@
 import { trackGoal } from '../analytics.js';
+import { CountUp } from '../components/CountUp.jsx';
 import { Icon } from '../components/Icon.jsx';
 import { contact, dromListingsLabel, reviews, trustPoints } from '../data.js';
 
@@ -19,7 +20,9 @@ export function TrustSection({ reviewsMeta, ratingDetails, reviewsStatusText }) 
         <div className="trust-grid">
           <div className="tile tile--accent trust-rating">
             <div className="trust-rating__score">
-              <strong>{reviewsMeta.rating}</strong>
+              <strong>
+                <CountUp value={reviewsMeta.rating} />
+              </strong>
               <Icon name="star" size={40} />
             </div>
             <p>

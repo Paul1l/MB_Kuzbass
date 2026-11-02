@@ -8,6 +8,7 @@ import { MobileContactBar } from './components/MobileContactBar.jsx';
 import { categoryPath, categoryPathNames } from './catalogPaths.js';
 import { contact, legalDocs, reviewsMeta, reviewsProvider, site } from './data.js';
 import { copyRequestText, createRequestText } from './lib/leadRequest.js';
+import { initReveal, initSpotlight } from './lib/motion.js';
 import { getCatalogSlugFromHash, schedulePageAnchorScroll, schedulePageTopReset } from './lib/navigation.js';
 import { isOnlineReviewsConfigured, loadOnlineReviewsMeta } from './onlineReviews.js';
 import { readPrivacyPreferences, savePrivacyPreferences } from './privacyConsent.js';
@@ -18,6 +19,7 @@ import { FeaturedSection } from './sections/FeaturedSection.jsx';
 import { HeroSection } from './sections/HeroSection.jsx';
 import { JapanCarsSection } from './sections/JapanCarsSection.jsx';
 import { StepsSection } from './sections/StepsSection.jsx';
+import { StockMarquee } from './sections/StockMarquee.jsx';
 import { TrustSection } from './sections/TrustSection.jsx';
 
 // Нужна как корневой компонент. Собирает SEO-состояние, SPA-каталог, отзывы, формы заявки,
@@ -160,6 +162,16 @@ function App() {
     };
   }, []);
 
+  // Включает появление плиток при прокрутке и подсветку карточек под курсором (src/lib/motion.js).
+  useEffect(() => {
+    const stopReveal = initReveal();
+    const stopSpotlight = initSpotlight();
+    return () => {
+      stopReveal();
+      stopSpotlight();
+    };
+  }, []);
+
   // Пытается получить актуальные публичные показатели отзывов из 2ГИС, если задан API-ключ или proxy.
   useEffect(() => {
     if (!onlineReviewsConfigured) return undefined;
@@ -245,6 +257,7 @@ function App() {
           reviewsMeta={currentReviewsMeta}
           ratingDetails={ratingDetails}
         />
+        <StockMarquee />
         <CatalogSection />
         <FeaturedSection />
         <StepsSection />

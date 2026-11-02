@@ -1,0 +1,173 @@
+@use 'tokens' as *;
+
+// Бегущая лента «С фото со склада» сразу под мозаикой первого экрана: тёмная плитка, слева бирка,
+// в середине лента названий деталей с затуханием по краям, справа кнопка паузы.
+.stock-marquee {
+  // Лента продолжает мозаику первого экрана: тот же шаг между плитками, а не отступ нового раздела.
+  margin-top: -56px + $gap;
+}
+
+.stock-marquee__tile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 12px 12px 14px;
+  border-radius: 999px;
+}
+
+.stock-marquee__label {
+  flex: none;
+  margin: 0;
+  padding: 8px 14px;
+  color: $ink;
+  background: $tag;
+  border-radius: 999px;
+  font-family: $font-body;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.marquee {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+}
+
+.marquee__list {
+  display: flex;
+  flex: none;
+  gap: 28px;
+  margin: 0;
+  padding: 0 28px 0 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    white-space: nowrap;
+
+    // Разделитель между деталями — красная точка, как маршрут на первом экране.
+    &::before {
+      width: 6px;
+      height: 6px;
+      content: '';
+      background: $accent;
+      border-radius: 50%;
+    }
+  }
+
+  a {
+    color: $soft-dark;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: $white;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+}
+
+.marquee__toggle {
+  display: grid;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  color: $white;
+  cursor: pointer;
+  background: $ink-2;
+  border: 1px solid $line-dark;
+  border-radius: 50%;
+
+  &:hover {
+    background: $navy;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $tag;
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marquee__track {
+    // 30 деталей проходят круг примерно за полторы минуты: читать успеваешь, глаз не устаёт.
+    animation: marquee-scroll 90s linear infinite;
+  }
+
+  .marquee:hover .marquee__track,
+  .marquee:focus-within .marquee__track,
+  .marquee.is-paused .marquee__track {
+    animation-play-state: paused;
+  }
+}
+
+// Без движения лента стоит на месте и листается вбок; копия для бесконечного круга и пауза не нужны.
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .marquee__list[aria-hidden='true'],
+  .marquee__toggle {
+    display: none;
+  }
+}
+
+@keyframes marquee-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 560px) {
+  .stock-marquee {
+    margin-top: -36px + 10px;
+  }
+
+  .stock-marquee__tile {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 24px;
+  }
+
+  .stock-marquee__label {
+    order: 1;
+  }
+
+  .marquee__toggle {
+    order: 2;
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+  }
+
+  .marquee {
+    flex-basis: 100%;
+    order: 3;
+  }
+
+  .marquee__list a {
+    font-size: 14px;
+  }
+}

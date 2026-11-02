@@ -1,0 +1,189 @@
+@use 'tokens' as *;
+
+// Анимации главной в духе библиотек 21st.dev (blur fade, number ticker, border beam, spotlight card) — на
+// чистом CSS и src/lib/motion.js, без сторонних библиотек. Всё, что движется само, выключено при
+// «Уменьшить движение» в системе.
+
+// 1. Появление при прокрутке: плитка проявляется из размытия и чуть поднимается. Класс reveal-ready ставит
+// motion.js; без него (нет JS, «Уменьшить движение») ничего не скрыто. Анимация без заливки вперёд: после
+// неё у плитки снова свои transform и transition, и подъём при наведении работает как раньше.
+.reveal-ready [data-reveal]:not(.is-revealed) {
+  opacity: 0;
+}
+
+.reveal-ready [data-reveal].is-revealed {
+  animation: blur-fade-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(var(--reveal-index, 0) * 80ms);
+}
+
+@keyframes blur-fade-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(24px);
+  }
+}
+
+@media print {
+  .reveal-ready [data-reveal]:not(.is-revealed) {
+    opacity: 1;
+  }
+}
+
+// 2. Счётчик (компонент CountUp): невидимая копия итогового числа держит ширину, бегущее значение — поверх.
+.count-up {
+  position: relative;
+  display: inline-block;
+}
+
+.count-up__sizer {
+  visibility: hidden;
+}
+
+.count-up__value {
+  position: absolute;
+  inset: 0;
+  white-space: nowrap;
+}
+
+// 3. Огонёк по рамке формы заявки: квадрат с конусным градиентом вращается под маской-кольцом толщиной 2 px.
+// Вращается transform, поэтому браузер не перерисовывает плитку на каждом кадре. Без поддержки маски огонёк
+// не показывается совсем: иначе конус лёг бы на всю форму.
+.beam {
+  display: none;
+}
+
+@supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+  .beam {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    padding: 2px;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: inherit;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300%;
+      aspect-ratio: 1;
+      content: '';
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg 280deg,
+        rgba($accent, 0.15) 300deg,
+        $accent 340deg,
+        $tag 352deg,
+        transparent 360deg
+      );
+      transform: translate(-50%, -50%);
+      animation: beam-rotate 7s linear infinite;
+    }
+  }
+}
+
+// Без движения огонёк не нужен: он стоял бы красной дугой на одной стороне рамки.
+@media (prefers-reduced-motion: reduce) {
+  .beam {
+    display: none !important;
+  }
+}
+
+@keyframes beam-rotate {
+  to {
+    transform: translate(-50%, -50%) rotate(1turn);
+  }
+}
+
+// 4. Подсветка под курсором: мягкое пятно в точке --spot-x/--spot-y (их ставит motion.js). Только для мыши.
+// Пятно лежит между фоном карточки и её содержимым (isolation + z-index −1), текст не тонируется.
+@media (hover: hover) and (pointer: fine) {
+  [data-spotlight] {
+    position: relative;
+    isolation: isolate;
+
+    &::before {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      content: '';
+      pointer-events: none;
+      background: radial-gradient(
+        320px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+        rgba($accent, 0.1),
+        transparent 70%
+      );
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+
+  // На фото пятно светлое и «подсвечивает» снимок (поверх фото, под затемнением), а не тонирует его красным.
+  .category-card[data-spotlight]::before {
+    background: radial-gradient(
+      280px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      rgba($white, 0.35),
+      transparent 70%
+    );
+    mix-blend-mode: soft-light;
+  }
+}
+
+// 5. Маршрут «Япония → Барнаул → вся Россия»: по линиям бежит красная точка — посылка в пути. Двигается
+// фон, а не элемент: раскладка не пересчитывается. Вторая линия стартует, когда точка доходит до Барнаула.
+@media (prefers-reduced-motion: no-preference) {
+  .route__line {
+    position: relative;
+
+    &::after {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      content: '';
+      background: radial-gradient(circle, $accent 3px, transparent 3.5px) no-repeat 0 50% / 8px 8px;
+      opacity: 0;
+      transform: translateY(-50%);
+      animation: route-dot 3.2s ease-in-out infinite;
+    }
+
+    & ~ .route__line::after {
+      animation-delay: 1.44s;
+    }
+  }
+}
+
+@keyframes route-dot {
+  0% {
+    background-position: 0 50%;
+    opacity: 1;
+  }
+
+  45% {
+    background-position: 100% 50%;
+    opacity: 1;
+  }
+
+  46%,
+  100% {
+    background-position: 100% 50%;
+    opacity: 0;
+  }
+}
