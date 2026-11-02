@@ -1,4 +1,4 @@
-import { LEAD_TELEGRAM, expect, hasHorizontalScroll, test } from './fixtures.js';
+import { LEAD_TELEGRAM, expect, hasHorizontalScroll, test, waitForInitialScrollReset } from './fixtures.js';
 
 // «Уже заказали в Японии» — карусель в духе примера с мороженым: машина в центре, фон блока в её цвет.
 test('«Уже заказали в Японии»: стрелки, точки и машины справа меняют машину в центре и цвет блока, «Хочу похожий» ведёт в @MB_Kuzbass с моделью', async ({
@@ -51,15 +51,8 @@ test('«Уже заказали в Японии» листается само, �
   const section = page.locator('#japan-cars');
   const caption = section.locator('.ice__car strong');
   await expect(caption).toHaveText('Mercedes-Benz C-класс Кабриолет');
-  // Первую секунду главная сама возвращается к первому экрану, поэтому блок прокручиваем на каждой проверке:
-  // карусель листается только видимой.
-  await expect
-    .poll(
-      async () => {
-        await section.evaluate((element) => element.scrollIntoView({ block: 'center' }));
-        return caption.textContent();
-      },
-      { timeout: 12000, intervals: [500] },
-    )
-    .not.toBe('Mercedes-Benz C-класс Кабриолет');
+  // Карусель листается только видимой, поэтому прокручиваем к ней после возврата главной к первому экрану.
+  await waitForInitialScrollReset(page);
+  await section.evaluate((element) => element.scrollIntoView({ block: 'center' }));
+  await expect(caption).not.toHaveText('Mercedes-Benz C-класс Кабриолет', { timeout: 8000 });
 });

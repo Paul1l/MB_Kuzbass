@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures.js';
+import { expect, test, waitForInitialScrollReset } from './fixtures.js';
 
 // Анимации главной (src/lib/motion.js, CountUp, StockMarquee): работают и ничего не прячут насовсем,
 // а при «Уменьшить движение» в системе выключаются.
@@ -70,6 +70,7 @@ test('фото на карточках и на страницах каталог
 
 test('частицы рисуют маршрут, а сцена «склад» собирается при прокрутке', async ({ page }) => {
   await page.goto('./');
+  await waitForInitialScrollReset(page);
   const canvas = page.locator('.particle-route canvas');
   await canvas.scrollIntoViewIfNeeded();
   await expect

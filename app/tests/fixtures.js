@@ -22,6 +22,16 @@ export async function isInViewport(page, selector) {
   });
 }
 
+// Нужна тестам, которые прокручивают главную далеко вниз. Первые 700 мс после запуска главная сама
+// возвращается к первому экрану (schedulePageTopReset в src/lib/navigation.js), и прокрутка в это время
+// пропадает. Ждём, пока это окно закончится.
+export async function waitForInitialScrollReset(page) {
+  await page.waitForFunction(() => {
+    const [navigation] = performance.getEntriesByType('navigation');
+    return navigation && navigation.domContentLoadedEventEnd > 0 && performance.now() - navigation.domContentLoadedEventEnd > 900;
+  });
+}
+
 // Нужна для проверки вёрстки на телефоне: страница не должна прокручиваться вбок.
 export async function hasHorizontalScroll(page) {
   return page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
