@@ -18,10 +18,10 @@ import { DirectionsSection } from './sections/DirectionsSection.jsx';
 import { FeaturedSection } from './sections/FeaturedSection.jsx';
 import { HeroSection } from './sections/HeroSection.jsx';
 import { JapanCarsSection } from './sections/JapanCarsSection.jsx';
-import { MegaType } from './sections/MegaType.jsx';
 import { StepsSection } from './sections/StepsSection.jsx';
 import { StockMarquee } from './sections/StockMarquee.jsx';
 import { TrustSection } from './sections/TrustSection.jsx';
+import { WarehouseScene } from './sections/WarehouseScene.jsx';
 
 // Нужна как корневой компонент. Собирает SEO-состояние, SPA-каталог, отзывы, формы заявки,
 // footer-документы и cookie-плашку в одну страницу.
@@ -271,7 +271,7 @@ function App() {
           ratingDetails={ratingDetails}
           reviewsStatusText={reviewsStatusText}
         />
-        <MegaType />
+        <WarehouseScene reviewsMeta={currentReviewsMeta} />
         <ContactsSection reviewsMeta={currentReviewsMeta} />
       </main>
 

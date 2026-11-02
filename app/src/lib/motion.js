@@ -9,7 +9,7 @@ const revealSelector = [
   '.product-card',
   '.step',
   '.direction-card',
-  '.car-stage',
+  '.ice__text',
   '.particle-route',
   '.trust-rating',
   '.trust-card',
@@ -129,36 +129,74 @@ export function initWindowParallax(root = document) {
   return () => cleanups.forEach((cleanup) => cleanup());
 }
 
-// Огромные слова, которые едут вбок при прокрутке (как «BORING» и «ARGON 18» из примеров владельца).
-// В --mega-p — сколько полосы прошло через экран, от 0 до 1; сдвиг строк считает CSS. Прокрутку слушаем,
-// только пока полоса на экране.
-export function initScrollShift(element) {
-  if (!element || !canAnimateOnView()) return () => {};
+// Сцена «склад» (WarehouseScene, как примеры BORING и ARGON 18): пока сцена прокручивается, в --p уходит
+// прогресс от 0 (фото на весь экран) до 1 (фото карточкой справа, слева текст), в --tx/--ty — положение
+// курсора от −1 до 1 для наклона фото. Остальное считает CSS (_scene.scss). При «Уменьшить движение»
+// сцена сразу в конечном виде и не следит за курсором.
+export function initScene(element) {
+  if (!element) return () => {};
+  if (prefersReducedMotion()) {
+    element.style.setProperty('--p', '1');
+    element.classList.add('scene--static');
+    return () => {};
+  }
 
   let frame = 0;
   const update = () => {
     frame = 0;
     const rect = element.getBoundingClientRect();
-    const viewport = window.innerHeight || 1;
-    const progress = Math.min(Math.max((viewport - rect.top) / (viewport + rect.height), 0), 1);
-    element.style.setProperty('--mega-p', progress.toFixed(4));
+    const range = Math.max(rect.height - window.innerHeight, 1);
+    const raw = Math.min(Math.max(-rect.top / range, 0), 1);
+    // Первые 12% прокрутки фото стоит на весь экран, последние 10% — сцена уже собрана.
+    const progress = Math.min(Math.max((raw - 0.12) / 0.78, 0), 1);
+    const eased = progress < 0.5 ? 2 * progress * progress : 1 - (-2 * progress + 2) ** 2 / 2;
+    element.style.setProperty('--p', eased.toFixed(4));
+    element.classList.toggle('is-assembled', eased > 0.85);
   };
   const handleScroll = () => {
     if (!frame) frame = window.requestAnimationFrame(update);
   };
+
+  const finePointer = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+  let pointerFrame = 0;
+  let pointer = null;
+  const handlePointerMove = (event) => {
+    pointer = event;
+    if (pointerFrame) return;
+    pointerFrame = window.requestAnimationFrame(() => {
+      pointerFrame = 0;
+      element.style.setProperty('--tx', ((pointer.clientX / window.innerWidth) * 2 - 1).toFixed(3));
+      element.style.setProperty('--ty', ((pointer.clientY / window.innerHeight) * 2 - 1).toFixed(3));
+    });
+  };
+  const handlePointerLeave = () => {
+    element.style.setProperty('--tx', '0');
+    element.style.setProperty('--ty', '0');
+  };
+
   const observer = new IntersectionObserver(([entry]) => {
     if (entry.isIntersecting) {
       update();
       window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('resize', handleScroll, { passive: true });
     } else {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
     }
   });
   observer.observe(element);
+  if (finePointer) {
+    element.addEventListener('pointermove', handlePointerMove, { passive: true });
+    element.addEventListener('pointerleave', handlePointerLeave);
+  }
 
   return () => {
     observer.disconnect();
     window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener('resize', handleScroll);
+    element.removeEventListener('pointermove', handlePointerMove);
+    element.removeEventListener('pointerleave', handlePointerLeave);
     if (frame) window.cancelAnimationFrame(frame);
+    if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
   };
 }
