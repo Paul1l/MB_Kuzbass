@@ -187,3 +187,55 @@
     opacity: 0;
   }
 }
+
+// 6. Плавный переход между страницами (View Transitions; Chrome, Яндекс Браузер, Edge, Safari 18+): фото
+// с карточки «перелетает» на страницу раздела или детали, остальное плавно сменяется. Имена фото — в
+// src/catalogPaths.js; то же правило есть в public/seo-pages.css. Другие браузеры просто открывают страницу.
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+::view-transition-group(*) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+::view-transition-old(*.photo),
+::view-transition-new(*.photo) {
+  height: 100%;
+  object-fit: cover;
+}
+
+::view-transition-group(*.photo) {
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+// 7. Фото-«окно» на первом экране и в контактах: снимок на 12% больше рамки и смещается за курсором
+// (--wx/--wy от motion.js), а на телефоне и при прокрутке — по вертикали, будто смотришь в окно.
+@media (prefers-reduced-motion: no-preference) {
+  .window > img {
+    scale: 1.12;
+    transform: translate3d(calc(var(--wx, 0) * -2.5%), calc(var(--wy, 0) * -2.5%), 0);
+    transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @supports (animation-timeline: view()) {
+    .window > img {
+      animation: window-drift linear both;
+      animation-timeline: view();
+    }
+  }
+}
+
+@keyframes window-drift {
+  from {
+    translate: 0 -3%;
+  }
+
+  to {
+    translate: 0 3%;
+  }
+}

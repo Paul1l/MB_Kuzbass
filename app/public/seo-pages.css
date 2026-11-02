@@ -815,3 +815,27 @@ h2 {
     transform: translateY(28px) scale(.97);
   }
 }
+
+/* Плавный переход между страницами (View Transitions): фото с карточки «перелетает» на страницу раздела или
+   детали. Имена фото — в src/catalogPaths.js, то же правило есть в стилях главной (_motion.scss). */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+::view-transition-group(*) {
+  animation-duration: .5s;
+  animation-timing-function: cubic-bezier(.2,.7,.2,1);
+}
+
+::view-transition-old(*.photo),
+::view-transition-new(*.photo) {
+  height: 100%;
+  object-fit: cover;
+}
+
+::view-transition-group(*.photo) {
+  overflow: hidden;
+  border-radius: 20px;
+}

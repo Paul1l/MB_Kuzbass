@@ -1,7 +1,13 @@
 import { mkdir, readFile, writeFile, access } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
-import { catalogRoot, categoryPath, productPath } from '../src/catalogPaths.js';
+import {
+  catalogRoot,
+  categoryPath,
+  categoryTransitionName,
+  productPath,
+  productTransitionName,
+} from '../src/catalogPaths.js';
 
 // Создает в dist статические страницы каталога, которые видят поисковики: /katalog/, шесть разделов
 // и страницу на каждую деталь из catalog-products.json, и дописывает их в dist/sitemap.xml.
@@ -94,6 +100,7 @@ for (const category of catalogData.categories) {
     products.push({
       ...product,
       path: `/${productPath(category.slug, product.title)}`,
+      transitionName: productTransitionName(category.slug, product.title),
       images: await Promise.all(product.images.map((fileName) => imageInfo(category.slug, fileName))),
     });
   }
@@ -101,6 +108,7 @@ for (const category of catalogData.categories) {
     ...category,
     heading: categoryHeadings[category.slug] || category.label,
     path: `/${categoryPath(category.slug)}`,
+    transitionName: categoryTransitionName(category.slug),
     products,
   });
 }
@@ -112,6 +120,9 @@ if (new Set(productPaths).size !== productPaths.length) {
 
 const image = (info, alt, attributes = '') =>
   `<img src="${info.src}" alt="${escapeHtml(alt)}" width="${info.width}" height="${info.height}"${attributes} />`;
+
+// Атрибут для плавного перехода: то же имя стоит у фото на главной и на карточках (src/catalogPaths.js).
+const transition = (name) => ` style="view-transition-name: ${name}; view-transition-class: photo"`;
 
 function breadcrumbs(items) {
   const links = items
@@ -135,7 +146,7 @@ function contactButtons(topic, primaryLabel) {
 function productCard(product, categoryLabel) {
   const [cover] = product.images;
   return `<a class="seo-card" href="${product.path}">
-            ${image(cover, `${product.title} — фото товара MB Kuzbass`, ' loading="lazy" decoding="async"')}
+            ${image(cover, `${product.title} — фото товара MB Kuzbass`, ` loading="lazy" decoding="async"${transition(product.transitionName)}`)}
             <span class="seo-card__body"><small>${escapeHtml(product.meta || categoryLabel)}</small><strong>${escapeHtml(product.title)}</strong><span>Цена по запросу →</span></span>
           </a>`;
 }
@@ -290,7 +301,7 @@ await writePage(
           ${categories
             .map(
               (category) => `<a class="seo-card" href="${category.path}">
-            ${image(category.products[0].images[0], `${category.heading} — фото со склада MB Kuzbass`, ' loading="lazy" decoding="async"')}
+            ${image(category.products[0].images[0], `${category.heading} — фото со склада MB Kuzbass`, ` loading="lazy" decoding="async"${transition(category.transitionName)}`)}
             <span class="seo-card__body"><small>${category.products.length} ${plural(category.products.length, 'позиция', 'позиции', 'позиций')} с фото</small><strong>${escapeHtml(category.heading)}</strong><span>Открыть раздел →</span></span>
           </a>`,
             )
@@ -333,7 +344,7 @@ for (const category of categories) {
           <p class="seo-lead">${escapeHtml(category.description)} Склад в Барнауле, отправка транспортными компаниями по России.</p>
           ${contactButtons(`Нужна деталь из раздела «${category.label}». VIN или модель:`, 'Подобрать по VIN в Telegram')}
         </div>
-        ${image(category.products[0].images[0], `${category.products[0].title} — фото товара MB Kuzbass`)}
+        ${image(category.products[0].images[0], `${category.products[0].title} — фото товара MB Kuzbass`, transition(category.transitionName))}
       </section>
 
       <div class="seo-content seo-content--wide">
@@ -365,7 +376,7 @@ for (const category of categories) {
         schemaType: 'ItemPage',
         body: `<section class="seo-product">
         <div class="seo-product__gallery">
-          ${image(mainImage, `${product.title} — фото товара MB Kuzbass`)}
+          ${image(mainImage, `${product.title} — фото товара MB Kuzbass`, transition(product.transitionName))}
           ${moreImages.map((info, index) => image(info, `${product.title} — ракурс ${index + 2}`, ' loading="lazy" decoding="async"')).join('\n          ')}
         </div>
         <div class="seo-product__info">

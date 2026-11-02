@@ -1,5 +1,5 @@
 import { trackGoal } from '../analytics.js';
-import { productPath } from '../catalogPaths.js';
+import { productPath, productTransitionName } from '../catalogPaths.js';
 import { contact, createMessengerUrl, featuredProducts } from '../data.js';
 import { handleImageError } from '../lib/images.js';
 
@@ -31,6 +31,10 @@ export function FeaturedSection() {
                   loading="lazy"
                   decoding="async"
                   onError={handleImageError}
+                  style={{
+                    viewTransitionName: productTransitionName(product.categorySlug, product.title),
+                    viewTransitionClass: 'photo',
+                  }}
                 />
                 <span className="tag">Фото товара</span>
               </a>

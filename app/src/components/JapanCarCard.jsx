@@ -3,8 +3,9 @@ import { trackGoal } from '../analytics.js';
 import { contact, createMessengerUrl } from '../data.js';
 import { Icon } from './Icon.jsx';
 
-// Нужна для карточек «Уже заказали в Японии». Стрелки стоят под фото, чтобы не закрывать машину и табличку;
-// на телефоне свайп листает сами карточки. Следующее фото грузится при листании.
+// Нужна для витрины «Уже заказали в Японии»: крупное фото выбранной машины, стрелки под ним (не закрывают
+// машину и табличку), большой код кузова и кнопка «Хочу похожий». При выборе другой машины карточка
+// создаётся заново, и фото с кодом кузова въезжают (анимация в _japan-cars.scss).
 export function JapanCarCard({ car }) {
   const [activePhoto, setActivePhoto] = useState(0);
   const totalPhotos = car.photos.length;
@@ -18,6 +19,10 @@ export function JapanCarCard({ car }) {
         <span className="tag tag--dark">Фото из Японии</span>
       </div>
       <div className="car-card__body">
+        <span className="car-card__bigcode" aria-hidden="true">
+          {car.code}
+        </span>
+        <h3>{car.title}</h3>
         <div className="car-card__meta">
           <span className="car-card__code">Кузов {car.code}</span>
           {totalPhotos > 1 && (
@@ -34,7 +39,6 @@ export function JapanCarCard({ car }) {
             </div>
           )}
         </div>
-        <h3>{car.title}</h3>
         <a
           className="button button--accent button--arrow"
           href={createMessengerUrl(contact.telegram, `Хочу похожий автомобиль из Японии: ${car.query}. Бюджет и годы выпуска:`)}

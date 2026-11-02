@@ -161,6 +161,11 @@ if (catalogPaths.length < 7) {
 }
 for (const catalogPath of catalogPaths) {
   const catalogHtml = await readFile(path.join(distDirectory, catalogPath, 'index.html'), 'utf8');
+  // Одинаковое имя у двух фото на странице ломает плавный переход между страницами (View Transitions).
+  const transitionNames = [...catalogHtml.matchAll(/view-transition-name: ([\w-]+);/g)].map((match) => match[1]);
+  if (new Set(transitionNames).size !== transitionNames.length) {
+    throw new Error(`На ${catalogPath} два фото с одним view-transition-name: переход между страницами не сработает.`);
+  }
   if (!catalogHtml.includes(`<link rel="canonical" href="https://mb-kuzbass.ru${catalogPath}" />`)) {
     throw new Error(`${catalogPath}: нет канонического адреса страницы.`);
   }

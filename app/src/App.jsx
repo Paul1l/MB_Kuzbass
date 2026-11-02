@@ -8,7 +8,7 @@ import { MobileContactBar } from './components/MobileContactBar.jsx';
 import { categoryPath, categoryPathNames } from './catalogPaths.js';
 import { contact, legalDocs, reviewsMeta, reviewsProvider, site } from './data.js';
 import { copyRequestText, createRequestText } from './lib/leadRequest.js';
-import { initReveal, initSpotlight } from './lib/motion.js';
+import { initReveal, initSpotlight, initWindowParallax } from './lib/motion.js';
 import { getCatalogSlugFromHash, schedulePageAnchorScroll, schedulePageTopReset } from './lib/navigation.js';
 import { isOnlineReviewsConfigured, loadOnlineReviewsMeta } from './onlineReviews.js';
 import { readPrivacyPreferences, savePrivacyPreferences } from './privacyConsent.js';
@@ -18,6 +18,7 @@ import { DirectionsSection } from './sections/DirectionsSection.jsx';
 import { FeaturedSection } from './sections/FeaturedSection.jsx';
 import { HeroSection } from './sections/HeroSection.jsx';
 import { JapanCarsSection } from './sections/JapanCarsSection.jsx';
+import { MegaType } from './sections/MegaType.jsx';
 import { StepsSection } from './sections/StepsSection.jsx';
 import { StockMarquee } from './sections/StockMarquee.jsx';
 import { TrustSection } from './sections/TrustSection.jsx';
@@ -166,9 +167,11 @@ function App() {
   useEffect(() => {
     const stopReveal = initReveal();
     const stopSpotlight = initSpotlight();
+    const stopWindows = initWindowParallax();
     return () => {
       stopReveal();
       stopSpotlight();
+      stopWindows();
     };
   }, []);
 
@@ -268,6 +271,7 @@ function App() {
           ratingDetails={ratingDetails}
           reviewsStatusText={reviewsStatusText}
         />
+        <MegaType />
         <ContactsSection reviewsMeta={currentReviewsMeta} />
       </main>
 

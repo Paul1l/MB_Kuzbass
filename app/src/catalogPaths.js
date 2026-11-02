@@ -39,3 +39,14 @@ export function categoryPath(categorySlug) {
 export function productPath(categorySlug, productTitle) {
   return `${categoryPath(categorySlug)}${slugify(productTitle)}/`;
 }
+
+// Имена для плавного перехода между страницами (View Transitions): у фото на карточке и на открывшейся
+// странице одно имя, и браузер «перетягивает» снимок с карточки на страницу. Имя должно быть уникальным
+// на странице, поэтому в нём адрес раздела и детали.
+export function categoryTransitionName(categorySlug) {
+  return `c-${categoryPathNames[categorySlug]}`;
+}
+
+export function productTransitionName(categorySlug, productTitle) {
+  return `p-${categoryPathNames[categorySlug]}-${slugify(productTitle)}`;
+}

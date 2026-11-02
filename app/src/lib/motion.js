@@ -9,7 +9,8 @@ const revealSelector = [
   '.product-card',
   '.step',
   '.direction-card',
-  '.car-card',
+  '.car-stage',
+  '.particle-route',
   '.trust-rating',
   '.trust-card',
   '.review-card',
@@ -89,6 +90,75 @@ export function initSpotlight(root = document) {
   document.addEventListener('pointermove', handlePointerMove, { passive: true });
   return () => {
     document.removeEventListener('pointermove', handlePointerMove);
+    if (frame) window.cancelAnimationFrame(frame);
+  };
+}
+
+// Фото-«окно» (как сайт-«окно» из примеров владельца): снимок чуть больше рамки и смещается за курсором,
+// будто смотришь в окно на склад. Координаты курсора уходят в --wx/--wy от −1 до 1, сдвиг считает CSS
+// (_motion.scss). Только для мыши; на телефоне снимок сдвигается при прокрутке средствами CSS.
+export function initWindowParallax(root = document) {
+  if (prefersReducedMotion() || !window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) return () => {};
+
+  const cleanups = [...root.querySelectorAll('[data-window]')].map((element) => {
+    let frame = 0;
+    let pointer = null;
+    const handleMove = (event) => {
+      pointer = event;
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const rect = element.getBoundingClientRect();
+        element.style.setProperty('--wx', (((pointer.clientX - rect.left) / rect.width) * 2 - 1).toFixed(3));
+        element.style.setProperty('--wy', (((pointer.clientY - rect.top) / rect.height) * 2 - 1).toFixed(3));
+      });
+    };
+    const handleLeave = () => {
+      element.style.setProperty('--wx', '0');
+      element.style.setProperty('--wy', '0');
+    };
+    element.addEventListener('pointermove', handleMove, { passive: true });
+    element.addEventListener('pointerleave', handleLeave);
+    return () => {
+      element.removeEventListener('pointermove', handleMove);
+      element.removeEventListener('pointerleave', handleLeave);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  });
+
+  return () => cleanups.forEach((cleanup) => cleanup());
+}
+
+// Огромные слова, которые едут вбок при прокрутке (как «BORING» и «ARGON 18» из примеров владельца).
+// В --mega-p — сколько полосы прошло через экран, от 0 до 1; сдвиг строк считает CSS. Прокрутку слушаем,
+// только пока полоса на экране.
+export function initScrollShift(element) {
+  if (!element || !canAnimateOnView()) return () => {};
+
+  let frame = 0;
+  const update = () => {
+    frame = 0;
+    const rect = element.getBoundingClientRect();
+    const viewport = window.innerHeight || 1;
+    const progress = Math.min(Math.max((viewport - rect.top) / (viewport + rect.height), 0), 1);
+    element.style.setProperty('--mega-p', progress.toFixed(4));
+  };
+  const handleScroll = () => {
+    if (!frame) frame = window.requestAnimationFrame(update);
+  };
+  const observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      update();
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    } else {
+      window.removeEventListener('scroll', handleScroll);
+    }
+  });
+  observer.observe(element);
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener('scroll', handleScroll);
     if (frame) window.cancelAnimationFrame(frame);
   };
 }

@@ -219,11 +219,14 @@ export const directions = [
 // Автомобили, которые MB Kuzbass заказал в Японии (фото прислал владелец 03.10.2026). Фото сделаны в Японии,
 // номера и таблички японских продавцов закрыты табличкой MB Kuzbass. Модель и кузов определены по фото;
 // год, пробег, цена, город и срок доставки не указаны — их нет в исходных данных, добавлять только со слов владельца.
+// stage — цвет витрины, когда машина выбрана (как фон в цвет товара): светлый для белых машин, серебристый,
+// тёмно-красный для красной; tone: 'dark' — фон тёмный, текст и кнопка светлые.
 export const japanCars = [
   {
     title: 'Mercedes-Benz C-класс Кабриолет',
     code: 'A205',
     query: 'Mercedes-Benz C-класс Кабриолет (A205)',
+    stage: { bg: '#dde4ec', tone: 'light' },
     photos: [
       { src: asset('japan/mercedes-c-cabrio-a205-front.webp'), alt: 'Белый Mercedes-Benz C-класс Кабриолет спереди' },
       { src: asset('japan/mercedes-c-cabrio-a205-rear.webp'), alt: 'Белый Mercedes-Benz C-класс Кабриолет сзади' },
@@ -234,6 +237,7 @@ export const japanCars = [
     title: 'Mercedes-Benz C-класс Купе',
     code: 'C204',
     query: 'Mercedes-Benz C-класс Купе (C204)',
+    stage: { bg: '#b4bbc3', tone: 'light' },
     photos: [
       { src: asset('japan/mercedes-c-coupe-c204-front.webp'), alt: 'Серебристый Mercedes-Benz C-класс Купе спереди' },
       { src: asset('japan/mercedes-c-coupe-c204-side.webp'), alt: 'Серебристый Mercedes-Benz C-класс Купе сбоку слева' },
@@ -244,6 +248,7 @@ export const japanCars = [
     title: 'Mercedes-Benz C-класс седан',
     code: 'W205',
     query: 'Mercedes-Benz C-класс седан (W205)',
+    stage: { bg: '#8c1d29', tone: 'dark' },
     photos: [
       { src: asset('japan/mercedes-c-w205-front.webp'), alt: 'Красный Mercedes-Benz C-класс седан спереди' },
       { src: asset('japan/mercedes-c-w205-rear.webp'), alt: 'Красный Mercedes-Benz C-класс седан сзади' },
@@ -255,6 +260,7 @@ export const japanCars = [
     title: 'Mercedes-Benz C180 седан',
     code: 'W204',
     query: 'Mercedes-Benz C180 седан (W204)',
+    stage: { bg: '#e8e3d8', tone: 'light' },
     photos: [
       { src: asset('japan/mercedes-c180-w204-front.webp'), alt: 'Белый Mercedes-Benz C180 спереди' },
       { src: asset('japan/mercedes-c180-w204-rear.webp'), alt: 'Белый Mercedes-Benz C180 сзади' },

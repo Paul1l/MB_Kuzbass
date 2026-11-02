@@ -171,17 +171,19 @@ export function HeroSection({
             Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется.
           </p>
         </div>
-        <figure className="tile tile--photo hero__main">
-          <img
-            src={heroImages.main}
-            srcSet={`${heroImages.mainSmall} 480w, ${heroImages.main} 960w`}
-            sizes="(max-width: 1100px) 50vw, 440px"
-            alt={heroImages.mainAlt}
-            width="960"
-            height="1280"
-            loading="lazy"
-            decoding="async"
-          />
+        <figure className="tile tile--photo hero__main" data-window>
+          <span className="window">
+            <img
+              src={heroImages.main}
+              srcSet={`${heroImages.mainSmall} 480w, ${heroImages.main} 960w`}
+              sizes="(max-width: 1100px) 50vw, 440px"
+              alt={heroImages.mainAlt}
+              width="960"
+              height="1280"
+              loading="lazy"
+              decoding="async"
+            />
+          </span>
           <figcaption className="tile__chip">Склад в Барнауле</figcaption>
           <div className="notch">
             <a className="notch__link" href="#catalog">

@@ -1,5 +1,5 @@
 import { trackGoal } from '../analytics.js';
-import { categoryPath } from '../catalogPaths.js';
+import { categoryPath, categoryTransitionName } from '../catalogPaths.js';
 import { Icon } from '../components/Icon.jsx';
 import { catalog, catalogCards, landingPages } from '../data.js';
 import { handleImageError } from '../lib/images.js';
@@ -32,6 +32,7 @@ export function CatalogSection() {
                 loading="lazy"
                 decoding="async"
                 onError={handleImageError}
+                style={{ viewTransitionName: categoryTransitionName(item.slug), viewTransitionClass: 'photo' }}
               />
               <span className="category-card__body">
                 <strong>{item.label}</strong>

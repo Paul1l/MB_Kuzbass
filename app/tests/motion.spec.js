@@ -42,6 +42,52 @@ test('плитки каталога проявляются при прокрут
   await expect(card).toHaveCSS('opacity', '1');
 });
 
+test('фото на карточках и на страницах каталога связаны одним именем для плавного перехода', async ({ page }) => {
+  const transitionNames = () =>
+    page.locator('[style*="view-transition-name"]').evaluateAll((items) => items.map((item) => item.style.viewTransitionName));
+
+  await page.goto('./');
+  const homeNames = await transitionNames();
+  expect(homeNames.length).toBeGreaterThanOrEqual(10);
+  expect(new Set(homeNames).size, 'имена на главной не повторяются').toBe(homeNames.length);
+
+  const featured = page.locator('#stock .product-card').first();
+  const productName = await featured.locator('img').evaluate((image) => image.style.viewTransitionName);
+  const productHref = await featured.locator('h3 a').evaluate((link) => link.href);
+  const categoryName = await page.locator('.category-card img').first().evaluate((image) => image.style.viewTransitionName);
+  const categoryHref = await page.locator('.category-card').first().evaluate((link) => link.href);
+
+  await page.goto(productHref);
+  await expect(page.locator('.seo-product__gallery img').first()).toHaveAttribute('style', new RegExp(`view-transition-name: ${productName};`));
+  const productPageNames = await transitionNames();
+  expect(new Set(productPageNames).size).toBe(productPageNames.length);
+
+  await page.goto(categoryHref);
+  await expect(page.locator('.seo-hero img')).toHaveAttribute('style', new RegExp(`view-transition-name: ${categoryName};`));
+  const categoryPageNames = await transitionNames();
+  expect(new Set(categoryPageNames).size).toBe(categoryPageNames.length);
+});
+
+test('частицы рисуют маршрут, а большие слова едут при прокрутке', async ({ page }) => {
+  await page.goto('./');
+  const canvas = page.locator('.particle-route canvas');
+  await canvas.scrollIntoViewIfNeeded();
+  await expect
+    .poll(() =>
+      canvas.evaluate((element) => {
+        const { data } = element.getContext('2d').getImageData(0, 0, element.width, element.height);
+        let painted = 0;
+        for (let index = 3; index < data.length; index += 4) if (data[index] > 0) painted += 1;
+        return painted;
+      }),
+    )
+    .toBeGreaterThan(500);
+
+  const mega = page.locator('.mega-type');
+  await mega.scrollIntoViewIfNeeded();
+  await expect.poll(() => mega.evaluate((element) => element.style.getPropertyValue('--mega-p'))).not.toBe('');
+});
+
 test.describe('при «Уменьшить движение»', () => {
   test.use({ contextOptions: { reducedMotion: 'reduce' } });
 
@@ -55,5 +101,7 @@ test.describe('при «Уменьшить движение»', () => {
     await expect(page.locator('.marquee__track')).toHaveCSS('animation-name', 'none');
     await expect(page.locator('.marquee__list[aria-hidden="true"]')).toBeHidden();
     await expect(page.locator('.hero__form .beam')).toBeHidden();
+    await expect(page.locator('.particle-route')).toBeHidden();
+    expect(await page.locator('.hero__main img').evaluate((image) => getComputedStyle(image).scale)).toBe('none');
   });
 });

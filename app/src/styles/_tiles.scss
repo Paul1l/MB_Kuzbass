@@ -32,6 +32,22 @@
     object-fit: cover;
     border-radius: $radius;
   }
+
+  // Фото-«окно»: рамка со скруглением обрезает снимок, а сам снимок сдвигается внутри (_motion.scss).
+  > .window {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: $radius;
+
+    > img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
 }
 
 a.tile {
