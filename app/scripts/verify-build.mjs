@@ -187,6 +187,10 @@ for (const photo of japanPhotos) {
 
 // Редирект на https://mb-kuzbass.ru должен приходить из исходников, а не из ручной правки корня репозитория.
 const htaccess = await readFile(path.join(distDirectory, '.htaccess'), 'utf8');
+// На хостинге HTTPS принимает nginx, Apache видит http: проверка %{HTTPS} зацикливает каждую страницу (02.11.2026).
+if (/RewriteCond\s+%\{HTTPS\}/.test(htaccess)) {
+  throw new Error('.htaccess проверяет %{HTTPS}: на Спринтхосте это бесконечный редирект. Используйте %{HTTP:X-Forwarded-Proto}.');
+}
 if (!htaccess.includes('RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI} [R=301,L,NE]')) {
   throw new Error('.htaccess в сборке не содержит редирект на https://mb-kuzbass.ru.');
 }
