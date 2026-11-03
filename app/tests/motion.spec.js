@@ -103,6 +103,9 @@ test.describe('при «Уменьшить движение»', () => {
     await expect(page.locator('.marquee__list[aria-hidden="true"]')).toBeHidden();
     await expect(page.locator('.hero__form .beam')).toBeHidden();
     await expect(page.locator('.particle-route')).toBeHidden();
+    // Точка на маршруте и кольца у пунктов тоже стоят.
+    expect(await page.locator('.route__line').first().evaluate((line) => getComputedStyle(line, '::after').animationName)).toBe('none');
+    expect(await page.locator('.route__point').first().evaluate((point) => getComputedStyle(point, '::after').animationName)).toBe('none');
     expect(await page.locator('.hero__main img').evaluate((image) => getComputedStyle(image).scale)).toBe('none');
   });
 });
