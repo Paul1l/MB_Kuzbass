@@ -1,8 +1,11 @@
+import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import './styles.scss';
 
-createRoot(document.getElementById('root')).render(<App />);
+// Первый рендер синхронный: к концу скрипта разметка уже на странице (см. renderBlockingEntry в vite.config.js).
+const root = createRoot(document.getElementById('root'));
+flushSync(() => root.render(<App />));
 
 // Регистрирует offline-страницу только в опубликованной версии. Локальная разработка не получает
 // устаревший service worker и не кеширует промежуточные сборки.

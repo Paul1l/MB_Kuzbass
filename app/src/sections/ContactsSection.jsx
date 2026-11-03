@@ -56,8 +56,10 @@ export function ContactsSection({ reviewsMeta }) {
           </div>
         </div>
 
-        <figure className="tile tile--photo contacts__photo">
-          <img src={heroImages.yard} alt={heroImages.yardAlt} width="1280" height="960" loading="lazy" decoding="async" />
+        <figure className="tile tile--photo contacts__photo" data-window>
+          <span className="window">
+            <img src={heroImages.yard} alt={heroImages.yardAlt} width="1280" height="960" loading="lazy" decoding="async" />
+          </span>
           <figcaption className="tile__chip">{contact.address}</figcaption>
         </figure>
 

@@ -68,6 +68,13 @@ h3 {
 }
 
 // Текст для экранных дикторов, который не виден на экране.
+// Заглушка вместо фото, которое не загрузилось (src/lib/images.js).
+img.is-fallback {
+  object-fit: contain !important;
+  padding: 18px;
+  background: $white;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

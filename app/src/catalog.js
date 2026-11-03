@@ -11,8 +11,6 @@ function catalogAsset(categorySlug, fileName) {
 export const catalog = catalogProducts.categories.map((category) => ({
   slug: category.slug,
   label: category.label,
-  caption: 'Открыть каталог',
-  href: `#catalog/${category.slug}`,
   description: category.description,
   items: category.products.map((product) => ({
     title: product.title,

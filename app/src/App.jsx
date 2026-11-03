@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { disableAnalytics, enableAnalytics, trackGoal, trackPageView } from './analytics.js';
-import { CatalogCategoryPage } from './components/CatalogCategoryPage.jsx';
 import { CookieBanner } from './components/CookieBanner.jsx';
 import { Footer } from './components/Footer.jsx';
 import { Header } from './components/Header.jsx';
 import { LegalModal } from './components/LegalModal.jsx';
 import { MobileContactBar } from './components/MobileContactBar.jsx';
-import { catalog, contact, legalDocs, reviewsMeta, reviewsProvider, site } from './data.js';
+import { categoryPath, categoryPathNames } from './catalogPaths.js';
+import { contact, legalDocs, reviewsMeta, reviewsProvider, site } from './data.js';
 import { copyRequestText, createRequestText } from './lib/leadRequest.js';
+import { initReveal, initSpotlight, initWindowParallax } from './lib/motion.js';
 import { getCatalogSlugFromHash, schedulePageAnchorScroll, schedulePageTopReset } from './lib/navigation.js';
 import { isOnlineReviewsConfigured, loadOnlineReviewsMeta } from './onlineReviews.js';
 import { readPrivacyPreferences, savePrivacyPreferences } from './privacyConsent.js';
@@ -17,7 +18,9 @@ import { DirectionsSection } from './sections/DirectionsSection.jsx';
 import { FeaturedSection } from './sections/FeaturedSection.jsx';
 import { HeroSection } from './sections/HeroSection.jsx';
 import { JapanCarsSection } from './sections/JapanCarsSection.jsx';
+import { MegaType } from './sections/MegaType.jsx';
 import { StepsSection } from './sections/StepsSection.jsx';
+import { StockMarquee } from './sections/StockMarquee.jsx';
 import { TrustSection } from './sections/TrustSection.jsx';
 
 // Нужна как корневой компонент. Собирает SEO-состояние, SPA-каталог, отзывы, формы заявки,
@@ -33,9 +36,6 @@ function App() {
   const [currentReviewsMeta, setCurrentReviewsMeta] = useState(() => ({ ...reviewsMeta, isLive: false }));
   const onlineReviewsConfigured = useMemo(() => isOnlineReviewsConfigured(reviewsProvider), []);
   const [reviewsSyncStatus, setReviewsSyncStatus] = useState(onlineReviewsConfigured ? 'loading' : 'static');
-  const [catalogSlug, setCatalogSlug] = useState(() =>
-    typeof window === 'undefined' ? null : getCatalogSlugFromHash(window.location.hash),
-  );
   const partInputRef = useRef(null);
   const ratingDetails = [currentReviewsMeta.ratingCount, currentReviewsMeta.reviewCount].filter(Boolean).join(', ');
   const reviewsStatusText =
@@ -47,10 +47,6 @@ function App() {
   const activeLegalDoc = useMemo(
     () => legalDocs.find((doc) => doc.id === activeLegalId),
     [activeLegalId],
-  );
-  const activeCatalogCategory = useMemo(
-    () => catalog.find((item) => item.slug === catalogSlug),
-    [catalogSlug],
   );
 
   // Закрывает документ и убирает его hash из адреса, чтобы после обновления страницы окно не открылось снова.
@@ -79,9 +75,7 @@ function App() {
       return undefined;
     }
 
-    const analyticsTitle = activeCatalogCategory
-      ? `${activeCatalogCategory.label} — каталог MB Kuzbass`
-      : activeLegalDoc
+    const analyticsTitle = activeLegalDoc
         ? `${activeLegalDoc.title} — ${site.shortName}`
         : document.title;
 
@@ -98,7 +92,7 @@ function App() {
     return () => {
       isActive = false;
     };
-  }, [activeCatalogCategory, activeLegalDoc, privacyPreferences?.analytics]);
+  }, [activeLegalDoc, privacyPreferences?.analytics]);
 
   // Закрывает документ и меню по Escape, чтобы они не мешали просмотру сайта.
   useEffect(() => {
@@ -113,7 +107,8 @@ function App() {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [closeLegalDocument]);
 
-  // Синхронизирует hash URL с состоянием SPA-каталога и сбрасывает прокрутку при открытии категории.
+  // Синхронизирует hash URL с открытым документом и прокруткой к разделу. Старые адреса каталога
+  // (#catalog/engines) ведут на отдельные страницы /katalog/<раздел>/, которые видят поисковики.
   useEffect(() => {
     const previousScrollRestoration = window.history.scrollRestoration;
     let isInitialNavigation = true;
@@ -122,7 +117,7 @@ function App() {
       window.history.scrollRestoration = 'manual';
     }
 
-    // Нужна для маршрутизации каталога. Читает hash, выбирает категорию и ставит страницу наверх.
+    // Нужна для hash-адресов. Открывает документ, переадресует старый адрес каталога или прокручивает к разделу.
     function handleHashChange() {
       const isFirstRun = isInitialNavigation;
       isInitialNavigation = false;
@@ -132,8 +127,13 @@ function App() {
       // посадочных страниц) обрабатывается ниже как якорь и прокручивает страницу к каталогу.
       if (isFirstRun && !currentHash) {
         setActiveLegalId(null);
-        setCatalogSlug(null);
         schedulePageTopReset();
+        return;
+      }
+
+      const legacyCatalogSlug = getCatalogSlugFromHash(currentHash);
+      if (legacyCatalogSlug && categoryPathNames[legacyCatalogSlug]) {
+        window.location.replace(new URL(categoryPath(legacyCatalogSlug), window.location.href.split('#')[0]).href);
         return;
       }
 
@@ -146,15 +146,7 @@ function App() {
       }
 
       setActiveLegalId(null);
-
-      const nextCatalogSlug = getCatalogSlugFromHash(window.location.hash);
-      setCatalogSlug(nextCatalogSlug);
-
-      if (nextCatalogSlug) {
-        window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
-      } else {
-        schedulePageAnchorScroll(window.location.hash);
-      }
+      schedulePageAnchorScroll(window.location.hash);
     }
 
     handleHashChange();
@@ -171,34 +163,17 @@ function App() {
     };
   }, []);
 
-  // Обновляет title и description для главной страницы и внутренних страниц каталога.
+  // Включает появление плиток при прокрутке и подсветку карточек под курсором (src/lib/motion.js).
   useEffect(() => {
-    const nextTitle = activeCatalogCategory
-      ? `${activeCatalogCategory.label} — каталог MB Kuzbass`
-      : site.title;
-    const nextDescription = activeCatalogCategory
-      ? `${activeCatalogCategory.description} MB Kuzbass, Барнаул.`
-      : site.description;
-    const descriptionMeta = document.querySelector('meta[name="description"]');
-
-    document.title = nextTitle;
-    if (descriptionMeta) descriptionMeta.setAttribute('content', nextDescription);
-  }, [activeCatalogCategory]);
-
-  // Управляет прокруткой после смены SPA-состояния, чтобы якоря и страницы каталога открывались предсказуемо.
-  useEffect(() => {
-    if (activeCatalogCategory) {
-      const resetScroll = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      window.requestAnimationFrame(resetScroll);
-      window.setTimeout(resetScroll, 80);
-      return;
-    }
-
-    const hashTarget = window.location.hash.replace(/^#/, '');
-    if (!hashTarget || hashTarget.startsWith('catalog/')) return;
-
-    schedulePageAnchorScroll(window.location.hash);
-  }, [activeCatalogCategory]);
+    const stopReveal = initReveal();
+    const stopSpotlight = initSpotlight();
+    const stopWindows = initWindowParallax();
+    return () => {
+      stopReveal();
+      stopSpotlight();
+      stopWindows();
+    };
+  }, []);
 
   // Пытается получить актуальные публичные показатели отзывов из 2ГИС, если задан API-ключ или proxy.
   useEffect(() => {
@@ -256,22 +231,6 @@ function App() {
     });
   }
 
-  // Нужна для карточек каталога на главной. Открывает SPA-категорию и сбрасывает старую позицию прокрутки.
-  function handleCatalogOpen(event, slug) {
-    event.preventDefault();
-    const nextHash = `#catalog/${slug}`;
-    const resetScroll = () => window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-
-    if (window.location.hash !== nextHash) {
-      window.history.pushState(null, '', nextHash);
-    }
-
-    setCatalogSlug(slug);
-    trackGoal('catalog_open');
-    window.requestAnimationFrame(resetScroll);
-    window.setTimeout(resetScroll, 80);
-  }
-
   // Фиксирует выбор cookie и закрывает панель. Отдельное согласие на аналитику можно отозвать в footer.
   function handlePrivacySave(analyticsAllowed) {
     const nextPreferences = savePrivacyPreferences(analyticsAllowed);
@@ -288,36 +247,32 @@ function App() {
       />
 
       <main id="top" className="page">
-        {activeCatalogCategory ? (
-          <CatalogCategoryPage category={activeCatalogCategory} />
-        ) : (
-          <>
-            <HeroSection
-              heroMode={heroMode}
-              onHeroModeChange={setHeroMode}
-              vehicleQuery={vehicleQuery}
-              onVehicleQueryChange={setVehicleQuery}
-              partInputRef={partInputRef}
-              formStatus={formStatus}
-              onLeadSubmit={handleLeadSubmit}
-              onOpenLegal={setActiveLegalId}
-              onDonorPick={handleDonorPick}
-              reviewsMeta={currentReviewsMeta}
-              ratingDetails={ratingDetails}
-            />
-            <CatalogSection onCatalogOpen={handleCatalogOpen} />
-            <FeaturedSection onCatalogOpen={handleCatalogOpen} />
-            <StepsSection />
-            <DirectionsSection />
-            <JapanCarsSection />
-            <TrustSection
-              reviewsMeta={currentReviewsMeta}
-              ratingDetails={ratingDetails}
-              reviewsStatusText={reviewsStatusText}
-            />
-            <ContactsSection reviewsMeta={currentReviewsMeta} />
-          </>
-        )}
+        <HeroSection
+          heroMode={heroMode}
+          onHeroModeChange={setHeroMode}
+          vehicleQuery={vehicleQuery}
+          onVehicleQueryChange={setVehicleQuery}
+          partInputRef={partInputRef}
+          formStatus={formStatus}
+          onLeadSubmit={handleLeadSubmit}
+          onOpenLegal={setActiveLegalId}
+          onDonorPick={handleDonorPick}
+          reviewsMeta={currentReviewsMeta}
+          ratingDetails={ratingDetails}
+        />
+        <StockMarquee />
+        <CatalogSection />
+        <FeaturedSection />
+        <StepsSection />
+        <DirectionsSection />
+        <JapanCarsSection />
+        <TrustSection
+          reviewsMeta={currentReviewsMeta}
+          ratingDetails={ratingDetails}
+          reviewsStatusText={reviewsStatusText}
+        />
+        <MegaType />
+        <ContactsSection reviewsMeta={currentReviewsMeta} />
       </main>
 
       <Footer onOpenLegal={setActiveLegalId} onOpenPrivacySettings={() => setPrivacyPanelOpen(true)} />

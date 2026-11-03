@@ -2,50 +2,272 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://mb-kuzbass.ru/</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://mb-kuzbass.ru/kontraktnye-zapchasti-barnaul/</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://mb-kuzbass.ru/zapchasti-mercedes-barnaul/</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://mb-kuzbass.ru/zapchasti-bmw-barnaul/</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://mb-kuzbass.ru/dvigateli-akpp-mercedes-bmw-barnaul/</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://mb-kuzbass.ru/kuzovnye-detali-optika-mercedes-bmw-barnaul/</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://mb-kuzbass.ru/avtomobili-iz-yaponii-barnaul/</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://mb-kuzbass.ru/postavki-dlya-avtorazborov-barnaul/</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-11-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/dvigateli/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/akpp/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/kuzov/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/optika/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/salon/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/dvigateli/dvigatel-bmw-e39-m54/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/dvigateli/dvigatel-bmw-x3-n52/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/dvigateli/dvigatel-mercedes-benz-c203-m111/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/dvigateli/dvigatel-mercedes-benz-c203-m271/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/dvigateli/dvigatel-mercedes-benz-e211-m272/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/dvigateli/dvigatel-bmw-e60-n62/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/dvigateli/dvigatel-mercedes-benz-w163-m112/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/akpp/akpp-bmw-525i/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/akpp/akpp-mercedes-benz-e-class-2009/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/akpp/akpp-zf-6hp26-bmw-550i/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/balka-zadney-podveski-bmw-e39-525i/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/tormoznye-diski-mercedes-benz-w221-s500/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/perednie-tormoznye-diski-mercedes-benz-w211-e300/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/komplekt-diskov-bmw-e39-525i/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/komplekt-diskov-mercedes-benz-w204/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/komplekt-diskov-mercedes-benz-w211/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/komplekt-koles-bmw-e60-550i/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/rychagi-zadney-podveski-mercedes-benz-w203/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/diski-podveska-tormoza/rychagi-zadney-podveski-mercedes-benz-w211/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/kuzov/kuzov-mercedes-benz-c-class-w204/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/kuzov/porogi-kuzova-v-assortimente/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/kuzov/perednie-porogi-kuzova-mercedes-benz-w203/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/optika/komplekt-perednikh-far-mercedes-benz-w212/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/optika/komplekt-perednikh-far-bmw-550i-2006/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/optika/komplekt-ksenonovykh-far-mercedes-benz-c-class-2013/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/optika/ksenonovaya-fara-mercedes-benz-e-class-2007/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/optika/komplekt-zadnikh-fonarey-bmw-e60-550i/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/optika/komplekt-zadnikh-fonarey-mercedes-benz-w207/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/optika/komplekt-zadnikh-fonarey-mercedes-benz-w211/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mb-kuzbass.ru/katalog/salon/komplekt-sideniy-bmw-550i/</loc>
+    <lastmod>2026-11-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

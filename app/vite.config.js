@@ -26,9 +26,24 @@ function preloadCriticalFonts() {
   };
 }
 
+// Главная — SPA: пока не выполнен скрипт, страница пустая. Скрипт с blocking="render" придерживает первый кадр
+// до готовой разметки (main.jsx рендерит синхронно), поэтому плавный переход со страницы детали обратно на
+// главную показывает страницу, а не пустой фон. Заголовок и так рисует скрипт, поэтому скорость не меняется.
+function renderBlockingEntry() {
+  return {
+    name: 'mb-render-blocking-entry',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        return html.replace('<script type="module" crossorigin src=', '<script type="module" crossorigin blocking="render" src=');
+      },
+    },
+  };
+}
+
 export default defineConfig({
   base: './',
-  plugins: [react(), preloadCriticalFonts()],
+  plugins: [react(), preloadCriticalFonts(), renderBlockingEntry()],
   // Dev- и preview-серверы доступны только с этого компьютера. Это исключает случайную публикацию
   // исходников в локальную сеть во время обслуживания сайта.
   server: {

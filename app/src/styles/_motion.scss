@@ -1,0 +1,301 @@
+@use 'tokens' as *;
+
+// Анимации главной в духе библиотек 21st.dev (blur fade, number ticker, border beam, spotlight card) — на
+// чистом CSS и src/lib/motion.js, без сторонних библиотек. Всё, что движется само, выключено при
+// «Уменьшить движение» в системе.
+
+// 1. Появление при прокрутке: плитка проявляется из размытия и чуть поднимается. Класс reveal-ready ставит
+// motion.js; без него (нет JS, «Уменьшить движение») ничего не скрыто. Анимация без заливки вперёд: после
+// неё у плитки снова свои transform и transition, и подъём при наведении работает как раньше.
+.reveal-ready [data-reveal]:not(.is-revealed) {
+  opacity: 0;
+}
+
+.reveal-ready [data-reveal].is-revealed {
+  animation: blur-fade-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(var(--reveal-index, 0) * 80ms);
+}
+
+@keyframes blur-fade-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(24px);
+  }
+}
+
+@media print {
+  .reveal-ready [data-reveal]:not(.is-revealed) {
+    opacity: 1;
+  }
+}
+
+// 2. Счётчик (компонент CountUp): невидимая копия итогового числа держит ширину, бегущее значение — поверх.
+.count-up {
+  position: relative;
+  display: inline-block;
+}
+
+.count-up__sizer {
+  visibility: hidden;
+}
+
+.count-up__value {
+  position: absolute;
+  inset: 0;
+  white-space: nowrap;
+}
+
+// 3. Огонёк по рамке формы заявки: квадрат с конусным градиентом вращается под маской-кольцом толщиной 2 px.
+// Вращается transform, поэтому браузер не перерисовывает плитку на каждом кадре. Без поддержки маски огонёк
+// не показывается совсем: иначе конус лёг бы на всю форму.
+.beam {
+  display: none;
+}
+
+@supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+  .beam {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    padding: 2px;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: inherit;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300%;
+      aspect-ratio: 1;
+      content: '';
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg 280deg,
+        rgba($accent, 0.15) 300deg,
+        $accent 340deg,
+        $tag 352deg,
+        transparent 360deg
+      );
+      transform: translate(-50%, -50%);
+      animation: beam-rotate 7s linear infinite;
+    }
+  }
+}
+
+// Без движения огонёк не нужен: он стоял бы красной дугой на одной стороне рамки.
+@media (prefers-reduced-motion: reduce) {
+  .beam {
+    display: none !important;
+  }
+}
+
+@keyframes beam-rotate {
+  to {
+    transform: translate(-50%, -50%) rotate(1turn);
+  }
+}
+
+// 4. Подсветка под курсором: мягкое пятно в точке --spot-x/--spot-y (их ставит motion.js). Только для мыши.
+// Пятно лежит между фоном карточки и её содержимым (isolation + z-index −1), текст не тонируется.
+@media (hover: hover) and (pointer: fine) {
+  [data-spotlight] {
+    position: relative;
+    isolation: isolate;
+
+    &::before {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      content: '';
+      pointer-events: none;
+      background: radial-gradient(
+        320px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+        rgba($accent, 0.1),
+        transparent 70%
+      );
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+
+  // На фото пятно светлое и «подсвечивает» снимок (поверх фото, под затемнением), а не тонирует его красным.
+  .category-card[data-spotlight]::before {
+    background: radial-gradient(
+      280px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      rgba($white, 0.35),
+      transparent 70%
+    );
+    mix-blend-mode: soft-light;
+  }
+}
+
+// 5. Маршрут «Япония → Барнаул → вся Россия»: красная точка — посылка в пути. Точка плавно появляется
+// у «Японии», не спеша едет до «Барнаула», там пункт мягко «вспыхивает» кольцом, точка едет дальше
+// до «всей России», потом пауза и круг заново. Точка двигается через transform — плавно, без рывков
+// по пикселям; кольцо — через transform и прозрачность, без перерисовки.
+$route-cycle: 6.4s;
+// Доля круга на один перегон: 0–34% — Япония → Барнаул, 34–68% — Барнаул → вся Россия, дальше пауза.
+$route-leg: 0.34;
+$route-ease: cubic-bezier(0.45, 0, 0.55, 1);
+
+@media (prefers-reduced-motion: no-preference) {
+  .route__line {
+    position: relative;
+
+    // Слой во всю длину линии, точка нарисована у его левого края и уезжает вместе со слоем.
+    &::after {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 14px;
+      margin-top: -7px;
+      content: '';
+      background: radial-gradient(
+        circle at 7px 50%,
+        $accent 0 3.2px,
+        rgba($accent, 0.3) 3.8px,
+        rgba($accent, 0) 7px
+      );
+      opacity: 0;
+      transform: translateX(-7px);
+      animation: route-travel $route-cycle $route-ease infinite;
+      will-change: transform, opacity;
+    }
+
+    & ~ .route__line::after {
+      animation-delay: $route-cycle * $route-leg;
+    }
+  }
+
+  .route__point {
+    position: relative;
+
+    &::after {
+      position: absolute;
+      inset: -1.5px;
+      content: '';
+      pointer-events: none;
+      border: 2px solid $accent;
+      border-radius: inherit;
+      opacity: 0;
+      animation: route-pulse $route-cycle ease-out infinite;
+    }
+
+    // «Япония» — отправление, «Барнаул» и «вся Россия» — прибытие точки.
+    &:nth-child(3)::after {
+      animation-delay: $route-cycle * $route-leg;
+    }
+
+    &:nth-child(5)::after {
+      animation-delay: $route-cycle * $route-leg * 2;
+    }
+  }
+}
+
+// Прозрачность меняется в своих кадрах, а движение — одним плавным отрезком от 0% до 34%.
+@keyframes route-travel {
+  0% {
+    opacity: 0;
+    transform: translateX(-7px);
+  }
+
+  7% {
+    opacity: 1;
+  }
+
+  26% {
+    opacity: 1;
+  }
+
+  34%,
+  100% {
+    opacity: 0;
+    transform: translateX(calc(100% - 7px));
+  }
+}
+
+@keyframes route-pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+
+  16% {
+    opacity: 0;
+    transform: scale(1.18, 1.45);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.18, 1.45);
+  }
+}
+
+// 6. Плавный переход между страницами (View Transitions; Chrome, Яндекс Браузер, Edge, Safari 18+): фото
+// с карточки «перелетает» на страницу раздела или детали, остальное плавно сменяется. Имена фото — в
+// src/catalogPaths.js; то же правило есть в public/seo-pages.css. Другие браузеры просто открывают страницу.
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+::view-transition-group(*) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+::view-transition-old(*.photo),
+::view-transition-new(*.photo) {
+  height: 100%;
+  object-fit: cover;
+}
+
+::view-transition-group(*.photo) {
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+// 7. Фото-«окно» на первом экране и в контактах: снимок на 12% больше рамки и смещается за курсором
+// (--wx/--wy от motion.js), а на телефоне и при прокрутке — по вертикали, будто смотришь в окно.
+@media (prefers-reduced-motion: no-preference) {
+  .window > img {
+    scale: 1.12;
+    transform: translate3d(calc(var(--wx, 0) * -2.5%), calc(var(--wy, 0) * -2.5%), 0);
+    transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @supports (animation-timeline: view()) {
+    .window > img {
+      animation: window-drift linear both;
+      animation-timeline: view();
+    }
+  }
+}
+
+@keyframes window-drift {
+  from {
+    translate: 0 -3%;
+  }
+
+  to {
+    translate: 0 3%;
+  }
+}

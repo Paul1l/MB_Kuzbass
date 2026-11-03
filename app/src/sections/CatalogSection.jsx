@@ -1,9 +1,12 @@
+import { trackGoal } from '../analytics.js';
+import { categoryPath, categoryTransitionName } from '../catalogPaths.js';
 import { Icon } from '../components/Icon.jsx';
 import { catalog, catalogCards, landingPages } from '../data.js';
 import { handleImageError } from '../lib/images.js';
 
-// Нужна для блока «Каталог запчастей» на главной: мозаика категорий с фото со склада и ссылки на разделы сайта.
-export function CatalogSection({ onCatalogOpen }) {
+// Нужна для блока «Каталог запчастей» на главной: мозаика разделов с фото со склада. Каждая плитка ведет
+// на отдельную страницу раздела /katalog/<раздел>/, которую видят поисковики.
+export function CatalogSection() {
   return (
     <section className="section" id="catalog" aria-labelledby="catalog-title">
       <div className="container">
@@ -17,8 +20,8 @@ export function CatalogSection({ onCatalogOpen }) {
           {catalog.map((item) => (
             <a
               className={`category-card category-card--${item.slug}`}
-              href={item.href}
-              onClick={(event) => onCatalogOpen(event, item.slug)}
+              href={categoryPath(item.slug)}
+              onClick={() => trackGoal('catalog_open')}
               key={item.slug}
             >
               <img
@@ -29,6 +32,7 @@ export function CatalogSection({ onCatalogOpen }) {
                 loading="lazy"
                 decoding="async"
                 onError={handleImageError}
+                style={{ viewTransitionName: categoryTransitionName(item.slug), viewTransitionClass: 'photo' }}
               />
               <span className="category-card__body">
                 <strong>{item.label}</strong>
@@ -41,6 +45,9 @@ export function CatalogSection({ onCatalogOpen }) {
           ))}
         </div>
         <nav className="pill-row" aria-label="Подробнее о запчастях и услугах">
+          <a className="pill" href="katalog/">
+            Весь каталог запчастей
+          </a>
           {landingPages.map((page) => (
             <a className="pill" href={page.href} key={page.href}>
               {page.label}

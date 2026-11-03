@@ -55,7 +55,7 @@ export function CookieBanner({ preferences, initialSettings = false, onSave, onC
         <h2>Управление cookie</h2>
         <p>
           Необходимые cookie запоминают ваш выбор. Яндекс.Метрика включится только после отдельного
-          разрешения на аналитику. Рекламные технологии не подключены.
+          разрешения на аналитику.<span className="cookie-banner__extra"> Рекламные технологии не подключены.</span>
         </p>
       </div>
       <div className="cookie-banner__actions">
@@ -65,10 +65,10 @@ export function CookieBanner({ preferences, initialSettings = false, onSave, onC
         <button className="button" type="button" onClick={() => onSave(false)}>
           Только необходимые
         </button>
-        <button className="button" type="button" onClick={() => setShowSettings(true)}>
+        <button className="button cookie-banner__more" type="button" onClick={() => setShowSettings(true)}>
           Настроить
         </button>
-        <button className="button" type="button" onClick={() => onOpenDocument('cookies')}>
+        <button className="button cookie-banner__more" type="button" onClick={() => onOpenDocument('cookies')}>
           Подробнее
         </button>
       </div>

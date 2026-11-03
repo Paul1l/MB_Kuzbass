@@ -54,7 +54,7 @@ for (const [sourceName, source, requiredText] of [
   ['src', appSource, 'Редакция согласия:'],
   ['src', appSource, 'Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется'],
   ['data.js', dataSource, 'Клиент на Флампе'],
-  ['data.js', dataSource, "updatedAt: '03.10.2026'"],
+  ['data.js', dataSource, "updatedAt: '29.10.2026'"],
   ['privacyConsent.js', privacyConsentSource, "PRIVACY_CONSENT_VERSION = '2026-08-03'"],
 ]) {
   if (!source.includes(requiredText)) {
@@ -140,16 +140,46 @@ if (!indexHtml.includes(`<link rel="canonical" href="${productionOrigin}/"`)) {
   throw new Error('index.html does not contain the expected production canonical URL.');
 }
 
-// Каждый адрес из sitemap.xml должен быть в сборке: посадочные страницы лежат в public/<адрес>/index.html
-// и иначе тихо пропадут при следующей выкладке.
+// Каждый адрес из sitemap.xml должен быть в сборке: посадочные страницы лежат в public/<адрес>/index.html,
+// страницы каталога /katalog/ создает scripts/generate-catalog-pages.mjs. Иначе они тихо пропадут при выкладке.
 const landingPaths = [];
+const catalogPaths = [];
 for (const [, location] of sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
   const { pathname } = new URL(location);
   const pageFile = pathname === '/' ? 'index.html' : `${pathname.replace(/^\/+|\/+$/g, '')}/index.html`;
   await access(path.join(distDirectory, pageFile)).catch(() => {
     throw new Error(`sitemap.xml ссылается на страницу, которой нет в сборке: ${pathname}`);
   });
-  if (pathname !== '/') landingPaths.push(pathname);
+  if (pathname.startsWith('/katalog/')) catalogPaths.push(pathname);
+  else if (pathname !== '/') landingPaths.push(pathname);
+}
+
+// Каталог: общая страница, разделы и детали. На каждой — канонический адрес, хлебные крошки и заявка
+// в личный аккаунт; главная ведет на разделы каталога обычными ссылками.
+if (catalogPaths.length < 7) {
+  throw new Error(`В sitemap.xml мало страниц каталога (${catalogPaths.length}): не запустился generate-catalog-pages.mjs?`);
+}
+for (const catalogPath of catalogPaths) {
+  const catalogHtml = await readFile(path.join(distDirectory, catalogPath, 'index.html'), 'utf8');
+  // Одинаковое имя у двух фото на странице ломает плавный переход между страницами (View Transitions).
+  const transitionNames = [...catalogHtml.matchAll(/view-transition-name: ([\w-]+);/g)].map((match) => match[1]);
+  if (new Set(transitionNames).size !== transitionNames.length) {
+    throw new Error(`На ${catalogPath} два фото с одним view-transition-name: переход между страницами не сработает.`);
+  }
+  if (!catalogHtml.includes(`<link rel="canonical" href="https://mb-kuzbass.ru${catalogPath}" />`)) {
+    throw new Error(`${catalogPath}: нет канонического адреса страницы.`);
+  }
+  if (!catalogHtml.includes(`href="${leadTelegramUrl}`) || !catalogHtml.includes('class="seo-breadcrumbs"')) {
+    throw new Error(`${catalogPath}: нет кнопки Telegram в аккаунт для заявок или хлебных крошек.`);
+  }
+  for (const [, imageSrc] of catalogHtml.matchAll(/<img src="(\/assets\/[^"]+)"/g)) {
+    await access(path.join(distDirectory, imageSrc)).catch(() => {
+      throw new Error(`${catalogPath}: нет фото ${imageSrc}`);
+    });
+  }
+}
+if (!javascriptBundle.includes('katalog/')) {
+  throw new Error('Главная не ссылается на страницы каталога /katalog/.');
 }
 
 // Посадочные связаны с главной и друг с другом обычными ссылками, а заявки с них идут в личный аккаунт.
@@ -185,8 +215,21 @@ for (const photo of japanPhotos) {
   });
 }
 
+// Все картинки главной из data.js должны быть в сборке. Генерируемые файлы (WebP, уменьшенные копии для телефона)
+// в git не хранятся: если их перестанет создавать optimize-images.mjs, на сайте будет пустое место (02.11.2026).
+for (const [, fileName] of dataSource.matchAll(/asset\('([\w./-]+)'\)/g)) {
+  const builtName = fileName === 'telegram-avatar.jpg' ? fileName : fileName.replace(/\.(?:jpe?g|png)$/i, '.webp');
+  await access(path.join(distDirectory, 'assets', builtName)).catch(() => {
+    throw new Error(`В сборке нет картинки из data.js: assets/${builtName}`);
+  });
+}
+
 // Редирект на https://mb-kuzbass.ru должен приходить из исходников, а не из ручной правки корня репозитория.
 const htaccess = await readFile(path.join(distDirectory, '.htaccess'), 'utf8');
+// На хостинге HTTPS принимает nginx, Apache видит http: проверка %{HTTPS} зацикливает каждую страницу (02.11.2026).
+if (/RewriteCond\s+%\{HTTPS\}/.test(htaccess)) {
+  throw new Error('.htaccess проверяет %{HTTPS}: на Спринтхосте это бесконечный редирект. Используйте %{HTTP:X-Forwarded-Proto}.');
+}
 if (!htaccess.includes('RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI} [R=301,L,NE]')) {
   throw new Error('.htaccess в сборке не содержит редирект на https://mb-kuzbass.ru.');
 }

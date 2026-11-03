@@ -1,5 +1,6 @@
 import { trackGoal } from '../analytics.js';
 import { ConsentCheckbox } from '../components/ConsentCheckbox.jsx';
+import { CountUp } from '../components/CountUp.jsx';
 import { FormStatus } from '../components/FormStatus.jsx';
 import { Icon } from '../components/Icon.jsx';
 import { LegalLink } from '../components/LegalLink.jsx';
@@ -41,6 +42,8 @@ export function HeroSection({
         </div>
 
         <div className="tile hero__form" id="request">
+          {/* Огонёк, бегущий по рамке формы (как «border beam»): привлекает взгляд к заявке. */}
+          <span className="beam" aria-hidden="true" />
           <div className="hero-switch" role="group" aria-label="Что вы ищете">
             <button type="button" aria-pressed={heroMode === 'parts'} onClick={() => onHeroModeChange('parts')}>
               Нужна запчасть
@@ -168,17 +171,19 @@ export function HeroSection({
             Согласие на публикацию имени, фото или отзыва этой галочкой не предоставляется.
           </p>
         </div>
-        <figure className="tile tile--photo hero__main">
-          <img
-            src={heroImages.main}
-            srcSet={`${heroImages.mainSmall} 480w, ${heroImages.main} 960w`}
-            sizes="(max-width: 1100px) 50vw, 440px"
-            alt={heroImages.mainAlt}
-            width="960"
-            height="1280"
-            loading="lazy"
-            decoding="async"
-          />
+        <figure className="tile tile--photo hero__main" data-window>
+          <span className="window">
+            <img
+              src={heroImages.main}
+              srcSet={`${heroImages.mainSmall} 480w, ${heroImages.main} 960w`}
+              sizes="(max-width: 1100px) 50vw, 440px"
+              alt={heroImages.mainAlt}
+              width="960"
+              height="1280"
+              loading="lazy"
+              decoding="async"
+            />
+          </span>
           <figcaption className="tile__chip">Склад в Барнауле</figcaption>
           <div className="notch">
             <a className="notch__link" href="#catalog">
@@ -208,7 +213,7 @@ export function HeroSection({
           onClick={() => trackGoal('reviews_2gis')}
         >
           <span className="hero__stat-value">
-            {reviewsMeta.rating}
+            <CountUp value={reviewsMeta.rating} />
             <Icon name="star" size={26} />
           </span>
           <span className="hero__stat-label">в 2ГИС · {ratingDetails}</span>
@@ -221,7 +226,9 @@ export function HeroSection({
           rel="noopener noreferrer"
           onClick={() => trackGoal('reviews_drom')}
         >
-          <span className="hero__stat-value">{dromListingsCount}</span>
+          <span className="hero__stat-value">
+            <CountUp value={dromListingsCount} />
+          </span>
           <span className="hero__stat-label">объявлений на Drom</span>
         </a>
 

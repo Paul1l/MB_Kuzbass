@@ -15,6 +15,7 @@ for (const path of LANDING_PATHS) {
     );
     expect(hrefs.some((href) => href.startsWith(`${LEAD_TELEGRAM}?text=`))).toBe(true);
     for (const otherPath of LANDING_PATHS.filter((other) => other !== path)) expect(hrefs).toContain(otherPath);
+    for (const doc of ['/#privacy', '/#consent', '/#cookies']) expect(hrefs).toContain(doc);
     expect(await hasHorizontalScroll(page)).toBe(false);
   });
 }
@@ -30,4 +31,15 @@ test('на странице авто из Японии 4 машины с фот�
   await expect
     .poll(() => cars.locator('img').evaluateAll((images) => images.every((image) => image.complete && image.naturalWidth > 0)))
     .toBe(true);
+});
+
+test('на странице авто из Японии разметка FAQ совпадает с вопросами и ответами на странице', async ({ page }) => {
+  await page.goto('./avtomobili-iz-yaponii-barnaul/');
+  const visible = await page.locator('.seo-faq__item').evaluateAll((items) =>
+    items.map((item) => [item.querySelector('h3').textContent.trim(), item.querySelector('p').textContent.trim()]),
+  );
+  const graph = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'];
+  const faq = graph.find((node) => node['@type'] === 'FAQPage');
+  expect(visible.length).toBeGreaterThan(0);
+  expect(faq.mainEntity.map((question) => [question.name, question.acceptedAnswer.text])).toEqual(visible);
 });

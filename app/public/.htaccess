@@ -10,7 +10,10 @@ DirectoryIndex index.html
   RewriteCond %{REQUEST_URI} !/$
   RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI}/ [R=301,L,NE]
 
-  RewriteCond %{HTTPS} !=on [OR]
+  # HTTPS принимает nginx хостинга и передаёт запрос в Apache по http, поэтому %{HTTPS} здесь всегда off:
+  # проверка «HTTPS выключен» зацикливала каждую страницу (02.11.2026). Протокол берём из X-Forwarded-Proto;
+  # если хостинг его не передаёт, правило просто не срабатывает.
+  RewriteCond %{HTTP:X-Forwarded-Proto} =http [OR]
   RewriteCond %{HTTP_HOST} !^mb-kuzbass\.ru$ [NC]
   RewriteRule ^ https://mb-kuzbass.ru%{REQUEST_URI} [R=301,L,NE]
 </IfModule>
