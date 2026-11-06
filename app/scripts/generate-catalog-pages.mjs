@@ -8,25 +8,19 @@ import {
   productPath,
   productTransitionName,
 } from '../src/catalogPaths.js';
+import { contactButtons, escapeHtml, mobileBar } from './static-contact.mjs';
 
 // Создает в dist статические страницы каталога, которые видят поисковики: /katalog/, шесть разделов
 // и страницу на каждую деталь из catalog-products.json, и дописывает их в dist/sitemap.xml.
 // На главной каталог открывается внутри SPA и поисковикам не виден — эти страницы закрывают пробел.
 // Оформление — общее с посадочными (public/seo-pages.css), согласие на cookie и Яндекс Метрика — тоже
-// (public/seo-pages.js). Данные компании, подвал с реквизитами и ссылками на документы и версии стилей и скрипта
-// берутся из посадочной страницы, чтобы не держать их в двух местах.
+// (public/seo-pages.js). Данные компании, шапка, подвал с реквизитами и ссылками на документы и версии стилей и
+// скрипта берутся из посадочной страницы, чтобы не держать их в двух местах. Контакты — scripts/static-contact.mjs.
 
 const distDirectory = path.resolve('dist');
 const siteUrl = 'https://mb-kuzbass.ru/';
 // Дата изменения страниц каталога для sitemap.xml. Обновлять при изменении catalog-products.json.
 const catalogUpdatedAt = '2026-11-02';
-
-const contact = {
-  phone: '+7 923 536-27-77',
-  phoneHref: 'tel:+79235362777',
-  telegram: 'https://t.me/MB_Kuzbass',
-  whatsapp: 'https://wa.me/79235362777',
-};
 
 // Заголовки разделов под поисковые запросы; описание раздела — из catalog-products.json.
 const categoryHeadings = {
@@ -56,13 +50,6 @@ const landingLinks = [
   ['/postavki-dlya-avtorazborov-barnaul/', 'Поставки для авторазборов'],
 ];
 
-const escapeHtml = (value) =>
-  String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-// Первое сообщение в мессенджере: как createMessengerUrl в src/data.js.
-const messengerUrl = (baseUrl, topic = '') =>
-  `${baseUrl}?text=${encodeURIComponent(['Здравствуйте! Пишу с сайта mb-kuzbass.ru.', topic].filter(Boolean).join(' '))}`;
-
 const plural = (count, one, few, many) => {
   const mod10 = count % 10;
   const mod100 = count % 100;
@@ -77,8 +64,9 @@ const stylesheetHref = referenceLanding.match(/href="(\/seo-pages\.css\?v=[^"]+)
 const pageScriptSrc = referenceLanding.match(/src="(\/seo-pages\.js\?v=[^"]+)"/)?.[1];
 const referenceJsonLd = referenceLanding.match(/<script type="application\/ld\+json">(.+?)<\/script>/s)?.[1];
 const footerHtml = referenceLanding.replace(/\r\n/g, '\n').match(/<footer class="seo-footer">[\s\S]*?<\/footer>/)?.[0];
+const headerHtml = referenceLanding.replace(/\r\n/g, '\n').match(/<header class="seo-header">[\s\S]*?<\/header>/)?.[0];
 const business = JSON.parse(referenceJsonLd || '{}')['@graph']?.find((node) => node['@type'] === 'AutoPartsStore');
-if (!stylesheetHref || !pageScriptSrc || !business || !footerHtml) {
+if (!stylesheetHref || !pageScriptSrc || !business || !footerHtml || !headerHtml) {
   throw new Error('Не удалось взять версию seo-pages.css, seo-pages.js, подвал или данные компании из посадочной zapchasti-mercedes-barnaul.');
 }
 
@@ -136,14 +124,6 @@ function breadcrumbs(items) {
     )
     .join('');
   return `<nav class="seo-breadcrumbs" aria-label="Навигация по разделам"><ol>${links}</ol></nav>`;
-}
-
-function contactButtons(topic, primaryLabel) {
-  return `<div class="seo-actions">
-            <a class="seo-button seo-button--primary" href="${escapeHtml(messengerUrl(contact.telegram, topic))}">${primaryLabel}</a>
-            <a class="seo-button" href="${contact.phoneHref}">Позвонить</a>
-            <a class="seo-button" href="${escapeHtml(messengerUrl(contact.whatsapp, topic))}">WhatsApp</a>
-          </div>`;
 }
 
 function productCard(product, categoryLabel) {
@@ -233,18 +213,7 @@ function page({ pagePath, title, description, breadcrumbItems, ogImage, schemaTy
     <title>${escapeHtml(title)}</title>
   </head>
   <body>
-    <header class="seo-header">
-      <a class="seo-brand" href="/">
-        <img src="/assets/telegram-avatar.jpg" alt="Логотип MB Kuzbass" width="64" height="64" />
-        <span><strong>МБ Кузбасс / MB Kuzbass</strong><small>Барнаул</small></span>
-      </a>
-      <nav aria-label="Основная навигация">
-        <a href="/${catalogRoot}">Каталог</a>
-        <a href="/#reviews">Отзывы</a>
-        <a href="/#contacts">Контакты</a>
-      </nav>
-      <a class="seo-phone" href="${contact.phoneHref}">${contact.phone}</a>
-    </header>
+    ${headerHtml}
 
     <main>
       ${breadcrumbs(breadcrumbItems)}
@@ -253,11 +222,7 @@ function page({ pagePath, title, description, breadcrumbItems, ogImage, schemaTy
 
     ${footerHtml}
 
-    <nav class="seo-mobile-bar" aria-label="Быстрая связь">
-      <a class="seo-mobile-bar__phone" href="${contact.phoneHref}">Позвонить</a>
-      <a href="${escapeHtml(messengerUrl(contact.telegram, generalTopic))}">Telegram</a>
-      <a href="${escapeHtml(messengerUrl(contact.whatsapp, generalTopic))}">WhatsApp</a>
-    </nav>
+    ${mobileBar(generalTopic)}
   </body>
 </html>
 `;
