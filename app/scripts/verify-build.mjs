@@ -1,5 +1,6 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { legalDocPath, legalDocPathNames } from '../src/legalPaths.js';
 
 const distDirectory = path.resolve('dist');
 const productionOrigin = 'https://mb-kuzbass.ru';
@@ -181,10 +182,60 @@ for (const marker of ["'mb_privacy_preferences'", 'https://mc.yandex.ru/metrika/
     throw new Error(`В seo-pages.js нет обязательной части: ${marker}`);
   }
 }
-for (const staticPath of [...landingPaths, ...catalogPaths]) {
+// Документы — отдельные страницы /dokumenty/…/ из тех же текстов legalDocs, что окна на главной (generate-legal-pages.mjs):
+// они должны быть для каждого документа, не пустые и с тем же заголовком. В sitemap.xml их нет: они для посетителей.
+const legalDocsFromSource = [...dataSource.matchAll(/id: '([\w-]+)',\s*footerLabel: '([^']+)',\s*title: '([^']+)'/g)].map(
+  ([, id, footerLabel, title]) => ({ id, footerLabel, title, path: `/${legalDocPath(id)}` }),
+);
+if (legalDocsFromSource.length !== Object.keys(legalDocPathNames).length) {
+  throw new Error(`В data.js ${legalDocsFromSource.length} документов, а адресов в src/legalPaths.js ${Object.keys(legalDocPathNames).length}.`);
+}
+for (const doc of legalDocsFromSource) {
+  const legalHtml = await readFile(path.join(distDirectory, doc.path, 'index.html'), 'utf8').catch(() => '');
+  const sectionCount = (legalHtml.match(/<section>/g) || []).length;
+  if (!legalHtml.includes(`<h1>${doc.title}</h1>`) || sectionCount < 1 || legalHtml.length < 3000) {
+    throw new Error(`${doc.path}: страница документа «${doc.title}» не создана или пустая (разделов: ${sectionCount}).`);
+  }
+  if (!legalHtml.includes(`<link rel="canonical" href="${productionOrigin}${doc.path}" />`)) {
+    throw new Error(`${doc.path}: нет канонического адреса страницы документа.`);
+  }
+}
+if (sitemapXml.includes('/dokumenty/')) {
+  throw new Error('Страницы документов попали в sitemap.xml: они закрыты от индекса (noindex) и там не нужны.');
+}
+
+// Подвал каждой статичной страницы: реквизиты (ИНН и ОГРНИП из data.js) и ссылки на все документы с теми же подписями,
+// что в подвале главной. Ссылки на документы — страницы, а не окна /#privacy: те открываются только с JavaScript.
+const ownerInn = dataSource.match(/ inn: '(\d+)'/)?.[1];
+const ownerOgrnip = dataSource.match(/ ogrnip: '(\d+)'/)?.[1];
+const documentLinks = legalDocsFromSource.map((doc) => `<a href="${doc.path}">${doc.footerLabel}</a>`);
+const legalPaths = legalDocsFromSource.map((doc) => doc.path);
+for (const staticPath of [...landingPaths, ...catalogPaths, ...legalPaths]) {
+  const footer = (await readFile(path.join(distDirectory, staticPath, 'index.html'), 'utf8'))
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .match(/<footer class="seo-footer">[\s\S]*?<\/footer>/)?.[0] || '';
+  if (!footer.includes(`ИНН ${ownerInn}`) || !footer.includes(`ОГРНИП ${ownerOgrnip}`)) {
+    throw new Error(`${staticPath}: в подвале нет ИНН и ОГРНИП владельца.`);
+  }
+  const missingLinks = documentLinks.filter((link) => !footer.includes(link));
+  if (missingLinks.length) {
+    throw new Error(`${staticPath}: в подвале нет ссылок на документы: ${missingLinks.join(', ')}`);
+  }
+  if (/href="\/#(privacy|consent|cookies|agreement|requisites|order-terms)"/.test(footer)) {
+    throw new Error(`${staticPath}: подвал ссылается на документ окном /#…, которое без JavaScript не откроется.`);
+  }
+}
+const homeFooter = indexHtml.match(/<footer class="footer">[\s\S]*?<\/footer>/)?.[0] || '';
+for (const doc of legalDocsFromSource) {
+  if (!homeFooter.includes(`href="${legalDocPath(doc.id)}"`)) {
+    throw new Error(`В подвале главной нет ссылки на страницу документа ${legalDocPath(doc.id)}.`);
+  }
+}
+
+for (const staticPath of [...landingPaths, ...catalogPaths, ...legalPaths]) {
   // Закомментированный тег <!-- <script …> --> браузер не выполнит, поэтому комментарии вырезаются до проверки.
   const staticHtml = (await readFile(path.join(distDirectory, staticPath, 'index.html'), 'utf8')).replace(/<!--[\s\S]*?-->/g, '');
-  if (!staticHtml.includes('<script src="/analytics-config.js" defer></script>') || !/<script src="\/seo-pages\.js\?v=[^"]+" data-page="(landing|catalog|product)" defer><\/script>/.test(staticHtml)) {
+  if (!staticHtml.includes('<script src="/analytics-config.js" defer></script>') || !/<script src="\/seo-pages\.js\?v=[^"]+" data-page="(landing|catalog|product|document)" defer><\/script>/.test(staticHtml)) {
     throw new Error(`${staticPath}: не подключена аналитика (analytics-config.js и seo-pages.js) — визиты не будут учтены.`);
   }
   if (staticHtml.includes('mc.yandex.ru')) {

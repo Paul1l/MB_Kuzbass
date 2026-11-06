@@ -15,7 +15,10 @@ for (const path of LANDING_PATHS) {
     );
     expect(hrefs.some((href) => href.startsWith(`${LEAD_TELEGRAM}?text=`))).toBe(true);
     for (const otherPath of LANDING_PATHS.filter((other) => other !== path)) expect(hrefs).toContain(otherPath);
-    for (const doc of ['/#privacy', '/#consent', '/#cookies']) expect(hrefs).toContain(doc);
+    // Документы — страницы /dokumenty/…/: открываются и без JavaScript.
+    for (const doc of ['/dokumenty/politika/', '/dokumenty/soglasie/', '/dokumenty/cookie/', '/dokumenty/rekvizity/']) {
+      expect(hrefs).toContain(doc);
+    }
     expect(await hasHorizontalScroll(page)).toBe(false);
   });
 }

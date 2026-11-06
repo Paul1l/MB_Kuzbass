@@ -840,6 +840,23 @@ h2 {
   border-radius: 20px;
 }
 
+/* Страницы документов /dokumenty/…/ (scripts/generate-legal-pages.mjs): длинный текст в одной белой плитке,
+   заголовки разделов мельче, чем на посадочных, чтобы документ читался подряд */
+.seo-legal section + section {
+  margin-top: 26px;
+}
+
+.seo-legal h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.1rem,1.6vw,1.3rem);
+  line-height: 1.3;
+}
+
+.seo-legal p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 /* Плашка выбора cookie (её создаёт /seo-pages.js, пока посетитель не выбрал) — как на главной:
    тёмная плитка внизу слева; на телефоне — над нижней панелью связи и не выше трети экрана */
 .seo-cookie {

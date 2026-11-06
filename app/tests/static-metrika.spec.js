@@ -55,7 +55,7 @@ for (const { path, type } of PAGES) {
     const banner = page.locator('.seo-cookie');
     await expect(banner).toBeVisible();
     await expect(banner).toContainText('Яндекс.Метрика включится только после отдельного разрешения на аналитику');
-    await expect(banner.locator('a', { hasText: 'Подробнее' })).toHaveAttribute('href', '/#cookies');
+    await expect(banner.locator('a', { hasText: 'Подробнее' })).toHaveAttribute('href', '/dokumenty/cookie/');
     if (test.info().project.name === 'mobile') {
       // На телефоне плашка не выше трети экрана и не закрывает нижнюю панель связи.
       const box = await banner.boundingBox();
@@ -134,7 +134,10 @@ for (const [label, pagePath, openSettings] of [
   ['посадочная', 'zapchasti-bmw-barnaul/', (page) => page.locator('.seo-footer').getByRole('button', { name: 'Настройки cookie' })],
   ['главная', '', (page) => page.locator('.footer').getByRole('button', { name: 'Настройки cookie' })],
 ]) {
-  test(`${label}: отзыв согласия удаляет cookie Метрики и на домене сайта`, async ({ page, baseURL }) => {
+  test(`${label}: отзыв согласия удаляет cookie Метрики (и на домене сайта) и её записи в хранилище браузера`, async ({
+    page,
+    baseURL,
+  }) => {
     const site = 'http://mb.test/';
     await page.context().route(/^https:\/\/mc\.yandex\.(ru|com)\//, (route) =>
       route.fulfill({ status: 200, contentType: 'application/javascript', body: '' }),
@@ -153,12 +156,23 @@ for (const [label, pagePath, openSettings] of [
       { name: '_ym_d', value: '1', domain: '.mb.test', path: '/' },
       { name: '_ym_isad', value: '2', url: site },
     ]);
-    const ymCookies = async () => (await page.context().cookies(site)).filter((cookie) => cookie.name.startsWith('_ym_'));
+    // Метрика держит идентификатор и очередь запросов и в хранилище браузера; чужие ключи трогать нельзя.
+    await page.evaluate(() => {
+      for (const storage of [localStorage, sessionStorage]) {
+        ['_ym_uid', '_ym111089917_lsid', '_ym_synced', '_ym_retryReqs', 'not_metrika'].forEach((key) => storage.setItem(key, '1'));
+      }
+    });
+    const ymCookies = async () => (await page.context().cookies(site)).filter((cookie) => cookie.name.startsWith('_ym'));
+    const storageKeys = () => page.evaluate(() => [...Object.keys(localStorage), ...Object.keys(sessionStorage)].sort());
     expect(await ymCookies()).toHaveLength(3);
 
     await openSettings(page).click();
     await page.getByRole('checkbox', { name: /Аналитика/ }).uncheck();
     await page.getByRole('button', { name: 'Сохранить выбор' }).click();
     await expect.poll(ymCookies).toEqual([]);
+    expect(await storageKeys()).toEqual(['not_metrika', 'not_metrika']);
+    // Выбор посетителя остаётся: плашка больше не спрашивает.
+    const preferences = (await page.context().cookies(site)).find((cookie) => cookie.name === 'mb_privacy_preferences');
+    expect(decodeURIComponent(preferences?.value)).toBe(`${CONSENT_VERSION}.necessary`);
   });
 }

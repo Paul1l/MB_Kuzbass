@@ -420,18 +420,18 @@ export const gallery = [
 
 // Базовые данные отзывов, которые показываются, если онлайн-загрузка 2ГИС недоступна.
 export const reviewsMeta = {
-  rating: '4.8',
-  ratingCount: '28 оценок',
-  reviewCount: '17 отзывов',
-  ratingCountValue: 28,
-  reviewCountValue: 17,
+  rating: '4.9',
+  ratingCount: '36 оценок',
+  reviewCount: '22 отзыва',
+  ratingCountValue: 36,
+  reviewCountValue: 22,
   source: '2ГИС',
   sourceUrl: contact.twoGis,
   sources: [
     {
       name: '2ГИС',
       url: contact.twoGis,
-      label: '4.8 / 28 оценок',
+      label: '4.9 / 36 оценок',
     },
     {
       name: 'Drom',
@@ -632,7 +632,7 @@ export const legalDocs = [
   },
   {
     id: 'privacy',
-    footerLabel: 'Политика конфиденциальности',
+    footerLabel: 'Политика обработки персональных данных',
     title: 'Политика обработки персональных данных',
     lead:
       `Редакция от ${site.updatedAt}. Документ описывает, какие персональные данные обрабатывает ${owner.name}, зачем они нужны и как пользователь может отозвать согласие.`,
@@ -808,7 +808,7 @@ export const legalDocs = [
   },
   {
     id: 'cookies',
-    footerLabel: 'Cookie',
+    footerLabel: 'Файлы cookie',
     title: 'Политика использования cookie',
     lead:
       `Редакция от ${site.updatedAt}. Документ описывает технические cookie сайта ${site.name}.`,
