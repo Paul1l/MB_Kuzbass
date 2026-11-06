@@ -1,4 +1,5 @@
 import { brandAvatar, commerce, landingPages, legalDocs, owner, site } from '../data.js';
+import { articleRoot } from '../articleLinks.js';
 import { legalDocPath } from '../legalPaths.js';
 
 // Нужна для нижней части сайта: бренд и реквизиты, ссылки на разделы и юридические документы.
@@ -32,6 +33,7 @@ export function Footer({ onOpenPrivacySettings }) {
                 {page.label}
               </a>
             ))}
+            <a href={articleRoot}>Статьи</a>
           </nav>
 
           <nav className="footer__nav" aria-label="Документы сайта">
