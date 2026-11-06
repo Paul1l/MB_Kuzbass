@@ -632,7 +632,7 @@ export const legalDocs = [
   },
   {
     id: 'privacy',
-    footerLabel: 'Политика конфиденциальности',
+    footerLabel: 'Политика обработки персональных данных',
     title: 'Политика обработки персональных данных',
     lead:
       `Редакция от ${site.updatedAt}. Документ описывает, какие персональные данные обрабатывает ${owner.name}, зачем они нужны и как пользователь может отозвать согласие.`,
@@ -808,7 +808,7 @@ export const legalDocs = [
   },
   {
     id: 'cookies',
-    footerLabel: 'Cookie',
+    footerLabel: 'Файлы cookie',
     title: 'Политика использования cookie',
     lead:
       `Редакция от ${site.updatedAt}. Документ описывает технические cookie сайта ${site.name}.`,
