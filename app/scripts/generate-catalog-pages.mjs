@@ -12,8 +12,9 @@ import {
 // Создает в dist статические страницы каталога, которые видят поисковики: /katalog/, шесть разделов
 // и страницу на каждую деталь из catalog-products.json, и дописывает их в dist/sitemap.xml.
 // На главной каталог открывается внутри SPA и поисковикам не виден — эти страницы закрывают пробел.
-// Оформление — общее с посадочными (public/seo-pages.css). Данные компании и версия стилей берутся
-// из посадочной страницы, чтобы не держать их в двух местах.
+// Оформление — общее с посадочными (public/seo-pages.css), согласие на cookie и Яндекс Метрика — тоже
+// (public/seo-pages.js). Данные компании и версии стилей и скрипта берутся из посадочной страницы, чтобы не
+// держать их в двух местах.
 
 const distDirectory = path.resolve('dist');
 const siteUrl = 'https://mb-kuzbass.ru/';
@@ -73,10 +74,11 @@ const plural = (count, one, few, many) => {
 // Данные компании для JSON-LD и версия стилей — из посадочной страницы.
 const referenceLanding = await readFile(path.join(distDirectory, 'zapchasti-mercedes-barnaul', 'index.html'), 'utf8');
 const stylesheetHref = referenceLanding.match(/href="(\/seo-pages\.css\?v=[^"]+)"/)?.[1];
+const pageScriptSrc = referenceLanding.match(/src="(\/seo-pages\.js\?v=[^"]+)"/)?.[1];
 const referenceJsonLd = referenceLanding.match(/<script type="application\/ld\+json">(.+?)<\/script>/s)?.[1];
 const business = JSON.parse(referenceJsonLd || '{}')['@graph']?.find((node) => node['@type'] === 'AutoPartsStore');
-if (!stylesheetHref || !business) {
-  throw new Error('Не удалось взять версию seo-pages.css или данные компании из посадочной zapchasti-mercedes-barnaul.');
+if (!stylesheetHref || !pageScriptSrc || !business) {
+  throw new Error('Не удалось взять версию seo-pages.css, seo-pages.js или данные компании из посадочной zapchasti-mercedes-barnaul.');
 }
 
 const catalogData = JSON.parse(await readFile(path.resolve('catalog-products.json'), 'utf8'));
@@ -172,7 +174,8 @@ function relatedNav(currentPath) {
         </nav>`;
 }
 
-function page({ pagePath, title, description, breadcrumbItems, ogImage, schemaType, extraGraph = [], body }) {
+// analyticsPage — начало идентификатора цели в Метрике по кнопкам связи: product_telegram, catalog_phone и т. п.
+function page({ pagePath, title, description, breadcrumbItems, ogImage, schemaType, analyticsPage, extraGraph = [], body }) {
   const url = new URL(pagePath, siteUrl).href;
   const graph = [
     business,
@@ -215,6 +218,8 @@ function page({ pagePath, title, description, breadcrumbItems, ogImage, schemaTy
     <link rel="icon" href="/favicon-96x96.png" type="image/png" sizes="96x96" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
     <link rel="stylesheet" href="${stylesheetHref}" />
+    <script src="/analytics-config.js" defer></script>
+    <script src="${pageScriptSrc}" data-page="${analyticsPage}" defer></script>
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ru_RU" />
     <meta property="og:site_name" content="${escapeHtml(business.name)}" />
@@ -285,6 +290,7 @@ await writePage(
     breadcrumbItems: [homeCrumb, catalogCrumb],
     ogImage: categories[0].products[0].images[0].src,
     schemaType: 'CollectionPage',
+    analyticsPage: 'catalog',
     body: `<section class="seo-hero seo-hero--compact">
         <div>
           <p class="seo-eyebrow">Каталог запчастей</p>
@@ -325,6 +331,7 @@ for (const category of categories) {
       breadcrumbItems: [homeCrumb, catalogCrumb, categoryCrumb],
       ogImage: category.products[0].images[0].src,
       schemaType: 'CollectionPage',
+      analyticsPage: 'catalog',
       extraGraph: [
         {
           '@type': 'ItemList',
@@ -374,6 +381,7 @@ for (const category of categories) {
         breadcrumbItems: [homeCrumb, catalogCrumb, categoryCrumb, [product.path, product.title]],
         ogImage: mainImage.src,
         schemaType: 'ItemPage',
+        analyticsPage: 'product',
         body: `<section class="seo-product">
         <div class="seo-product__gallery">
           ${image(mainImage, `${product.title} — фото товара MB Kuzbass`, transition(product.transitionName))}

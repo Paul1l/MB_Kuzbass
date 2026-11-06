@@ -40,7 +40,7 @@ export default [
     },
   },
   {
-    files: ['public/analytics-config.js', 'public/reviews-config.js'],
+    files: ['public/analytics-config.js', 'public/reviews-config.js', 'public/seo-pages.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       globals: globals.browser,
