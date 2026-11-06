@@ -1,5 +1,6 @@
 app/node_modules/
 app/dist/
+app/dist-ssr/
 app/.npm-cache/
 app/*.log
 app/test-results/

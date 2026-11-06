@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useClientLayoutEffect } from '../lib/useClientLayoutEffect.js';
 import { canAnimateOnView } from '../lib/motion.js';
 
 // Разбирает строку вида «4.8» или «8 000+»: текст до и после числа, число, знаки после запятой и разделители,
@@ -29,18 +30,19 @@ function formatNumber(value, parsed) {
 export function CountUp({ value, duration = 1400 }) {
   const text = String(value);
   const ref = useRef(null);
-  const [display, setDisplay] = useState(() => {
-    const parsed = parseNumber(text);
-    return parsed && canAnimateOnView() ? formatNumber(0, parsed) : text;
-  });
+  // В готовом HTML главной — итоговое число (его видят поисковики и браузер без JavaScript). Ноль для
+  // анимации ставится до первого кадра в браузере, поэтому итог не мелькает перед счётом.
+  const [display, setDisplay] = useState(text);
 
-  useEffect(() => {
+  useClientLayoutEffect(() => {
     const parsed = parseNumber(text);
     const element = ref.current;
     if (!parsed || !element || !canAnimateOnView()) {
       setDisplay(text);
       return undefined;
     }
+
+    setDisplay(formatNumber(0, parsed));
 
     let frame = 0;
     const observer = new IntersectionObserver(

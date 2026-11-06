@@ -13,6 +13,9 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${port}/`,
     browserName: 'chromium',
     trace: 'retain-on-failure',
+    // Локально можно взять уже установленный Chromium, не скачивая браузер Playwright:
+    // PW_CHROMIUM_PATH=…/chrome.exe npm test. В CI переменной нет, и Playwright берёт свой браузер.
+    ...(process.env.PW_CHROMIUM_PATH ? { launchOptions: { executablePath: process.env.PW_CHROMIUM_PATH } } : {}),
   },
   projects: [
     {
