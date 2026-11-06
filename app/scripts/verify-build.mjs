@@ -21,6 +21,7 @@ const requiredFiles = [
   'offline.html',
   '_headers',
   'analytics-config.js',
+  'seo-pages.js',
   'robots.txt',
   'sitemap.xml',
   'sw.js',
@@ -73,6 +74,19 @@ if (!indexHtml.includes('name="msvalidate.01" content="192BAF445B30A248D9D63FB12
 }
 if (!indexHtml.includes('rel="icon" href="./favicon-96x96.png"')) {
   throw new Error('Google Search favicon link is missing or invalid.');
+}
+// Главная приходит готовым HTML (scripts/prerender-home.mjs): без него поисковики видят пустую страницу.
+const rootStart = indexHtml.indexOf('<div id="root">');
+const rootHtml = rootStart === -1 ? '' : indexHtml.slice(rootStart, indexHtml.indexOf('<script', rootStart));
+if (!/<h1[\s>]/.test(rootHtml)) {
+  throw new Error('В dist/index.html нет заголовка H1 внутри #root: готовая разметка главной не собралась.');
+}
+if (!rootHtml.includes('href="katalog/"')) {
+  throw new Error('В готовой разметке главной нет обычной ссылки на каталог katalog/.');
+}
+// Плашка cookie появляется только в браузере и только у тех, кто ещё не выбирал.
+if (rootHtml.includes('cookie-banner')) {
+  throw new Error('Плашка cookie попала в готовый HTML главной.');
 }
 if (indexHtml.includes('mc.yandex.ru/watch/')) {
   throw new Error('В HTML найден пиксель Метрики, который может сработать до согласия пользователя.');
@@ -152,6 +166,30 @@ for (const [, location] of sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
   });
   if (pathname.startsWith('/katalog/')) catalogPaths.push(pathname);
   else if (pathname !== '/') landingPaths.push(pathname);
+}
+
+// Посадочные и страницы каталога подключают согласие на cookie и Метрику (public/seo-pages.js) внешними файлами.
+// Версия согласия в нём должна совпадать с главной: иначе выбор, сделанный на одной странице, не узнает другая.
+const staticPagesScript = await readFile(path.join(distDirectory, 'seo-pages.js'), 'utf8');
+const mainConsentVersion = privacyConsentSource.match(/PRIVACY_CONSENT_VERSION = '([^']+)'/)?.[1];
+if (!mainConsentVersion || !staticPagesScript.includes(`const CONSENT_VERSION = '${mainConsentVersion}';`)) {
+  throw new Error(`Версия согласия в seo-pages.js не совпадает с src/privacyConsent.js (${mainConsentVersion}).`);
+}
+// Ключевые места скрипта: тот же cookie выбора, загрузка счётчика, цели по кнопкам связи, удаление cookie Метрики.
+for (const marker of ["'mb_privacy_preferences'", 'https://mc.yandex.ru/metrika/tag.js?id=', "'reachGoal'", "'destruct'", '; Domain=']) {
+  if (!staticPagesScript.includes(marker)) {
+    throw new Error(`В seo-pages.js нет обязательной части: ${marker}`);
+  }
+}
+for (const staticPath of [...landingPaths, ...catalogPaths]) {
+  // Закомментированный тег <!-- <script …> --> браузер не выполнит, поэтому комментарии вырезаются до проверки.
+  const staticHtml = (await readFile(path.join(distDirectory, staticPath, 'index.html'), 'utf8')).replace(/<!--[\s\S]*?-->/g, '');
+  if (!staticHtml.includes('<script src="/analytics-config.js" defer></script>') || !/<script src="\/seo-pages\.js\?v=[^"]+" data-page="(landing|catalog|product)" defer><\/script>/.test(staticHtml)) {
+    throw new Error(`${staticPath}: не подключена аналитика (analytics-config.js и seo-pages.js) — визиты не будут учтены.`);
+  }
+  if (staticHtml.includes('mc.yandex.ru')) {
+    throw new Error(`${staticPath}: Метрика подключена прямо в HTML и сработает до согласия посетителя.`);
+  }
 }
 
 // Каталог: общая страница, разделы и детали. На каждой — канонический адрес, хлебные крошки и заявка

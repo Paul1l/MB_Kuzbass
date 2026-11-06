@@ -839,3 +839,162 @@ h2 {
   overflow: hidden;
   border-radius: 20px;
 }
+
+/* Плашка выбора cookie (её создаёт /seo-pages.js, пока посетитель не выбрал) — как на главной:
+   тёмная плитка внизу слева; на телефоне — над нижней панелью связи и не выше трети экрана */
+.seo-cookie {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 20;
+  display: flex;
+  width: min(640px,calc(100vw - 48px));
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  color: #fff;
+  background: #15172a;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 28px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.25);
+}
+
+.seo-cookie__copy {
+  display: grid;
+  gap: 8px;
+}
+
+.seo-cookie h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.seo-cookie p {
+  margin: 0;
+  color: rgba(255,255,255,.78);
+  line-height: 1.5;
+}
+
+.seo-cookie__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.seo-cookie .seo-button {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.seo-cookie .seo-button:not(.seo-button--primary) {
+  color: #fff;
+  background: transparent;
+  border-color: rgba(255,255,255,.3);
+}
+
+.seo-cookie .seo-button:not(.seo-button--primary):hover {
+  border-color: #fff;
+}
+
+.seo-cookie__options {
+  display: grid;
+  gap: 10px;
+}
+
+.seo-cookie__option {
+  display: grid;
+  grid-template-columns: 22px minmax(0,1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.seo-cookie__option input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: #c93d38;
+}
+
+.seo-cookie__option span {
+  display: grid;
+  gap: 4px;
+}
+
+.seo-cookie__option small {
+  color: rgba(255,255,255,.68);
+  line-height: 1.45;
+}
+
+.seo-cookie-link {
+  padding: 0;
+  color: #fff;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 820px) {
+  .seo-cookie {
+    right: 10px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    left: 10px;
+    width: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .seo-cookie {
+    gap: 10px;
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .seo-cookie p {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  /* Про рекламу подробно сказано в политике cookie; на телефоне фраза не помещается */
+  .seo-cookie__extra {
+    display: none;
+  }
+
+  .seo-cookie__copy {
+    gap: 4px;
+  }
+
+  .seo-cookie h2 {
+    font-size: 16px;
+  }
+
+  .seo-cookie__actions {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 6px;
+  }
+
+  .seo-cookie__actions .seo-button {
+    min-height: 46px;
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .seo-cookie .seo-button.seo-cookie__more {
+    min-height: 40px;
+    color: rgba(255,255,255,.86);
+    border-color: transparent;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}

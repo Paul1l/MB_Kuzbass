@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useClientLayoutEffect } from '../lib/useClientLayoutEffect.js';
 import { canAnimateOnView } from '../lib/motion.js';
 
 // Разбирает строку вида «4.8» или «8 000+»: текст до и после числа, число, знаки после запятой и разделители,
@@ -24,32 +25,46 @@ function formatNumber(value, parsed) {
   return `${parsed.prefix}${grouped}${fractionPart ? parsed.decimalSeparator + fractionPart : ''}${parsed.suffix}`;
 }
 
+// Браузеры без атрибута blocking="render" (Firefox и др.) показывают готовый HTML раньше скрипта: число на
+// экране уже видно итоговым. Сбросить его в ноль и считать заново — заметное мелькание, поэтому такой счётчик
+// остаётся итоговым. Счётчики ниже первого экрана посетитель ещё не видел — они набегают как обычно.
+function wasPaintedBeforeScript(element) {
+  if ('blocking' in HTMLScriptElement.prototype) return false;
+  const rect = element.getBoundingClientRect();
+  return rect.bottom > 0 && rect.top < window.innerHeight;
+}
+
 // Число «набегает» от нуля, когда попадает на экран (как «number ticker»). Ширину держит невидимая копия
 // итогового значения, поэтому соседний текст не прыгает; программы чтения с экрана сразу получают итог.
 export function CountUp({ value, duration = 1400 }) {
   const text = String(value);
   const ref = useRef(null);
-  const [display, setDisplay] = useState(() => {
-    const parsed = parseNumber(text);
-    return parsed && canAnimateOnView() ? formatNumber(0, parsed) : text;
-  });
+  // В готовом HTML главной — итоговое число (его видят поисковики и браузер без JavaScript). Ноль для
+  // анимации ставится до первого кадра в браузере, поэтому итог не мелькает перед счётом.
+  const [display, setDisplay] = useState(text);
 
-  useEffect(() => {
+  useClientLayoutEffect(() => {
     const parsed = parseNumber(text);
     const element = ref.current;
-    if (!parsed || !element || !canAnimateOnView()) {
+    if (!parsed || !element || !canAnimateOnView() || wasPaintedBeforeScript(element)) {
       setDisplay(text);
       return undefined;
     }
+
+    setDisplay(formatNumber(0, parsed));
 
     let frame = 0;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
         observer.disconnect();
-        const start = performance.now();
+        // Отсчёт — от метки первого кадра анимации, а не от performance.now(): метка кадра бывает раньше
+        // момента, когда сработал наблюдатель, и прогресс уходил в минус («-1.0» на первом кадре).
+        // Ограничение 0…1 — вторая страховка: число никогда не меньше нуля и не больше итога.
+        let start = null;
         const step = (now) => {
-          const progress = Math.min((now - start) / duration, 1);
+          if (start === null) start = now;
+          const progress = Math.min(Math.max((now - start) / duration, 0), 1);
           const eased = 1 - (1 - progress) ** 3;
           setDisplay(progress < 1 ? formatNumber(parsed.target * eased, parsed) : text);
           if (progress < 1) frame = window.requestAnimationFrame(step);

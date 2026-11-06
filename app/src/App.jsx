@@ -10,6 +10,7 @@ import { contact, legalDocs, reviewsMeta, reviewsProvider, site } from './data.j
 import { copyRequestText, createRequestText } from './lib/leadRequest.js';
 import { initReveal, initSpotlight, initWindowParallax } from './lib/motion.js';
 import { getCatalogSlugFromHash, schedulePageAnchorScroll, schedulePageTopReset } from './lib/navigation.js';
+import { useClientLayoutEffect } from './lib/useClientLayoutEffect.js';
 import { isOnlineReviewsConfigured, loadOnlineReviewsMeta } from './onlineReviews.js';
 import { readPrivacyPreferences, savePrivacyPreferences } from './privacyConsent.js';
 import { CatalogSection } from './sections/CatalogSection.jsx';
@@ -31,11 +32,15 @@ function App() {
   const [vehicleQuery, setVehicleQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeLegalId, setActiveLegalId] = useState(null);
-  const [privacyPreferences, setPrivacyPreferences] = useState(() => readPrivacyPreferences());
-  const [privacyPanelOpen, setPrivacyPanelOpen] = useState(() => !readPrivacyPreferences());
+  // undefined — выбор cookie ещё не прочитан. Готовый HTML главной собирается без cookie, поэтому первый рендер
+  // в браузере тоже идёт без них, а выбор читается до первого кадра (useClientLayoutEffect ниже). Так плашка
+  // не попадает в HTML для поисковиков и не мелькает у тех, кто уже выбрал.
+  const [privacyPreferences, setPrivacyPreferences] = useState(undefined);
+  const [privacyPanelOpen, setPrivacyPanelOpen] = useState(false);
   const [currentReviewsMeta, setCurrentReviewsMeta] = useState(() => ({ ...reviewsMeta, isLive: false }));
   const onlineReviewsConfigured = useMemo(() => isOnlineReviewsConfigured(reviewsProvider), []);
-  const [reviewsSyncStatus, setReviewsSyncStatus] = useState(onlineReviewsConfigured ? 'loading' : 'static');
+  // Статус «обновляем 2ГИС» ставит эффект загрузки отзывов: в готовом HTML настроек отзывов нет.
+  const [reviewsSyncStatus, setReviewsSyncStatus] = useState('static');
   const partInputRef = useRef(null);
   const ratingDetails = [currentReviewsMeta.ratingCount, currentReviewsMeta.reviewCount].filter(Boolean).join(', ');
   const reviewsStatusText =
@@ -65,12 +70,23 @@ function App() {
     setActiveLegalId(null);
   }, []);
 
+  // Читает сохранённый выбор cookie; если выбора нет — показывает плашку.
+  useClientLayoutEffect(() => {
+    const savedPreferences = readPrivacyPreferences();
+    setPrivacyPreferences(savedPreferences);
+    if (!savedPreferences) setPrivacyPanelOpen(true);
+  }, []);
+
   // Загружает Метрику только после согласия, учитывает смену SPA-страницы и
   // удаляет доступные cookie счетчика после отзыва согласия.
+  // analyticsAllowed: undefined — выбор ещё не прочитан (первый кадр после гидратации), ничего не включаем и не удаляем.
+  const analyticsAllowed = privacyPreferences === undefined ? undefined : Boolean(privacyPreferences?.analytics);
   useEffect(() => {
     let isActive = true;
 
-    if (!privacyPreferences?.analytics) {
+    if (analyticsAllowed === undefined) return undefined;
+
+    if (!analyticsAllowed) {
       disableAnalytics();
       return undefined;
     }
@@ -92,7 +108,7 @@ function App() {
     return () => {
       isActive = false;
     };
-  }, [activeLegalDoc, privacyPreferences?.analytics]);
+  }, [activeLegalDoc, analyticsAllowed]);
 
   // Закрывает документ и меню по Escape, чтобы они не мешали просмотру сайта.
   useEffect(() => {
