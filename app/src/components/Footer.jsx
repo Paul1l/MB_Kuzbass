@@ -1,8 +1,10 @@
 import { brandAvatar, commerce, landingPages, legalDocs, owner, site } from '../data.js';
-import { LegalLink } from './LegalLink.jsx';
+import { legalDocPath } from '../legalPaths.js';
 
 // Нужна для нижней части сайта: бренд и реквизиты, ссылки на разделы и юридические документы.
-export function Footer({ onOpenLegal, onOpenPrivacySettings }) {
+// Документы в подвале — обычные ссылки на страницы /dokumenty/…/: они открываются и без JavaScript.
+// Старые адреса /#privacy и т. п. по-прежнему открывают документ окном (App.jsx).
+export function Footer({ onOpenPrivacySettings }) {
   return (
     <footer className="footer">
       <div className="container footer__inner">
@@ -35,7 +37,9 @@ export function Footer({ onOpenLegal, onOpenPrivacySettings }) {
           <nav className="footer__nav" aria-label="Документы сайта">
             <h3>Документы</h3>
             {legalDocs.map((doc) => (
-              <LegalLink doc={doc} onOpen={onOpenLegal} key={doc.id} />
+              <a href={legalDocPath(doc.id)} key={doc.id}>
+                {doc.footerLabel}
+              </a>
             ))}
             <button type="button" onClick={onOpenPrivacySettings}>
               Настройки cookie

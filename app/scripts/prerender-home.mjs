@@ -1,4 +1,4 @@
-import { readFile, rm, writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -24,7 +24,6 @@ if (!indexHtml.includes(emptyRoot)) {
   throw new Error(`В dist/index.html нет пустого ${emptyRoot}: главная уже обработана или изменился шаблон app/index.html.`);
 }
 await writeFile(indexPath, indexHtml.replace(emptyRoot, `<div id="root">${appHtml}</div>`));
-// Серверная сборка нужна только для этого шага и на хостинг не идёт.
-await rm(ssrDirectory, { recursive: true, force: true });
+// dist-ssr дальше нужна generate-legal-pages.mjs (тексты документов); удаляет её он.
 
 console.log(`Главная: готовая разметка ${Math.round(appHtml.length / 1024)} КБ вставлена в dist/index.html.`);

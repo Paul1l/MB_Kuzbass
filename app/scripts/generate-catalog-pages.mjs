@@ -13,8 +13,8 @@ import {
 // и страницу на каждую деталь из catalog-products.json, и дописывает их в dist/sitemap.xml.
 // На главной каталог открывается внутри SPA и поисковикам не виден — эти страницы закрывают пробел.
 // Оформление — общее с посадочными (public/seo-pages.css), согласие на cookie и Яндекс Метрика — тоже
-// (public/seo-pages.js). Данные компании и версии стилей и скрипта берутся из посадочной страницы, чтобы не
-// держать их в двух местах.
+// (public/seo-pages.js). Данные компании, подвал с реквизитами и ссылками на документы и версии стилей и скрипта
+// берутся из посадочной страницы, чтобы не держать их в двух местах.
 
 const distDirectory = path.resolve('dist');
 const siteUrl = 'https://mb-kuzbass.ru/';
@@ -76,9 +76,10 @@ const referenceLanding = await readFile(path.join(distDirectory, 'zapchasti-merc
 const stylesheetHref = referenceLanding.match(/href="(\/seo-pages\.css\?v=[^"]+)"/)?.[1];
 const pageScriptSrc = referenceLanding.match(/src="(\/seo-pages\.js\?v=[^"]+)"/)?.[1];
 const referenceJsonLd = referenceLanding.match(/<script type="application\/ld\+json">(.+?)<\/script>/s)?.[1];
+const footerHtml = referenceLanding.replace(/\r\n/g, '\n').match(/<footer class="seo-footer">[\s\S]*?<\/footer>/)?.[0];
 const business = JSON.parse(referenceJsonLd || '{}')['@graph']?.find((node) => node['@type'] === 'AutoPartsStore');
-if (!stylesheetHref || !pageScriptSrc || !business) {
-  throw new Error('Не удалось взять версию seo-pages.css, seo-pages.js или данные компании из посадочной zapchasti-mercedes-barnaul.');
+if (!stylesheetHref || !pageScriptSrc || !business || !footerHtml) {
+  throw new Error('Не удалось взять версию seo-pages.css, seo-pages.js, подвал или данные компании из посадочной zapchasti-mercedes-barnaul.');
 }
 
 const catalogData = JSON.parse(await readFile(path.resolve('catalog-products.json'), 'utf8'));
@@ -250,12 +251,7 @@ function page({ pagePath, title, description, breadcrumbItems, ogImage, schemaTy
       ${body}
     </main>
 
-    <footer class="seo-footer">
-      <p>© 2026 МБ Кузбасс / MB Kuzbass · ИП Пушкарев Кирилл Александрович</p>
-      <p>Информационная витрина. Наличие, состояние, стоимость и условия покупки подтверждаются при обращении.</p>
-      <p>Компания не является официальным дилером или представительством Mercedes-Benz и BMW.</p>
-      <p><a href="/#privacy">Политика обработки персональных данных</a> · <a href="/#consent">Согласие на обработку ПДн</a> · <a href="/#cookies">Cookie</a></p>
-    </footer>
+    ${footerHtml}
 
     <nav class="seo-mobile-bar" aria-label="Быстрая связь">
       <a class="seo-mobile-bar__phone" href="${contact.phoneHref}">Позвонить</a>

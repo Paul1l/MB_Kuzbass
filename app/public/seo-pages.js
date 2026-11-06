@@ -131,7 +131,8 @@
     return node;
   }
 
-  const policyLink = (label, className) => element('a', { class: className, href: '/#cookies' }, [label]);
+  // Политика cookie — отдельная страница /dokumenty/cookie/ (scripts/generate-legal-pages.mjs), открывается и без JavaScript.
+  const policyLink = (label, className) => element('a', { class: className, href: '/dokumenty/cookie/' }, [label]);
 
   function closeBanner() {
     banner?.remove();
@@ -192,7 +193,7 @@
 
   // Ссылка «Настройки cookie» в подвале: через неё политика cookie предлагает изменить или отозвать выбор.
   function addFooterSettingsLink() {
-    const documentsLine = document.querySelector('.seo-footer a[href="/#cookies"]')?.parentElement;
+    const documentsLine = document.querySelector('.seo-footer a[href="/dokumenty/cookie/"]')?.parentElement;
     if (!documentsLine) return;
     documentsLine.append(' · ', button('Настройки cookie', 'seo-cookie-link', () => openBanner(true)));
   }

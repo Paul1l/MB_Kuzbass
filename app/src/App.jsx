@@ -291,7 +291,7 @@ function App() {
         <ContactsSection reviewsMeta={currentReviewsMeta} />
       </main>
 
-      <Footer onOpenLegal={setActiveLegalId} onOpenPrivacySettings={() => setPrivacyPanelOpen(true)} />
+      <Footer onOpenPrivacySettings={() => setPrivacyPanelOpen(true)} />
       <MobileContactBar />
       {privacyPanelOpen && (
         <CookieBanner

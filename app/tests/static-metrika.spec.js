@@ -55,7 +55,7 @@ for (const { path, type } of PAGES) {
     const banner = page.locator('.seo-cookie');
     await expect(banner).toBeVisible();
     await expect(banner).toContainText('Яндекс.Метрика включится только после отдельного разрешения на аналитику');
-    await expect(banner.locator('a', { hasText: 'Подробнее' })).toHaveAttribute('href', '/#cookies');
+    await expect(banner.locator('a', { hasText: 'Подробнее' })).toHaveAttribute('href', '/dokumenty/cookie/');
     if (test.info().project.name === 'mobile') {
       // На телефоне плашка не выше трети экрана и не закрывает нижнюю панель связи.
       const box = await banner.boundingBox();
