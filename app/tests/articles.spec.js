@@ -32,6 +32,10 @@ test.describe('без JavaScript', () => {
     await expect(page.locator('.seo-breadcrumbs li')).toHaveText(['Главная', 'Статьи']);
     const cards = page.locator('.seo-article-list .seo-article-card');
     await expect(cards).toHaveCount(built.length);
+    // Порядок — как в src/articles.js.
+    expect(await cards.evaluateAll((items) => items.map((item) => item.getAttribute('href')))).toEqual(
+      built.map((article) => `/stati/${article.slug}/`),
+    );
     for (const article of built) {
       const card = page.locator(`.seo-article-card[href="/stati/${article.slug}/"]`);
       await expect(card.locator('strong')).toHaveText(article.h1);

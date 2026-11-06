@@ -57,9 +57,8 @@ allArticles.forEach(validate);
 const slugs = allArticles.map((article) => article.slug);
 if (new Set(slugs).size !== slugs.length) throw new Error('src/articles.js: у двух статей одинаковый slug.');
 
-const articles = allArticles
-  .filter((article) => includeDrafts || !article.draft)
-  .sort((a, b) => b.datePublished.localeCompare(a.datePublished) || a.slug.localeCompare(b.slug));
+// Порядок — как в src/articles.js: его задаёт автор.
+const articles = allArticles.filter((article) => includeDrafts || !article.draft);
 const articlePath = (article) => `/${articleRoot}${article.slug}/`;
 
 // Ссылка внутри текста — [текст](/адрес/) на страницу этого сайта. Остальное, включая внешние адреса и HTML,
