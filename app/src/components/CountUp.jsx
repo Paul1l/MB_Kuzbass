@@ -25,6 +25,15 @@ function formatNumber(value, parsed) {
   return `${parsed.prefix}${grouped}${fractionPart ? parsed.decimalSeparator + fractionPart : ''}${parsed.suffix}`;
 }
 
+// Браузеры без атрибута blocking="render" (Firefox и др.) показывают готовый HTML раньше скрипта: число на
+// экране уже видно итоговым. Сбросить его в ноль и считать заново — заметное мелькание, поэтому такой счётчик
+// остаётся итоговым. Счётчики ниже первого экрана посетитель ещё не видел — они набегают как обычно.
+function wasPaintedBeforeScript(element) {
+  if ('blocking' in HTMLScriptElement.prototype) return false;
+  const rect = element.getBoundingClientRect();
+  return rect.bottom > 0 && rect.top < window.innerHeight;
+}
+
 // Число «набегает» от нуля, когда попадает на экран (как «number ticker»). Ширину держит невидимая копия
 // итогового значения, поэтому соседний текст не прыгает; программы чтения с экрана сразу получают итог.
 export function CountUp({ value, duration = 1400 }) {
@@ -37,7 +46,7 @@ export function CountUp({ value, duration = 1400 }) {
   useClientLayoutEffect(() => {
     const parsed = parseNumber(text);
     const element = ref.current;
-    if (!parsed || !element || !canAnimateOnView()) {
+    if (!parsed || !element || !canAnimateOnView() || wasPaintedBeforeScript(element)) {
       setDisplay(text);
       return undefined;
     }

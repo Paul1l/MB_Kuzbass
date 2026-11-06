@@ -71,3 +71,30 @@ for (const consent of [false, true]) {
     });
   });
 }
+
+test('браузер без blocking="render": счётчик первого экрана не сбрасывается в ноль, ниже экрана — набегает', async ({
+  page,
+}) => {
+  // Так ведут себя Firefox и браузеры, которые рисуют готовый HTML раньше скрипта главной.
+  await page.addInitScript(() => {
+    delete HTMLScriptElement.prototype.blocking;
+    window.__heroValues = new Set();
+    const watch = () => {
+      const value = document.querySelector('.hero__stat--rating .count-up__value')?.textContent;
+      if (value) window.__heroValues.add(value);
+      if (performance.now() < 4000) requestAnimationFrame(watch);
+    };
+    requestAnimationFrame(watch);
+    document.addEventListener('DOMContentLoaded', () => {
+      window.__belowFold = document.querySelector('.trust-rating .count-up__value')?.textContent;
+    });
+  });
+  await page.goto('./');
+  const heroCounter = page.locator('.hero__stat--rating .count-up');
+  const finalValue = await heroCounter.locator('.visually-hidden').textContent();
+  await page.waitForTimeout(1500);
+  // На телефоне плитка рейтинга может быть ниже первого экрана — тогда она набегает, как в Chrome.
+  const heroOnScreen = await heroCounter.evaluate((element) => element.getBoundingClientRect().top < window.innerHeight);
+  if (heroOnScreen) expect(await page.evaluate(() => [...window.__heroValues])).toEqual([finalValue]);
+  expect(await page.evaluate(() => window.__belowFold)).toMatch(/^0[.,]0$/);
+});
