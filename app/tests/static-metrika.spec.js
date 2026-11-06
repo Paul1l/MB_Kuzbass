@@ -6,6 +6,9 @@ import { expect, test } from './fixtures.js';
 
 test.use({ consent: false });
 
+const CONSENT_VERSION = readFileSync(new URL('../src/privacyConsent.js', import.meta.url), 'utf8').match(
+  /PRIVACY_CONSENT_VERSION = '([^']+)'/,
+)[1];
 const COUNTER_ID = Number(
   readFileSync(new URL('../public/analytics-config.js', import.meta.url), 'utf8').match(/counterId: (\d+)/)[1],
 );
@@ -124,3 +127,38 @@ test('согласие с главной действует на посадоч�
   await expect(page.locator('.cookie-banner')).toHaveCount(0);
   expect(requests).toEqual([]);
 });
+
+// Метрика ставит cookie на домен сайта (Domain=.mb-kuzbass.ru). На 127.0.0.1 такие cookie поставить нельзя,
+// поэтому сайт открывается по имени mb.test: запросы к нему тест отдаёт с локального сервера.
+for (const [label, pagePath, openSettings] of [
+  ['посадочная', 'zapchasti-bmw-barnaul/', (page) => page.locator('.seo-footer').getByRole('button', { name: 'Настройки cookie' })],
+  ['главная', '', (page) => page.locator('.footer').getByRole('button', { name: 'Настройки cookie' })],
+]) {
+  test(`${label}: отзыв согласия удаляет cookie Метрики и на домене сайта`, async ({ page, baseURL }) => {
+    const site = 'http://mb.test/';
+    await page.context().route(/^https:\/\/mc\.yandex\.(ru|com)\//, (route) =>
+      route.fulfill({ status: 200, contentType: 'application/javascript', body: '' }),
+    );
+    // Главная просит браузер поднимать адреса до https (CSP upgrade-insecure-requests), поэтому оба протокола.
+    await page.context().route(/^https?:\/\/mb\.test\//, async (route) => {
+      const { pathname, search } = new URL(route.request().url());
+      await route.fulfill({ response: await route.fetch({ url: new URL(`${pathname.slice(1)}${search}`, baseURL).href }) });
+    });
+    await page.context().addCookies([
+      { name: 'mb_privacy_preferences', value: encodeURIComponent(`${CONSENT_VERSION}.analytics`), url: site },
+    ]);
+    await page.goto(`${site}${pagePath}`);
+    await page.context().addCookies([
+      { name: '_ym_uid', value: '1', domain: '.mb.test', path: '/' },
+      { name: '_ym_d', value: '1', domain: '.mb.test', path: '/' },
+      { name: '_ym_isad', value: '2', url: site },
+    ]);
+    const ymCookies = async () => (await page.context().cookies(site)).filter((cookie) => cookie.name.startsWith('_ym_'));
+    expect(await ymCookies()).toHaveLength(3);
+
+    await openSettings(page).click();
+    await page.getByRole('checkbox', { name: /Аналитика/ }).uncheck();
+    await page.getByRole('button', { name: 'Сохранить выбор' }).click();
+    await expect.poll(ymCookies).toEqual([]);
+  });
+}

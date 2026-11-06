@@ -81,9 +81,20 @@ export function disableAnalytics() {
     .split('; ')
     .map((cookie) => cookie.split('=')[0])
     .filter((name) => name.startsWith('_ym_'))
-    .forEach((name) => {
-      document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
-    });
+    .forEach(expireCookieEverywhere);
+}
+
+// Метрика ставит cookie на домен сайта (Domain=.mb-kuzbass.ru), а такие не удаляются записью без Domain.
+// Поэтому cookie стирается без Domain и с Domain текущего адреса и каждого родительского домена до двух
+// частей (www.mb-kuzbass.ru → mb-kuzbass.ru), с точкой и без. Та же функция есть в public/seo-pages.js.
+function expireCookieEverywhere(name) {
+  const { hostname } = window.location;
+  const labels = hostname.split('.');
+  const isNamedHost = labels.length >= 2 && !/^[\d.]+$/.test(hostname) && !hostname.includes(':');
+  const domains = isNamedHost ? labels.slice(0, -1).map((_, index) => labels.slice(index).join('.')) : [];
+  ['', ...domains.flatMap((domain) => [`; Domain=${domain}`, `; Domain=.${domain}`])].forEach((domainAttribute) => {
+    document.cookie = `${name}=; Max-Age=0; Path=/${domainAttribute}; SameSite=Lax`;
+  });
 }
 
 // Отправляет виртуальный просмотр текущего SPA/hash-адреса после инициализации счетчика.
