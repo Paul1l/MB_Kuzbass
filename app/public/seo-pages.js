@@ -79,6 +79,22 @@
       .map((cookie) => cookie.split('=')[0])
       .filter((name) => name.startsWith('_ym_'))
       .forEach(expireCookieEverywhere);
+    clearMetrikaStorage();
+  }
+
+  // Метрика держит идентификатор посетителя и очередь запросов и в хранилище браузера (_ym_uid, _ym111089917_lsid,
+  // _ym_synced, _ym_retryReqs). После отзыва согласия они тоже стираются (как clearMetrikaStorage в src/analytics.js).
+  function clearMetrikaStorage() {
+    ['localStorage', 'sessionStorage'].forEach((storageName) => {
+      try {
+        const storage = window[storageName];
+        Object.keys(storage)
+          .filter((key) => key.startsWith('_ym'))
+          .forEach((key) => storage.removeItem(key));
+      } catch {
+        // Хранилище недоступно (запрещено в браузере): удалять нечего.
+      }
+    });
   }
 
   // Метрика ставит cookie на домен сайта (Domain=.mb-kuzbass.ru), а такие не удаляются записью без Domain.
