@@ -175,8 +175,15 @@ const mainConsentVersion = privacyConsentSource.match(/PRIVACY_CONSENT_VERSION =
 if (!mainConsentVersion || !staticPagesScript.includes(`const CONSENT_VERSION = '${mainConsentVersion}';`)) {
   throw new Error(`Версия согласия в seo-pages.js не совпадает с src/privacyConsent.js (${mainConsentVersion}).`);
 }
+// Ключевые места скрипта: тот же cookie выбора, загрузка счётчика, цели по кнопкам связи, удаление cookie Метрики.
+for (const marker of ["'mb_privacy_preferences'", 'https://mc.yandex.ru/metrika/tag.js?id=', "'reachGoal'", "'destruct'", '; Domain=']) {
+  if (!staticPagesScript.includes(marker)) {
+    throw new Error(`В seo-pages.js нет обязательной части: ${marker}`);
+  }
+}
 for (const staticPath of [...landingPaths, ...catalogPaths]) {
-  const staticHtml = await readFile(path.join(distDirectory, staticPath, 'index.html'), 'utf8');
+  // Закомментированный тег <!-- <script …> --> браузер не выполнит, поэтому комментарии вырезаются до проверки.
+  const staticHtml = (await readFile(path.join(distDirectory, staticPath, 'index.html'), 'utf8')).replace(/<!--[\s\S]*?-->/g, '');
   if (!staticHtml.includes('<script src="/analytics-config.js" defer></script>') || !/<script src="\/seo-pages\.js\?v=[^"]+" data-page="(landing|catalog|product)" defer><\/script>/.test(staticHtml)) {
     throw new Error(`${staticPath}: не подключена аналитика (analytics-config.js и seo-pages.js) — визиты не будут учтены.`);
   }
