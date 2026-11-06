@@ -16,6 +16,27 @@ test('счётчики первого экрана доходят до итог�
   );
 });
 
+test('счётчик не показывает отрицательных чисел, даже если метка кадра раньше начала счёта', async ({ page }) => {
+  // Браузер передаёт в requestAnimationFrame время начала кадра, и оно бывает раньше performance.now() в момент
+  // запуска счёта (так было при медленной загрузке скрипта: «-1.0» и «-1 640+» на первом кадре). Здесь все
+  // метки кадров сдвинуты на 300 мс в прошлое, чтобы этот случай повторялся всегда.
+  await page.addInitScript(() => {
+    const requestFrame = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = (callback) => requestFrame((time) => callback(time - 300));
+    window.__counterValues = [];
+    new MutationObserver(() => {
+      for (const value of document.querySelectorAll('.hero__stat .count-up__value')) window.__counterValues.push(value.textContent);
+    }).observe(document, { childList: true, subtree: true, characterData: true });
+  });
+  await page.goto('./');
+  const rating = page.locator('.hero__stat--rating .count-up');
+  await rating.scrollIntoViewIfNeeded();
+  await expect(rating.locator('.count-up__value')).toHaveText(await rating.locator('.visually-hidden').textContent());
+  const values = await page.evaluate(() => window.__counterValues);
+  expect(values.length).toBeGreaterThan(5);
+  expect(values.filter((value) => value.includes('-'))).toEqual([]);
+});
+
 test('бегущая лента ведёт на существующие страницы деталей, копия скрыта, пауза останавливает', async ({ page }) => {
   await page.goto('./');
   const links = page.locator('.marquee__list:not([aria-hidden]) a');

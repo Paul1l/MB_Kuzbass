@@ -58,9 +58,13 @@ export function CountUp({ value, duration = 1400 }) {
       ([entry]) => {
         if (!entry.isIntersecting) return;
         observer.disconnect();
-        const start = performance.now();
+        // Отсчёт — от метки первого кадра анимации, а не от performance.now(): метка кадра бывает раньше
+        // момента, когда сработал наблюдатель, и прогресс уходил в минус («-1.0» на первом кадре).
+        // Ограничение 0…1 — вторая страховка: число никогда не меньше нуля и не больше итога.
+        let start = null;
         const step = (now) => {
-          const progress = Math.min((now - start) / duration, 1);
+          if (start === null) start = now;
+          const progress = Math.min(Math.max((now - start) / duration, 0), 1);
           const eased = 1 - (1 - progress) ** 3;
           setDisplay(progress < 1 ? formatNumber(parsed.target * eased, parsed) : text);
           if (progress < 1) frame = window.requestAnimationFrame(step);
