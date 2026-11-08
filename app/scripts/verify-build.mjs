@@ -404,6 +404,44 @@ for (const landingPath of landingPaths) {
   }
 }
 
+// Тексты посадочных называют детали каталога («в каталоге сейчас…», модели, кузова и моторы). Каждое название
+// должно быть в catalog-products.json: удалили деталь — поправьте текст посадочной (и FAQ) и этот список.
+const landingCatalogMentions = {
+  '/zapchasti-mercedes-barnaul/': ['W203', 'W204', 'W211', 'W212', 'W207', 'W221', 'W163', 'M111', 'M271', 'M272', 'M112'],
+  '/dvigateli-akpp-mercedes-bmw-barnaul/': [
+    'Двигатель Mercedes-Benz C203 M111',
+    'Двигатель Mercedes-Benz C203 M271',
+    'Двигатель Mercedes-Benz E211 M272',
+    'Двигатель Mercedes-Benz W163 M112',
+    'Двигатель BMW E39 M54',
+    'Двигатель BMW X3 N52',
+    'Двигатель BMW E60 N62',
+    'АКПП Mercedes-Benz E-Class 2009',
+    'АКПП BMW 525i',
+    'АКПП ZF 6HP26 BMW 550i',
+  ],
+  '/kuzovnye-detali-optika-mercedes-bmw-barnaul/': [
+    'Комплект передних фар Mercedes-Benz W212',
+    'Комплект ксеноновых фар Mercedes-Benz C-Class 2013',
+    'Ксеноновая фара Mercedes-Benz E-Class 2007',
+    'Комплект передних фар BMW 550i 2006',
+    'Комплект задних фонарей Mercedes-Benz W207',
+    'Комплект задних фонарей Mercedes-Benz W211',
+    'Комплект задних фонарей BMW E60 550i',
+    'Кузов Mercedes-Benz C-Class W204',
+    'Передние пороги кузова Mercedes-Benz W203',
+    'Пороги кузова в ассортименте',
+    'Комплект сидений BMW 550i',
+  ],
+};
+const catalogTitles = catalogManifest.categories.flatMap((category) => category.products.map((product) => product.title));
+for (const [landingPath, mentions] of Object.entries(landingCatalogMentions)) {
+  const missing = mentions.filter((mention) => !catalogTitles.some((title) => title.includes(mention)));
+  if (missing.length) {
+    throw new Error(`${landingPath}: текст называет детали, которых больше нет в каталоге: ${missing.join(', ')}. Поправьте текст и landingCatalogMentions.`);
+  }
+}
+
 // Фото блока «Уже заказали в Японии» лежат в public/assets/japan. Ссылка на отсутствующий файл дала бы
 // пустую карточку на главной и на посадочной об авто из Японии.
 const japanLandingHtml = await readFile(path.join(distDirectory, 'avtomobili-iz-yaponii-barnaul', 'index.html'), 'utf8');

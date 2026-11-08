@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { LANDING_PATHS, LEAD_TELEGRAM, expect, hasHorizontalScroll, test } from './fixtures.js';
 
 for (const path of LANDING_PATHS) {
@@ -59,15 +60,19 @@ for (const path of FAQ_LANDINGS) {
 }
 
 // Блок «Примеры со склада»: карточки из каталога вставляет generate-catalog-pages.mjs. Какие разделы и марка
-// должны попасть на каждую посадочную — как в landingExamples того скрипта.
+// должны попасть на каждую посадочную — как в landingExamples того скрипта. onePerSection — на общей странице
+// «по одной детали из каждого раздела каталога»: разделы не повторяются и представлены все непустые разделы.
+const CATALOG_SECTIONS = JSON.parse(readFileSync(new URL('../catalog-products.json', import.meta.url), 'utf8')).categories.filter(
+  (category) => category.products.length,
+).length;
 const EXAMPLE_LANDINGS = {
   '/zapchasti-mercedes-barnaul/': { sections: null, brand: 'Mercedes-Benz' },
-  '/kontraktnye-zapchasti-barnaul/': { sections: null, brand: null },
+  '/kontraktnye-zapchasti-barnaul/': { sections: null, brand: null, onePerSection: true },
   '/dvigateli-akpp-mercedes-bmw-barnaul/': { sections: ['dvigateli', 'akpp'], brand: null },
   '/kuzovnye-detali-optika-mercedes-bmw-barnaul/': { sections: ['kuzov', 'optika', 'salon'], brand: null },
 };
 
-for (const [path, { sections, brand }] of Object.entries(EXAMPLE_LANDINGS)) {
+for (const [path, { sections, brand, onePerSection }] of Object.entries(EXAMPLE_LANDINGS)) {
   test(`посадочная ${path}: примеры со склада ведут на страницы деталей, фото загружаются`, async ({ page }) => {
     await page.goto(`.${path}`);
     const cards = page.locator('.seo-grid .seo-card');
@@ -75,6 +80,11 @@ for (const [path, { sections, brand }] of Object.entries(EXAMPLE_LANDINGS)) {
     const items = await cards.evaluateAll((elements) =>
       elements.map((element) => ({ href: element.getAttribute('href'), title: element.querySelector('strong').textContent.trim() })),
     );
+    if (onePerSection) {
+      const cardSections = items.map(({ href }) => href.split('/')[2]);
+      expect(new Set(cardSections).size).toBe(cardSections.length);
+      expect(cardSections.length).toBe(CATALOG_SECTIONS);
+    }
     for (const { href, title } of items) {
       expect(href).toMatch(/^\/katalog\/[a-z-]+\/[a-z0-9-]+\/$/);
       if (sections) expect(sections).toContain(href.split('/')[2]);

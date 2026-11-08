@@ -386,16 +386,18 @@ for (const category of categories) {
 // Блок «Примеры со склада» на посадочных: метка <!-- catalog-examples --> в public/<адрес>/index.html заменяется
 // карточками деталей из catalog-products.json, поэтому примеры на посадочных всегда совпадают с каталогом
 // (удалили деталь из каталога — пропала и карточка, битой ссылки не будет). brand — только детали этой марки,
-// categories — только эти разделы; детали берутся по очереди из каждого раздела, чтобы примеры были разными.
+// categories — только эти разделы, perCategory — не больше стольких деталей из раздела, limit — всего карточек;
+// детали берутся по очереди из каждого раздела, чтобы примеры были разными. Тексты посадочных, которые называют
+// детали каталога, сверяет scripts/verify-build.mjs (landingCatalogMentions).
 const landingExamples = {
   'zapchasti-mercedes-barnaul': { brand: 'Mercedes-Benz', limit: 8 },
-  'kontraktnye-zapchasti-barnaul': { limit: 6 },
-  'dvigateli-akpp-mercedes-bmw-barnaul': { categories: ['engines', 'transmission'] },
+  'kontraktnye-zapchasti-barnaul': { perCategory: 1 },
+  'dvigateli-akpp-mercedes-bmw-barnaul': { categories: ['engines', 'transmission'], limit: 12 },
   'kuzovnye-detali-optika-mercedes-bmw-barnaul': { categories: ['body', 'optics', 'interior'], limit: 8 },
 };
 const examplesMarker = '<!-- catalog-examples -->';
 
-function pickExamples({ brand, categories: categorySlugs, limit = Infinity }) {
+function pickExamples({ brand, categories: categorySlugs, perCategory = Infinity, limit = Infinity }) {
   const queues = categories
     .filter((category) => !categorySlugs || categorySlugs.includes(category.slug))
     .map((category) => ({
@@ -403,9 +405,9 @@ function pickExamples({ brand, categories: categorySlugs, limit = Infinity }) {
       products: category.products.filter((product) => !brand || product.title.includes(brand)),
     }))
     .filter((queue) => queue.products.length);
-  const longest = Math.max(0, ...queues.map((queue) => queue.products.length));
+  const rounds = Math.min(perCategory, Math.max(0, ...queues.map((queue) => queue.products.length)));
   const picked = [];
-  for (let round = 0; round < longest; round += 1) {
+  for (let round = 0; round < rounds; round += 1) {
     for (const queue of queues) {
       if (queue.products[round] && picked.length < limit) picked.push(productCard(queue.products[round], queue.label));
     }
