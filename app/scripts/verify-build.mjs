@@ -366,6 +366,84 @@ for (const landingPath of landingPaths) {
   if (!landingHtml.includes(`href="${leadTelegramUrl}`)) {
     throw new Error(`${landingPath}: кнопка Telegram не ведет в аккаунт для заявок ${leadTelegramUrl}.`);
   }
+
+  // Метку блока «Примеры со склада» заменяет generate-catalog-pages.mjs: осталась — блок пустой.
+  if (landingHtml.includes('<!-- catalog-examples -->')) {
+    throw new Error(`${landingPath}: метка <!-- catalog-examples --> не заменена карточками каталога.`);
+  }
+
+  // Внутренние ссылки посадочной (карточки каталога, статьи, документы) ведут на страницы из сборки.
+  for (const [, href] of landingHtml.matchAll(/href="(\/[^"#?]*)"/g)) {
+    if (/\.\w+$/.test(href)) continue; // файлы: стили, иконки, картинки
+    const pageFile = href === '/' ? 'index.html' : `${href.replace(/^\/+|\/+$/g, '')}/index.html`;
+    await access(path.join(distDirectory, pageFile)).catch(() => {
+      throw new Error(`${landingPath}: ссылка на страницу, которой нет в сборке: ${href}`);
+    });
+  }
+
+  // FAQ: разметка FAQPage совпадает с вопросами и ответами на странице, иначе поисковик сочтет ее недостоверной.
+  const plainText = (html) =>
+    html
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const visibleFaq = [
+    ...landingHtml.matchAll(/<div class="seo-faq__item">\s*<h3>([\s\S]*?)<\/h3>\s*<p>([\s\S]*?)<\/p>\s*<\/div>/g),
+  ].map(([, question, answer]) => [plainText(question), plainText(answer)]);
+  const landingGraph = JSON.parse(landingHtml.match(/<script type="application\/ld\+json">(.+?)<\/script>/s)?.[1] || '{}')['@graph'] || [];
+  const faqPage = landingGraph.find((node) => node['@type'] === 'FAQPage');
+  const markedFaq = faqPage?.mainEntity?.map((question) => [question.name, question.acceptedAnswer?.text]) || [];
+  if (JSON.stringify(markedFaq) !== JSON.stringify(visibleFaq)) {
+    throw new Error(`${landingPath}: разметка FAQPage не совпадает с вопросами и ответами на странице.`);
+  }
+}
+
+// Тексты посадочных называют детали каталога («в каталоге сейчас…», модели, кузова и моторы). Каждое название
+// должно быть в catalog-products.json: удалили деталь — поправьте текст посадочной (и FAQ) и этот список.
+const landingCatalogMentions = {
+  '/zapchasti-mercedes-barnaul/': ['W203', 'W204', 'W211', 'W212', 'W207', 'W221', 'W163', 'M111', 'M271', 'M272', 'M112'],
+  '/dvigateli-akpp-mercedes-bmw-barnaul/': [
+    'Двигатель Mercedes-Benz C203 M111',
+    'Двигатель Mercedes-Benz C203 M271',
+    'Двигатель Mercedes-Benz E211 M272',
+    'Двигатель Mercedes-Benz W163 M112',
+    'Двигатель BMW E39 M54',
+    'Двигатель BMW X3 N52',
+    'Двигатель BMW E60 N62',
+    'АКПП Mercedes-Benz E-Class 2009',
+    'АКПП BMW 525i',
+    'АКПП ZF 6HP26 BMW 550i',
+  ],
+  '/kuzovnye-detali-optika-mercedes-bmw-barnaul/': [
+    'Комплект передних фар Mercedes-Benz W212',
+    'Комплект ксеноновых фар Mercedes-Benz C-Class 2013',
+    'Ксеноновая фара Mercedes-Benz E-Class 2007',
+    'Комплект передних фар BMW 550i 2006',
+    'Комплект задних фонарей Mercedes-Benz W207',
+    'Комплект задних фонарей Mercedes-Benz W211',
+    'Комплект задних фонарей BMW E60 550i',
+    'Кузов Mercedes-Benz C-Class W204',
+    'Передние пороги кузова Mercedes-Benz W203',
+    'Пороги кузова в ассортименте',
+    'Комплект сидений BMW 550i',
+  ],
+};
+const catalogTitles = catalogManifest.categories.flatMap((category) => category.products.map((product) => product.title));
+// Все страницы сразу: одна удаленная деталь может упоминаться на нескольких посадочных.
+const staleMentions = Object.entries(landingCatalogMentions)
+  .map(([landingPath, mentions]) => [landingPath, mentions.filter((mention) => !catalogTitles.some((title) => title.includes(mention)))])
+  .filter(([, missing]) => missing.length)
+  .map(([landingPath, missing]) => `${landingPath} — ${missing.join(', ')}`);
+if (staleMentions.length) {
+  throw new Error(
+    `Тексты посадочных называют детали, которых больше нет в каталоге: ${staleMentions.join('; ')}. Поправьте тексты и landingCatalogMentions.`,
+  );
 }
 
 // Фото блока «Уже заказали в Японии» лежат в public/assets/japan. Ссылка на отсутствующий файл дала бы
