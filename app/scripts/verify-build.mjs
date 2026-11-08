@@ -1,5 +1,7 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { articleLinks, articleRoot } from '../src/articleLinks.js';
+import { articles } from '../src/articles.js';
 import { legalDocPath, legalDocPathNames } from '../src/legalPaths.js';
 
 const distDirectory = path.resolve('dist');
@@ -158,6 +160,7 @@ if (!indexHtml.includes(`<link rel="canonical" href="${productionOrigin}/"`)) {
 // Каждый адрес из sitemap.xml должен быть в сборке: посадочные страницы лежат в public/<адрес>/index.html,
 // страницы каталога /katalog/ создает scripts/generate-catalog-pages.mjs. Иначе они тихо пропадут при выкладке.
 const landingPaths = [];
+const articleSitemapPaths = [];
 const catalogPaths = [];
 for (const [, location] of sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
   const { pathname } = new URL(location);
@@ -166,6 +169,7 @@ for (const [, location] of sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
     throw new Error(`sitemap.xml ссылается на страницу, которой нет в сборке: ${pathname}`);
   });
   if (pathname.startsWith('/katalog/')) catalogPaths.push(pathname);
+  else if (pathname.startsWith(`/${articleRoot}`)) articleSitemapPaths.push(pathname);
   else if (pathname !== '/') landingPaths.push(pathname);
 }
 
@@ -226,16 +230,91 @@ for (const staticPath of [...landingPaths, ...catalogPaths, ...legalPaths]) {
   }
 }
 const homeFooter = indexHtml.match(/<footer class="footer">[\s\S]*?<\/footer>/)?.[0] || '';
+if (!homeFooter.includes(`href="${articleRoot}"`)) {
+  throw new Error('В подвале главной нет ссылки на раздел «Статьи».');
+}
 for (const doc of legalDocsFromSource) {
   if (!homeFooter.includes(`href="${legalDocPath(doc.id)}"`)) {
     throw new Error(`В подвале главной нет ссылки на страницу документа ${legalDocPath(doc.id)}.`);
   }
 }
 
-for (const staticPath of [...landingPaths, ...catalogPaths, ...legalPaths]) {
+// Раздел «Статьи» (generate-article-pages.mjs). Черновики (draft: true) собираются только с ARTICLES_DRAFTS=1 —
+// посмотреть шаблон; в обычную сборку для сайта они попасть не могут.
+const draftsAllowed = process.env.ARTICLES_DRAFTS === '1';
+const publishedArticles = articles.filter((article) => !article.draft);
+const builtArticles = articles.filter((article) => draftsAllowed || !article.draft);
+const articleListPath = `/${articleRoot}`;
+const articlePaths = builtArticles.map((article) => `${articleListPath}${article.slug}/`);
+const builtFiles = (await collectFiles(distDirectory)).map((filePath) => path.relative(distDirectory, filePath).split(path.sep).join('/'));
+const builtFileSet = new Set(builtFiles);
+if (!draftsAllowed) {
+  for (const fileName of builtFiles.filter((name) => name.endsWith('.html'))) {
+    if ((await readFile(path.join(distDirectory, fileName), 'utf8')).includes('data-article-draft')) {
+      throw new Error(`${fileName}: в сборку попал черновик статьи (draft: true). Уберите его из src/articles.js или снимите draft.`);
+    }
+  }
+  if (!publishedArticles.length) {
+    throw new Error('В src/articles.js нет ни одной опубликованной статьи (только черновики-заглушки): раздел «Статьи» был бы пустым.');
+  }
+}
+// Внутренняя ссылка ведёт на файл сборки: /адрес/ → адрес/index.html, /файл.ext → файл.ext, «/» → index.html.
+const linkTarget = (href) => {
+  const pathname = decodeURIComponent(href.split(/[?#]/)[0]);
+  if (pathname === '/' || pathname.endsWith('/')) return `${pathname.replace(/^\/+/, '')}index.html`;
+  return pathname.replace(/^\/+/, '');
+};
+for (const pagePath of [articleListPath, ...articlePaths]) {
+  const pageHtml = await readFile(path.join(distDirectory, pagePath, 'index.html'), 'utf8').catch(() => '');
+  if (!pageHtml) throw new Error(`${pagePath}: страницы раздела «Статьи» нет в сборке.`);
+  if (!/<h1[\s>]/.test(pageHtml) || !pageHtml.includes(`<link rel="canonical" href="${productionOrigin}${pagePath}" />`)) {
+    throw new Error(`${pagePath}: нет H1 или канонического адреса.`);
+  }
+  if (pagePath !== articleListPath && !pageHtml.includes('"@type":"Article"')) {
+    throw new Error(`${pagePath}: нет разметки Article (JSON-LD).`);
+  }
+  if (pageHtml.includes('](/')) {
+    throw new Error(`${pagePath}: в тексте осталась необработанная ссылка вида [текст](/адрес/).`);
+  }
+  for (const [, href] of pageHtml.matchAll(/href="(\/[^"]*)"/g)) {
+    if (href.startsWith('//') || builtFileSet.has(linkTarget(href))) continue;
+    throw new Error(`${pagePath}: ссылка ${href} ведёт на страницу, которой нет в сборке.`);
+  }
+}
+for (const article of publishedArticles) {
+  if (!articleSitemapPaths.includes(`${articleListPath}${article.slug}/`)) {
+    throw new Error(`Статьи ${article.slug} нет в sitemap.xml.`);
+  }
+}
+if (publishedArticles.length && !articleSitemapPaths.includes(articleListPath)) {
+  throw new Error('Списка статей /stati/ нет в sitemap.xml.');
+}
+for (const sitemapPath of articleSitemapPaths) {
+  if (sitemapPath !== articleListPath && !publishedArticles.some((article) => sitemapPath === `${articleListPath}${article.slug}/`)) {
+    throw new Error(`В sitemap.xml адрес ${sitemapPath}, которого нет среди опубликованных статей.`);
+  }
+}
+// Блок «Полезные статьи»: на страницах из карты src/articleLinks.js есть ссылка хотя бы на одну статью из сборки.
+for (const [pagePath, slugsForPage] of Object.entries(articleLinks)) {
+  if (!slugsForPage.some((slug) => builtArticles.some((article) => article.slug === slug))) continue;
+  const pageHtml = await readFile(path.join(distDirectory, pagePath, 'index.html'), 'utf8');
+  if (!pageHtml.includes('class="seo-useful"')) throw new Error(`${pagePath}: нет блока «Полезные статьи».`);
+}
+
+for (const staticPath of [...landingPaths, ...catalogPaths, ...legalPaths, articleListPath, ...articlePaths]) {
+  // Ссылка на раздел «Статьи» — в подвале каждой статичной страницы, рядом с навигацией.
+  const staticFooter = (await readFile(path.join(distDirectory, staticPath, 'index.html'), 'utf8')).match(
+    /<footer class="seo-footer">[\s\S]*?<\/footer>/,
+  )?.[0];
+  if (!staticFooter?.includes(`href="${articleListPath}"`)) {
+    throw new Error(`${staticPath}: в подвале нет ссылки на раздел «Статьи».`);
+  }
+}
+
+for (const staticPath of [...landingPaths, ...catalogPaths, ...legalPaths, articleListPath, ...articlePaths]) {
   // Закомментированный тег <!-- <script …> --> браузер не выполнит, поэтому комментарии вырезаются до проверки.
   const staticHtml = (await readFile(path.join(distDirectory, staticPath, 'index.html'), 'utf8')).replace(/<!--[\s\S]*?-->/g, '');
-  if (!staticHtml.includes('<script src="/analytics-config.js" defer></script>') || !/<script src="\/seo-pages\.js\?v=[^"]+" data-page="(landing|catalog|product|document)" defer><\/script>/.test(staticHtml)) {
+  if (!staticHtml.includes('<script src="/analytics-config.js" defer></script>') || !/<script src="\/seo-pages\.js\?v=[^"]+" data-page="(landing|catalog|product|document|article)" defer><\/script>/.test(staticHtml)) {
     throw new Error(`${staticPath}: не подключена аналитика (analytics-config.js и seo-pages.js) — визиты не будут учтены.`);
   }
   if (staticHtml.includes('mc.yandex.ru')) {
