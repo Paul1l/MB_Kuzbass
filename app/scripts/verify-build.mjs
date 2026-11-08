@@ -366,6 +366,42 @@ for (const landingPath of landingPaths) {
   if (!landingHtml.includes(`href="${leadTelegramUrl}`)) {
     throw new Error(`${landingPath}: кнопка Telegram не ведет в аккаунт для заявок ${leadTelegramUrl}.`);
   }
+
+  // Метку блока «Примеры со склада» заменяет generate-catalog-pages.mjs: осталась — блок пустой.
+  if (landingHtml.includes('<!-- catalog-examples -->')) {
+    throw new Error(`${landingPath}: метка <!-- catalog-examples --> не заменена карточками каталога.`);
+  }
+
+  // Внутренние ссылки посадочной (карточки каталога, статьи, документы) ведут на страницы из сборки.
+  for (const [, href] of landingHtml.matchAll(/href="(\/[^"#?]*)"/g)) {
+    if (/\.\w+$/.test(href)) continue; // файлы: стили, иконки, картинки
+    const pageFile = href === '/' ? 'index.html' : `${href.replace(/^\/+|\/+$/g, '')}/index.html`;
+    await access(path.join(distDirectory, pageFile)).catch(() => {
+      throw new Error(`${landingPath}: ссылка на страницу, которой нет в сборке: ${href}`);
+    });
+  }
+
+  // FAQ: разметка FAQPage совпадает с вопросами и ответами на странице, иначе поисковик сочтет ее недостоверной.
+  const plainText = (html) =>
+    html
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const visibleFaq = [
+    ...landingHtml.matchAll(/<div class="seo-faq__item">\s*<h3>([\s\S]*?)<\/h3>\s*<p>([\s\S]*?)<\/p>\s*<\/div>/g),
+  ].map(([, question, answer]) => [plainText(question), plainText(answer)]);
+  const landingGraph = JSON.parse(landingHtml.match(/<script type="application\/ld\+json">(.+?)<\/script>/s)?.[1] || '{}')['@graph'] || [];
+  const faqPage = landingGraph.find((node) => node['@type'] === 'FAQPage');
+  const markedFaq = faqPage?.mainEntity?.map((question) => [question.name, question.acceptedAnswer?.text]) || [];
+  if (JSON.stringify(markedFaq) !== JSON.stringify(visibleFaq)) {
+    throw new Error(`${landingPath}: разметка FAQPage не совпадает с вопросами и ответами на странице.`);
+  }
 }
 
 // Фото блока «Уже заказали в Японии» лежат в public/assets/japan. Ссылка на отсутствующий файл дала бы
