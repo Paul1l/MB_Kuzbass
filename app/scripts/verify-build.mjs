@@ -435,11 +435,15 @@ const landingCatalogMentions = {
   ],
 };
 const catalogTitles = catalogManifest.categories.flatMap((category) => category.products.map((product) => product.title));
-for (const [landingPath, mentions] of Object.entries(landingCatalogMentions)) {
-  const missing = mentions.filter((mention) => !catalogTitles.some((title) => title.includes(mention)));
-  if (missing.length) {
-    throw new Error(`${landingPath}: текст называет детали, которых больше нет в каталоге: ${missing.join(', ')}. Поправьте текст и landingCatalogMentions.`);
-  }
+// Все страницы сразу: одна удаленная деталь может упоминаться на нескольких посадочных.
+const staleMentions = Object.entries(landingCatalogMentions)
+  .map(([landingPath, mentions]) => [landingPath, mentions.filter((mention) => !catalogTitles.some((title) => title.includes(mention)))])
+  .filter(([, missing]) => missing.length)
+  .map(([landingPath, missing]) => `${landingPath} — ${missing.join(', ')}`);
+if (staleMentions.length) {
+  throw new Error(
+    `Тексты посадочных называют детали, которых больше нет в каталоге: ${staleMentions.join('; ')}. Поправьте тексты и landingCatalogMentions.`,
+  );
 }
 
 // Фото блока «Уже заказали в Японии» лежат в public/assets/japan. Ссылка на отсутствующий файл дала бы
